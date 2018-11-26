@@ -22,6 +22,7 @@
         <checkbox-docs></checkbox-docs>
         <carousel-docs></carousel-docs>
         <datepicker-docs></datepicker-docs>
+        <daterange-docs></daterange-docs>
         <dropdown-docs></dropdown-docs>
         <input-docs></input-docs>
         <modal-docs></modal-docs>
@@ -69,6 +70,7 @@ import carouselDocs from './example/carouselDocs.vue'
 import checkboxDocs from './example/checkboxDocs.vue'
 import container from './example/container.vue'
 import datepickerDocs from './example/datepickerDocs.vue'
+import daterangeDocs from './example/daterangeDocs.vue'
 import dropdownDocs from './example/dropdownDocs.vue'
 import formGroupDocs from './example/formGroupDocs.vue'
 import inputDocs from './example/inputDocs.vue'
@@ -96,6 +98,7 @@ export default {
     checkboxDocs,
     container,
     datepickerDocs,
+    daterangeDocs,
     dropdownDocs,
     formGroupDocs,
     inputDocs,

@@ -1,0 +1,1588 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Camp</title>
+    <link href="https://tlgc.oss-cn-shanghai.aliyuncs.com/assert/ui/semantic/semantic.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="tlgc.css">
+    <!--[if lt IE 9]>
+      <link rel="stylesheet" href="incompatible.css">
+    <![endif]-->
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="semantic.min.js"></script>
+    <script src="vue.js"></script>
+    <script src="vue-resource.js"></script>
+    <script type="text/javascript" src="gym.js"></script>
+	<link href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
+	<link href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+	
+
+    <script>
+        var url_signlist="https://camp.thelittlegym.com.cn/api/crm/get/signlist";
+        var url_jsonp = "https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_jsonp_uni.aspx";
+        var url_local = "https://bbk.800app.com//uploadfile/staticresource/238592/279833/api_auto_json.aspx";
+		var sql_campaign="select distinct crmzdy_82053258 name from crm_zdytable_238592_27045_238592_view camp  where crmzdy_82053258<>''"
+        var sql_getGym = "select crm_name name,gym.crmzdy_80620116 id from crm_zdytable_238592_23594_238592_view gym join (select top 1 crm_jiandang,crmzdy_81611236 gymlist from crm_yh_238592_view where id=279833)yh on gym.crmzdy_80620116 >'500003' and gym.crmzdy_82037329=1 and (yh.crm_jiandang in ('@consultant','@administrator','市场顾问','市场专员') or (yh.crm_jiandang in ('中心运营总监','中心运营总监(练习)','中心员工','课程主管','销售主管','中心员工(练习)') and charindex(gym.crm_name,yh.gymlist)>0)) order by name";
+        var sql_quanxian ="selectnbsp;crmzdy_81611236nbsp;gyms,crm_jiandangnbsp;fromnbsp;crm_yh_238592_viewnbsp;wherenbsp;id=iduser";
+		var sql_preEnrol = "select/*main*/ crmzdy_82058177 idjt,camp.crmzdy_82053775 idzx,camp.crmzdy_82053602 uniqueid,camp.crmzdy_82053439 m_code,camp.id,camp.crmzdy_82053647 gym,camp.crm_name phone,crmzdy_82053559 iskeep,crmzdy_82053558 remark,isnull(nullif(crmzdy_82053557,''),'未处理') status,crmzdy_82053439 material_code,crmzdy_82053430 dtEnrol,crmzdy_82053429 centerid,crmzdy_82053258 campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyAge,crmzdy_82051553 babyName,crmzdy_82051552 parentid,crmzdy_82051551 openid,camp.create_time from crm_zdytable_238592_27045_238592_view camp where @campaignWhere @gymWhere;"
+		var url_fans = "https://camp.thelittlegym.com.cn/api/crm/get/subscribe";
+        //var sql_pre_enrol_total="select pre.gym,num_pre,num_recnd,isnull(enrol.num,0) enrol_num,isnull(enrol.amount,0) amount from (select crmzdy_82051555 gym,count(1)num_pre,sum(case when isnull(camp.crmzdy_82051552,'')<>'' then 1 else 0 end) num_recnd from crm_zdytable_238592_27045_238592_view camp where @where_campaign and @where_dt and @where_gymcode group by crmzdy_82051555)pre left join (select gym,sum(num)num,sum(amount)amount from (select crmzdy_81757911 gym,count(distinct crmzdy_81620220_id) num,sum(crmzdy_81636090) amount from  crm_zdytable_238592_23796_238592_view ht where ht.crmzdy_81591866_id=351 and @where_ht_dt and @where_ht_gymcode and isnull(ht.crmzdy_81759941,'')='' group by crmzdy_81757911 union all select crmzdy_81803719,count(distinct bk.crmzdy_81759419_id) idzx,0 from crm_zdytable_238592_23696_238592_view bk join crm_zdytable_238592_23583_238592 bj on @where_bk_dt and bk.crmzdy_80631248_id=bj.id and bj.crmzdy_80612382_id=198 and @where_bj_gymcode and bk.crmzdy_81762908>0 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bk.crmzdy_81636052_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by bj.crmzdy_81803719 union all select bj.crmzdy_81803719 gym,count(distinct bmks.crmzdy_81747420_id),0 from crm_zdytable_238592_25118_238592_view bmks join crm_zdytable_238592_25117_238592_view bjap on @where_bmks_dt and bmks.crmzdy_81486479_id=bjap.id join crm_zdytable_238592_23583_238592 bj on @where_bj_gymcode and bjap.crmzdy_81486476_id=bj.id and bj.crmzdy_80612382_id=198 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bjap.crmzdy_81598938_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by bj.crmzdy_81803719)enrol group by gym)enrol on pre.gym=enrol.gym"
+		var sql_pre_enrol_total="with jt as(select distinct * from(select jt.id,case when isnull(camp.crmzdy_82053430,'')='' then camp.create_time else dateadd(s,cast(camp.crmzdy_82053430 as int),'1970-01-01 08:00:00') end dtenrol,isnull(crmzdy_82058603,0) is_count,crmzdy_82051555 gym from crm_sj_238592 jt join crm_zdytable_238592_27045_238592_view camp on camp.crmzdy_82053258='2018小小奥运集训营' and camp.crm_name=jt.crmzdy_80620120 union all select jt.id,case when isnull(camp.crmzdy_82053430,'')='' then camp.create_time else dateadd(s,cast(camp.crmzdy_82053430 as int),'1970-01-01 08:00:00') end dtenrol,isnull(crmzdy_82058603,0) is_count,crmzdy_82051555 gym from crm_sj_238592 jt join crm_zdytable_238592_27045_238592_view camp on @where_campaign and camp.crmzdy_82053643=jt.crmzdy_80620120)jt),main as(select  coalesce(pre.gym,enrol.gym,kcht.gym)gym,num_pre,enrol.num enrol_num,enrol.amount enrol_amt,enrol.num2 enrol_num2,enrol.amount2 enrol_amt2,kcht.kcht_num,kcht.kcht_amt  from (select crmzdy_82051555 gym,count(1)num_pre from crm_zdytable_238592_27045_238592_view camp where @where_campaign and @where_dt and @where_gymcode group by crmzdy_82051555)pre full join (select gym,sum(num)num,sum(amount)amount,sum(num2)num2,sum(amount2)amount2 from (select crmzdy_81757911 gym,count(distinct crmzdy_81620220_id) num,sum(crmzdy_81636090) amount,count(distinct case when isnull(jt.id,0)=0 then crmzdy_81620220_id end) num2,sum(case when isnull(jt.id,0) =0 then crmzdy_81636090 end) amount2 from  crm_zdytable_238592_23796_238592_view ht join (select 1 x)x on ht.crmzdy_81591866_id=351 and @where_ht_dt and @where_ht_gymcode and isnull(ht.crmzdy_81759941,'')='' left join jt on jt.id=ht.crmzdy_80646020_id and jt.gym=ht.crmzdy_81757911 group by crmzdy_81757911 union all select crmzdy_81803719,count(distinct bk.crmzdy_81759419_id) idzx,0,count(distinct case when isnull(jt.id,0)=0 then bk.crmzdy_81759419_id end),0 from crm_zdytable_238592_23696_238592_view bk join crm_zdytable_238592_23583_238592 bj on @where_bk_dt and bk.crmzdy_80631248_id=bj.id and bj.crmzdy_80612382_id=198 and @where_bj_gymcode and bk.crmzdy_81762908>0 left join jt on bk.crmzdy_80631324_id=jt.id and jt.gym=bj.crmzdy_81803719 and is_count=1 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bk.crmzdy_81636052_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by bj.crmzdy_81803719 union all select bj.crmzdy_81803719 gym,count(distinct bmks.crmzdy_81747420_id),0,count(distinct case when isnull(jt.id,0)=0 then bmks.crmzdy_81747420_id end),0 from crm_zdytable_238592_25118_238592_view bmks join crm_zdytable_238592_25117_238592_view bjap on @where_bmks_dt and bmks.crmzdy_81486479_id=bjap.id join crm_zdytable_238592_23583_238592 bj on @where_bj_gymcode and bjap.crmzdy_81486476_id=bj.id and bj.crmzdy_80612382_id=198 left join jt on jt.id=bjap.crmzdy_81486474_id and jt.gym=bj.crmzdy_81803719 and is_count=1 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bjap.crmzdy_81598938_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by bj.crmzdy_81803719)enrol group by gym)enrol on pre.gym=enrol.gym full join (select crmzdy_81757911 gym,count(distinct crmzdy_81620220_id) kcht_num,sum(crmzdy_81636090) kcht_amt from  crm_zdytable_238592_23796_238592_view ht join (select 1 x)x on ht.crmzdy_81591866_id<>351 and @where_ht_dt and @where_ht_gymcode and isnull(ht.crmzdy_81759941,'')='' join jt on jt.id=ht.crmzdy_80646020_id and ht.crmzdy_80646021>jt.dtenrol group by crmzdy_81757911)kcht on pre.gym=kcht.gym),enrol3 as (SELECT crmzdy_82051555 gym,count(1)num FROM crm_zdytable_238592_27045_238592_view camp join (select 1 x)x on @where_campaign AND @where_gymcode and crmzdy_82053557='扣课报名夏令营' and isnull(crmzdy_82058603,0)=0  where not exists(select 1 from crm_zdytable_238592_23696_238592_view bk join crm_zdytable_238592_23583_238592 bj on bk.crmzdy_80631324_id=camp.crmzdy_82058177 and bk.crmzdy_80631248_id=bj.id and camp.crmzdy_82051555=bj.crmzdy_81803719 and bj.crmzdy_80612382_id=198 and bk.crmzdy_81762908>0) and not exists(select 1 from crm_zdytable_238592_25118_238592_view bmks join crm_zdytable_238592_25117_238592_view bjap on bjap.crmzdy_81486474_id=camp.crmzdy_82058177 and bmks.crmzdy_81486479_id=bjap.id join crm_zdytable_238592_23583_238592 bj on bjap.crmzdy_81486476_id=bj.id and camp.crmzdy_82051555=bj.crmzdy_81803719 and bj.crmzdy_80612382_id=198) and @where_update_dt group by crmzdy_82051555)select isnull(main.gym,enrol3.gym)gym,isnull(num_pre,0)num_pre,isnull(enrol_num,0)add;isnull(enrol3.num,0) enrol_num,enrol_amt,enrol_num2,enrol_amt2,kcht_num,kcht_amt from main full join enrol3 on enrol3.gym=main.gym;"
+        var sql_pre_enrolByRecnd="with jt as(select distinct * from(select jt.id,case when isnull(camp.crmzdy_82051552,'')<>'' then '是' else '否' end is_recnd,isnull(crmzdy_82058603,0) is_count,crmzdy_82051555 gym from crm_sj_238592 jt join crm_zdytable_238592_27045_238592_view camp on @where_campaign and camp.crm_name=jt.crmzdy_80620120 union all select jt.id,case when isnull(camp.crmzdy_82051552,'')<>'' then '是'  else '否' end is_recnd,isnull(crmzdy_82058603,0) is_count,crmzdy_82051555 gym from crm_sj_238592 jt join crm_zdytable_238592_27045_238592_view camp on @where_campaign and camp.crmzdy_82053643=jt.crmzdy_80620120)jt),main as(select pre.type,num_pre,enrol.enrol_num,enrol.enrol_amt from (select case when isnull(camp.crmzdy_82051552,'')<>'' then '是' else '否' end type,count(1)num_pre from crm_zdytable_238592_27045_238592_view camp where @where_campaign and @where_dt and @where_gymcode group by case when isnull(camp.crmzdy_82051552,'')<>'' then '是' else '否' end)pre left join (select type,sum(enrol_num)enrol_num,sum(enrol_amt)enrol_amt from (select isnull(jt.is_recnd,'否') type,count(distinct crmzdy_81620220_id)enrol_num,sum(crmzdy_81636090) enrol_amt from crm_zdytable_238592_23796_238592_view ht left join jt on jt.id=ht.crmzdy_80646020_id  and jt.gym=ht.crmzdy_81757911 where ht.crmzdy_81591866_id=351 and @where_ht_dt and @where_ht_gymcode and isnull(ht.crmzdy_81759941,'')='' group by isnull(jt.is_recnd,'否') union all select isnull(jt.is_recnd,'否'),count(distinct bk.crmzdy_81759419_id) idzx,0 from crm_zdytable_238592_23696_238592_view bk join crm_zdytable_238592_23583_238592 bj on @where_bk_dt and bk.crmzdy_80631248_id=bj.id and bj.crmzdy_80612382_id=198 and bj.crmzdy_81803719 between '500005' and '600005' and bk.crmzdy_81762908>0 left join jt on jt.id=bk.crmzdy_80631324_id and jt.gym=bj.crmzdy_81803719 and is_count=1 and jt.gym=bj.crmzdy_81803719 and is_count=1 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bk.crmzdy_81636052_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by isnull(jt.is_recnd,'否') union all select isnull(jt.is_recnd,'否'),count(distinct bmks.crmzdy_81747420_id),0 from crm_zdytable_238592_25118_238592_view bmks join crm_zdytable_238592_25117_238592_view bjap on @where_bmks_dt and bmks.crmzdy_81486479_id=bjap.id join crm_zdytable_238592_23583_238592 bj on bj.crmzdy_81803719 between '500005' and '600005' and bjap.crmzdy_81486476_id=bj.id and bj.crmzdy_80612382_id=198 left join jt on jt.id=bjap.crmzdy_81486474_id and jt.gym=bj.crmzdy_81803719 and is_count=1 left join crm_zdytable_238592_23796_238592_view ht on ht.id=bjap.crmzdy_81598938_id and ht.crmzdy_81591866_id=351 where ht.crm_name is null group by isnull(jt.is_recnd,'否'))enrol group by type)enrol on pre.type=enrol.type),enrol3 as (select type,sum(num)num from(select crmzdy_82051555 gym,case when isnull(camp.crmzdy_82051552,'')<>'' then '是' else '否' end type,count(1)num from crm_zdytable_238592_27045_238592_view camp join (select 1 x)x on @where_campaign and @where_gymcode and crmzdy_82053557='扣课报名夏令营' and isnull(crmzdy_82058603,0)=0  where not exists(select 1 from crm_zdytable_238592_23696_238592_view bk join crm_zdytable_238592_23583_238592 bj on bk.crmzdy_80631324_id=camp.crmzdy_82058177 and  bk.crmzdy_80631248_id=bj.id and camp.crmzdy_82051555=bj.crmzdy_81803719 and bj.crmzdy_80612382_id=198  and bk.crmzdy_81762908>0) and not exists(select 1 from crm_zdytable_238592_25118_238592_view bmks join crm_zdytable_238592_25117_238592_view bjap on bjap.crmzdy_81486474_id=camp.crmzdy_82058177 and bmks.crmzdy_81486479_id=bjap.id join crm_zdytable_238592_23583_238592 bj on  bjap.crmzdy_81486476_id=bj.id and camp.crmzdy_82051555=bj.crmzdy_81803719 and bj.crmzdy_80612382_id=198) and @where_update_dt group by crmzdy_82051555,case when isnull(camp.crmzdy_82051552,'')<>'' then '是' else '否' end)a group by type)select isnull(enrol3.type,main.type)type,isnull(num_pre,0)num_pre,isnull(enrol_num,0)add;isnull(enrol3.num,0)enrol_num,isnull(enrol_amt,0)enrol_amt from enrol3 full join main on enrol3.type=main.type";
+		var sql_kxj_ht ="with kxj as(select  camp.crmzdy_82053602 uniqueid,camp.id,camp.crmzdy_82053647 gym,camp.crm_name phone,crmzdy_82053643 phone2,isnull(nullif(crmzdy_82053557,''),'未处理') status,DATEADD(S,crmzdy_82053430 add; 8 * 3600,'1970-01-01 00:00:00') dtenrol,crmzdy_82053429 centerid,crmzdy_82053258 campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,crmzdy_82051553 babyname,crmzdy_82051551 openid,camp.create_time from crm_zdytable_238592_27045_238592_view camp where crmzdy_82053258='开学季'),zx as(select distinct idzx,gym,phone,dtenrol from(select zx.id idzx,zx.crmzdy_81620171 gym,jt.crmzdy_80620120 phone,dtenrol from kxj join crm_sj_238592_view jt on jt.crmzdy_80620120=kxj.phone join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and kxj.sign_centerid=zx.crmzdy_81769392 union all select zx.id idzx,zx.crmzdy_81620171 gym,jt.crmzdy_80620120 phone,dtenrol from kxj join crm_sj_238592_view jt on jt.crmzdy_80620120=kxj.phone2 join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and kxj.sign_centerid=zx.crmzdy_81769392)a),ht as(select jine,idzx,gym,phone,dtenrol,dtbm,convert(varchar(10),wkfirst,120)add;' - 'add;convert(varchar(10),wklast,120)span,type from(select idzx,gym,crmzdy_81636090 jine,phone,dtenrol,ht.crmzdy_80646021 dtbm,dateadd(day,1-(datepart(weekday,ht.crmzdy_80646021)add;@@datefirst-1)%7,ht.crmzdy_80646021)wkfirst,dateadd(day,7-(datepart(weekday,ht.crmzdy_80646021)add;@@datefirst-1)%7,ht.crmzdy_80646021)wklast,isnull((select top 1 '续报' from crm_zdytable_238592_23796_238592_view lsht where lsht.crmzdy_81620220_id=ht.crmzdy_81620220_id and lsht.crmzdy_81622226<>'全额退课' and isnull(lsht.crmzdy_81762904,'课程')='课程' and lsht.id<>ht.id and ht.crmzdy_80646021>lsht.crmzdy_80646021),'新报')type from zx join crm_zdytable_238592_23796_238592_view ht on ht.crmzdy_81620220_id=zx.idzx and ht.crmzdy_81622226<>'全额退课' and ht.crmzdy_81591866_id<>306 and @where_ht_dt and ht.crmzdy_80646021>dtenrol)a)"; 
+        sql_kxj_ht +="select isnull(span,'所有')time,case when grouping(span)=1 then '总 计' when grouping(gym)=1 then ' 合计' else gym end gym,count(1)num,sum(jine)jin,count(case when type='新报' then 1 end)num_x,sum(case when type='新报' then jine else 0 end)jin_x  from ht group by span,gym with rollup order by time desc,num desc";
+		
+        function get_iduser() {
+          var sql ="select id,nbsp;crm_jiandangnbsp;fromnbsp;crm_yh_238592_viewnbsp;wherenbsp;id=iduser";
+          json = get_data_json(sql);
+          return json.info[0].rec[0].id;
+        }
+		
+        //console.log(get_iduser());
+        function get_data_json(sql) {
+                    var res;
+        	        window.jQuery.ajax({ 
+                       url: "uploadfile/staticresource/238592/279833/dataInterface_json.aspx",
+  	     			   dataType : "json",
+                       data: "sql1=" + sql,
+                       async: false, 
+                       cache: false,
+  	     	           type: "post",
+                       success: function(data) { //string;dom
+                          try{
+                       	if(data && typeof(data.info[0].rec[0])!="string"){
+                       		res = data;
+                       	}else{
+                       		res = null;
+                       	}
+                          }catch(e){
+                           alert(e.message)
+                           //alert("无法获取权限信息！"); 
+                           //window.history.back(-1);
+                          }
+                       }
+        	        });
+        return res
+        }
+        Array.prototype.unique2 = function(){
+            this.sort(); //先排序
+            var res = [this[0]];
+            for(var i = 1; i < this.length; i++){
+                if(this[i] !== res[res.length - 1]){
+                    res.push(this[i]);
+                }
+            }
+            return res;
+        }
+
+       
+    </script>
+
+    <style>
+        .ui .label.total{
+            font-size: 2.4em;
+        }
+	    #result{
+		  width:98%!important;
+		}
+        .ui .checkbox {
+            cursor:pointer!important;
+            margin-right: 20px!important;
+        }
+        select {
+          border: none;
+          outline: none;
+          cursor: default;
+        }
+        .fans{
+            font-size: 1.8em;
+        }
+		th{
+		  font-size:1.6em;
+		}
+		td{
+		  font-size:1.4em;
+		}
+		.bold{
+		  font-size:1.8em;
+		  font-weight:900;
+		}
+		.blue{
+		  color:blue;
+		  font-size:1.4em;
+		  font-weight:500;
+		}
+ 
+.page-total {
+    display: inline-block;
+    vertical-align: middle;
+}
+ 
+    </style>
+
+</head>
+
+
+<body>
+ <!--[if lt IE 11]>
+  <div class="browser-happy">
+      <div class="content">
+          <li>浏览器太旧了，为了兼容与美观请更新您的浏览器</p>
+          <a href="http://browsehappy.com/">立即更新</a>
+      </div>
+  </div>
+<![endif]-->
+<div class='incompatible'>
+<div id="box" >
+    <div class="ui container" id="result">
+        <div class="ui segments" >
+            <div class="ui segment" >
+                <div class="ui one column stackable grid">
+                    <div class="column" >
+                        <div class="ui tabular menu">
+                            <a class="item" v-for="m of menuGroup" :class="{'active':menu==m.id}" @click="menuChange(m)" v-text="m.name"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui segments">
+                <div class="ui segment" v-show="report_cur!='fansData'||menu=='camp'">
+                    <div class="ui four column stackable grid">
+                        <div class="column left aligned">
+                           <div class="ui mini input">
+                             <div class="ui button">中心：</div>          
+                                <v-select @change="init()" :value.sync="select.gym_selected" :options="gyms" :disabled="disable.gym" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select>
+                                </v-select>				
+                             </div>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment" v-show="onlysql.checked">
+                   <pre v-text="onlysql.value"></pre>
+                </div>
+<!--componnet-->
+<div class="ui segments" v-show="menu=='camp'">
+        <div class="ui segment">
+            <div class="ui four column stackable grid">
+                  <div class="column left aligned">
+                      <div class="ui mini input">
+                        <div class="ui button">市场活动：</div>          
+                        <v-select @change="init()" :value.sync="select.campaign_selected" :disabled="disable.campaign" placeholder="请选市场活动" :options="select.campaigns" options-label="name" options-value="id"  search close-on-select>
+                        </v-select>					
+                      </div>
+                  </div>
+                  <div class="column left aligned">
+                      <v-select @change="init()" :value.sync="summerType"  :options="typeGroup" options-label="label" options-value="val" close-on-select>
+                      </v-select>
+                  </div>
+                  <div class="column left aligned">
+                      <div class="ui mini action input">
+                        <input type="text" v-model="search" placeholder="关键字">
+                        <div type="submit" @click="getEnrol()" class="ui primary button"><i class="search icon"></i>搜索</div>   
+                        <a type="submit" :href="url_export" target="_blank" class="btn btn-default" v-show="isadmin">导出Excel</a>                
+                      </div>
+                  </div>
+                  <div class="column middle aligned">
+                        <div class="ui mini action input">
+                          <button type="submit" class="btn btn-danger" @click="editContact"
+                          v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
+                        </div>
+                        <div class="ui mini action input">
+                          <button type="submit" class="btn btn-danger" @click="checkResult"
+                          v-show="select.acl.indexOf('系统管理员')!=-1">数据核对</button>                
+                        </div>
+                  </div>
+            </div>	
+        </div>
+        <div class="ui segment">
+           <div class="ui form">
+             <div class="inline fields">
+               <label>筛选条件1：</label>
+			   <!--
+               <div class="field">
+                 <div class="ui checkbox">
+                   <input id="keepInTouch" type="checkbox" v-model="keepInTouch">
+                   <label for="keepInTouch" >仅显示需要跟进的</label>
+                 </div>
+               </div>
+			   -->
+               <div class="field">
+                <div class="ui checkbox">
+                  <input id="isrecd" type="checkbox" v-model="isrecd">
+                  <label for="isrecd" >仅显示朋友推荐的</label>
+                </div>
+              </div>
+             </div>
+             <div class="inline fields">
+                 <label>筛选条件2:</label>
+                 <div class="field" v-for="s in arr_status">
+                   <div class="ui checkbox">
+                       <input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
+                       <label :for="s">{{s}}</label>
+                   </div>
+                 </div>
+ 
+             </div>
+             <div class="inline fields" v-if="select.acl.indexOf('系统管理员')!=-1">
+               <label>打印SQL</label>
+               <div class="field">
+                 <div class="ui checkbox">
+                   <input id="sql" type="checkbox" v-model="onlysql.checked">
+                   <label for="sql">仅打印SQL</label>
+                 </div>
+               </div>
+             </div>
+           </div>   
+        </div>
+        <div class="ui segment">
+                <div style="text-align:center" v-show="select.start" ><img src="loading.gif" width="40px" height="40px"></div>
+         </div>
+         <div class="ui segment" v-if="menu=='camp'">
+            <tlg-table :tbl_data="myData" :maxheight="tbl_maxheight" :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
+		 </div>
+      </div>
+      <div class="ui segments" v-if="menu=='report'">
+            <div class="ui segment">
+                 <div class="ui four column stackable grid">
+                       <div class="column left aligned">
+                             <div class="ui mini input">
+                                 <div class="ui button">报表：</div>  
+                                 <v-select @change="init()" placeholder="请选择报表" :value.sync="report_cur" :options="reports" options-label="label" options-value="id" close-on-select>
+                                 </v-select>
+                             </div>
+                       </div>
+                       <div class="column left aligned">
+                            <div class="ui mini input">
+                               <div class="ui button">市场活动：</div>          
+                               <v-select :value.sync="select.campaign_selected" :disabled="disable.campaign" placeholder="请选活动名称" :options="select.campaigns" options-label="name" options-value="id" search close-on-select>
+                               </v-select>					
+                             </div>
+                       </div>
+                       <div class="column left aligned">
+                           <div class="ui mini action input">
+                                 <datepicker :value.sync="dtStart" format="yyyy-MM-dd" :clear-button="clear" placeholder="开始日期"></datepicker>
+                                 -<datepicker :value.sync="dtEnd" format="yyyy-MM-dd" :clear-button="clear" placeholder="结束日期"></datepicker>
+                                <div type="submit" @click="getQuery()" class="ui primary button"><i class="search icon"></i>搜索</div> 
+                                <input v-show="report_cur=='kxjData'" id="Button1" type="button" class="ui positive button" value="导出EXCEL" class="rbtn23" onclick="javascript:HtmlExportToExcel('PanelExcel','开学季活动报名情况汇总')" />
+					            <a id="dlink" style="display: none;"></a>
+                           </div>
+                       </div>
+                 </div>	
+             </div>
+             <div class="ui segment">
+                <div class="ui form">
+                  <div class="inline fields" v-show="report_cur=='fansData'">
+                    <label>分组条件：</label>
+                    <div class="field" v-for="g in groups">
+                      <div class="ui checkbox">
+                          <input :id="g.id" type="checkbox" :value="g.id" v-model="groups_selected">
+                          <label :for="g.id">{{g.name}}</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="inline fields" v-show="report_cur=='sumData'">
+                        <label>分组条件：</label>
+                        <div class="field" v-for="g in groups2">
+                            <div class="ui radio checkbox">
+                                <input :id="g" type="radio" :value="g" @click="init()" v-model="group_selected">
+                                <label :for="g">{{g}}</label>
+                            </div>
+                        </div>
+                  </div>
+                  <div class="inline fields" v-if="select.acl.indexOf('系统管理员')!=-1">
+                    <label>打印SQL</label>
+                    <div class="field">
+                      <div class="ui checkbox">
+                        <input id="sql" type="checkbox" v-model="onlysql.checked">
+                        <label for="sql">仅打印SQL</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>   
+             </div>
+             <div class="ui segment">
+                 <div style="text-align:center" v-show="select.start" ><img src="loading.gif" width="40px" height="40px"></div>
+             </div>
+             <div class="ui segment total" v-show="report_cur=='sumData'">
+                     <div class="ui  column stackable grid">
+                         <div class="column left aligned">
+                                 <table class="ui selectable celled table">
+                                         <thead>
+                                             <tr class="positive">
+                                                 <th class="center aligned" rowspan="3" v-show="group_selected=='按中心'">中心名称</th>
+                                                 <th class="center aligned" rowspan="3" v-show="group_selected=='按是否来自朋友推荐'">是否来自朋友推荐</th>
+                                                 <th class="center aligned" rowspan="3">新增预报名总数</th>
+                                                 <th class="center aligned" rowspan="3">新增报名总数</th>
+                                                 <th class="center aligned" rowspan="3">新增报名总金额</th>
+												 <th class="center aligned" colspan="6"  v-show="group_selected=='按中心'">新增直接在中心报名统计</th>
+  
+                                             </tr>
+											 <tr v-show="group_selected=='按中心'">
+                                                 <th class="center aligned" colspan="2">未通过微信直接在中心报名Camp</th>
+                                                 <th class="center aligned" colspan="2">有通过微信但报名正式课程</th>
+												 <th class="center aligned" colspan="2">小计</th>
+											 </tr>
+											 <tr v-show="group_selected=='按中心'">
+											     <th class="center aligned">人数</th>
+                                                 <th class="center aligned">金额</th>
+											     <th class="center aligned">人数</th>
+                                                 <th class="center aligned">金额</th>
+											     <th class="center aligned">总数</th>
+                                                 <th class="center aligned">总额</th>
+											 </tr>
+                                         </thead>
+                                         <tbody>
+                                             <tr v-if="select.gym_selected=='all' && sumData.length>0">
+                                                 <td class="center aligned">总 计</td>
+                                                 <td class="right aligned" v-text="total.num_pre"></td>
+                                                 <td class="right aligned" v-text="total.enrol_num"></td>
+                                                 <td class="right aligned" v-text="total.enrol_amt"></td>
+                                                 <td class="right aligned" v-text="total.enrol_num2" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="total.enrol_amt2" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="total.kcht_num" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="total.kcht_amt" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="add(total.kcht_num,total.enrol_num2)" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="add(total.kcht_amt,total.enrol_amt2)" v-show="group_selected=='按中心'"></td>
+                                             </tr>
+                                             <tr v-for="item of sumData"  v-show="sumData.length>0">
+                                                 <td class="center aligned" v-text="item.gym|gymName" v-show="group_selected=='按中心'"></td>
+                                                 <td class="center aligned" v-text="item.type" v-show="group_selected=='按是否来自朋友推荐'"></td>
+                                                 <td class="right aligned" v-text="item.num_pre|n_fmt"></td>
+                                                 <td class="right aligned" v-text="item.enrol_num|n_fmt"></td>
+                                                 <td class="right aligned" v-text="item.enrol_amt|n_fmt"></td>
+												 <td class="right aligned" v-text="item.enrol_num2|n_fmt" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="item.enrol_amt2|n_fmt" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="item.kcht_num|n_fmt" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="item.kcht_amt|n_fmt" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="add(item.kcht_num,item.enrol_num2)" v-show="group_selected=='按中心'"></td>
+                                                 <td class="right aligned" v-text="add(item.kcht_amt,item.enrol_amt2)" v-show="group_selected=='按中心'"></td>
+                                             </tr>
+                                             <tr v-if="sumData.length==0 && noData &&select.gym_selected">
+                                                 <td colspan="11" style="text-align:center">
+                                                     <div class="ui pointing red  label">
+                                                         OOPS! No Record!
+                                                     </div>
+                                                 </td>
+                                             </tr>
+                                         </tbody>
+                                 </table>
+                         </div>
+                     </div>
+             </div>
+             <div class="ui segment" v-show="h5_data.length>0 && report_cur=='fansData'">
+                    <div class="ui one column stackable grid">
+                            <div class="ui label total">
+                                    <a class="detail">新增粉丝合计：</a>
+                                    {{fansTotal}}
+                             </div>
+                    </div>
+                    <div class="fans" :class="{'ui three column stackable grid':groups_selected.length==3,'ui two column stackable grid':groups_selected.length==2,'ui one column stackable grid':groups_selected.length<2}">
+                            <div class="column"  v-show="groupshow('m_code')">
+                                    <table  class="ui celled table">
+                                        <thead>
+                                            <tr>
+                                                <th class="center aligned" colspan="3">按物料</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="center aligned">序号</th>
+                                                <th class="center aligned">物料</th>
+                                                <th class="center aligned">新增粉丝总数</th>
+                                             </tr>
+                                        </thead>
+                                        <tbody>
+                                           <tr  v-for="v of by_m_Data">
+                                               <td class="right aligned" v-text="$index+1"></td>
+                                               <td class="right aligned" v-text="v.key|m_codeName"></td>
+                                               <td class="right aligned" v-text="v.sum"></td>
+                                           </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="column" v-show="groupshow('center')">
+                                       <table  class="ui celled table">
+                                           <thead>
+                                               <tr>
+                                                   <th class="center aligned" colspan="3">按来源中心</th>
+                                               </tr>
+                                               <tr>
+                                                    <th class="center aligned">序号</th>
+                                                    <th class="center aligned">来源中心</th>
+                                                    <th class="center aligned">新增粉丝总数</th>
+                                                </tr>
+                                           </thead>
+                                           <tbody>
+                                               <tr  v-for="v of by_c_Data">
+                                                   <td class="right aligned" v-text="$index+1"></td>
+                                                   <td class="right aligned" v-text="v.key|gymName"></td>
+                                                   <td class="right aligned" v-text="v.sum"></td>
+                                               </tr>
+                                           </tbody>
+                                       </table>
+                                 </div>
+                              <div class="column" v-show="groupshow('is_recnd')">
+                                       <table  class="ui celled table">
+                                           <thead>
+                                               <tr>
+                                                   <th class="center aligned" colspan="3">按朋友推荐</th>
+                                               </tr>
+                                               <tr>
+                                                    <th class="center aligned">是否来自朋友推荐</th>
+                                                    <th class="center aligned">新增粉丝总数</th>
+                                                </tr>
+                                           </thead>
+                                           <tbody>
+                                               <tr  v-for="v of by_is_recnd_data">
+                                                   <td class="right aligned" v-text="v.key|isrecd"></td>
+                                                   <td class="right aligned" v-text="v.sum"></td>
+                                               </tr>
+                                           </tbody>
+                                       </table>
+                                 </div>
+                               
+                            <!-- <div class="column" v-if="groups_selected.length==2">
+                               <table  class="ui celled table">
+                                   <thead>
+                                       <tr>
+                                           <th class="center aligned" colspan="4">按物料、来源中心</th>
+                                       </tr>
+                                       <tr>
+                                            <th class="center aligned">序号</th>
+                                            <th class="center aligned">物料</th>
+                                            <th class="center aligned">来源中心</th>
+                                            <th class="center aligned">新增粉丝总数</th>
+                                        </tr>
+                                   </thead>
+                                   <tbody>
+                                       <tr  v-for="v of by_m_c_Data">
+                                            <td class="right aligned" v-text="$index+1"></td>
+                                            <td class="right aligned" v-text="v.materialcode"></td>
+                                            <td class="right aligned" v-text="v.centerid|gymName"></td>
+                                            <td class="right aligned" v-text="v.sum"></td>
+                                       </tr>
+                                   </tbody>
+                               </table>
+                           </div> -->
+                    </div>
+            </div>
+             <div class="ui segment" v-show="report_cur=='kxjData'" id='PanelExcel'>
+			    <h1  style="display:none" id="lbl_innum_link">开学季活动报名情况汇总</h1>
+                <div class="ui  column stackable grid"> 
+                         <div class="column left aligned">
+                                 <table class="ui selectable celled table">
+                                         <thead>
+                                             <tr class="positive">
+                                                 <th class="center aligned">时间段</th>
+                                                 <th class="center aligned" >中心名称</th>
+                                                 <th class="center aligned" >报名合同数</th>
+												 <th class="center aligned" >报名总金额</th>
+                                                 <th class="center aligned" >其中新报合同数</th>
+												 <th class="center aligned" >其中新报合同金额</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>
+           
+                                             <tr v-for="item of kxjData"  v-show="kxjData.length>0">
+                                                 <td style="vertical-align: middle;" class="center aligned" :rowspan="rowGroup[item.time]" v-if="($index-1<0)?true:item.time!=kxjData[$index-1].time"><h1 class="ui center aligned header" v-text="item.time"></h1></td>
+                                                 <td class="right aligned" :class="{'bold':item.gym=='总 计','blue':item.gym=='合计'}" v-text="item.gym"></td>
+                                                 <td class="right aligned" v-text="item.num|n_fmt"></td>
+                                                 <td class="right aligned" v-text="item.jin|n_fmt"></td>
+                                                 <td class="right aligned" v-text="item.num_x|n_fmt"></td>
+                                                 <td class="right aligned" v-text="item.jin_x|n_fmt"></td>
+                                             </tr>
+                                             <tr v-if="sumData.length==0 && noData &&select.gym_selected">
+                                                 <td colspan="11" style="text-align:center">
+                                                     <div class="ui pointing red  label">
+                                                         OOPS! No Record!
+                                                     </div>
+                                                 </td>
+                                             </tr>
+                                         </tbody>
+                                 </table>
+                         </div>
+                     </div>
+			 </div>
+</div>
+<modal :show.sync="contactModal.show" effect="fade" width="400">
+  <div slot="modal-header" class="modal-header">
+    <h4 class="modal-title">
+      <b>{{contactModal.title}}</b> 
+    </h4>
+  </div>
+  <div slot="modal-body" class="modal-body">
+    <bs-input maxlength=11 track-by="$index" v-for="phone of contactModal.phones" :value.sync="phone" :label="'手机号'+($index+1)"  placeholder="手机号" :pattern="contactModal.phone_reg" icon></bs-input>
+  </div>
+  <div slot="modal-footer" class="modal-footer">
+    <button type="button" class="btn btn-success" @click="saveCon">保存</button>
+    <button type="button" class="btn btn-default" @click="contactModal.show = false">取消</button>
+  </div>
+</modal>
+<alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
+        <span class="ion-information-circled alert-icon-float-left"></span>
+        <strong>{{alertError.title}}</strong>
+        <p v-html="alertError.msg"></p>
+ </alert>
+ <alert :show.sync="alertInfo.show" placement="top" duration="0" type="success" width="400px" dismissable>
+        <span class="ion-information-circled alert-icon-float-left"></span>
+        <strong>{{alertInfo.title}}</strong>
+        <p v-html="alertInfo.msg"></p>
+ </alert>
+ 
+ <template id="camp">
+    <div style="text-align:center" v-show="loading" ><img src="loading.gif" width="40px" height="40px"></div>
+	<div v-show="sql"><pre v-text="tbl_data&&tbl_data.sql"></pre></div>
+    <div v-if="tbl_data&&tbl_data.arr&&header" :style="{height:maxheight}">
+           <table class="ui selectable celled table" :style="{height:height}">
+               <thead>
+                   <tr class="positive">
+                       <th v-for="h of header" :class="align(h&&h.label[0])" v-show="show(h)" v-text="label(h.label)"></th>
+                   </tr>
+               </thead>
+               <tbody v-show="tbl_data && tbl_data.total==0">
+                   <tr>
+                       <td colspan="11" style="text-align: center">
+                           <div class="ui pointing red  label">
+                               OOPS! No Record!
+                           </div>
+                       </td>
+                   </tr>
+               </tbody>
+               <tbody v-show="tbl_data && tbl_data.total>0">
+                   <tr v-for="item of tbl_data.arr">
+                       <td v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
+                   </tr>
+               </tbody>
+               <tfoot>
+               <tr><th colspan="11" v-show="tbl_data && tbl_data.arr && tbl_data.arr.length && tbl_data.total>0">
+                   <div class="ui compact menu">
+                       <a class="item">
+                           <i class="icon users"></i> 记录总数
+                           <div class="floating ui red label" v-text="tbl_data.total"></div>
+                       </a>
+                       <a class="item">
+                           <i class="icon user"></i> 当前记录数
+                           <div class="floating ui teal label" v-text="tbl_data.arr.length"></div>
+                       </a>
+                   </div>
+ 
+                   <div v-show="pageTotal>1" class="ui right floated menu">
+				       <a href="javascript:void(0)" class="item pager" v-text="'共 '+pageTotal+' 页'"></a>
+                       <select class="ui fluid dropdown" id="span" v-model="pagenation.pageSize">
+                           <option v-for="p in arr_pageSize" :value="p.val" v-text="p.label" :selected="$index === 0 ? true : false"></option>
+                       </select>
+                       
+                       <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow<=1}" v-on:click.prevent="pagenation.pageNow--;"><i class="left chevron icon"></i></a>
+                       <a href="javascript:void(0)" v-for="i in pagerSpan" :class="{'active':i+pagerStart==pagenation.pageNow}" v-show="i+pagerStart<=pageTotal" class="item pager" v-text="i+pagerStart" v-on:click.prevent="pagenation.pageNow=i+pagerStart"></a>
+                       <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow>=pageTotal}" v-on:click.prevent="pagenation.pageNow++;alert(1)"><i class="right chevron icon"></i></a>
+                   </div>
+               </th></tr>
+               </tfoot>
+           </table>
+    </div>   
+ </template>
+ 
+<!--componet-->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="vue-strap.min2.js"></script> 
+<script>
+ 
+ 
+Vue.component('tlg-table',{
+   template:"#camp",
+   props: {
+       //loading进度
+       loading: {
+           type: Boolean,
+           default: false
+       },
+       sql: {
+           type: Boolean,
+           default: false
+       },
+       //显示高度
+       maxheight: {
+	       type: String,
+           default: "auto"
+       },
+       height: {
+	       type: String,
+           default: "auto"
+       },
+       //输入表头
+       header: {
+           type: Array 
+       },
+       //表格填充数据
+       tbl_data: {
+          default: null
+       },
+	   pagenation:{
+	       type : Object
+	   }
+   },
+   data:function(){
+       return {
+		 pagerSpan:6,
+		 arr_pageSize:[
+		    {val:10,label:"每页 10 条"},{val:20,label:"每页 20 条"},{val:30,label:"每页 30 条"},{val:50,label:"每页 50 条"},
+		    {val:100,label:"每页 100 条"},{val:200,label:"每页 200 条"},{val:500,label:"每页 500 条"},{val:1000,label:"每页1000条"}
+		 ],
+		 data:{"errcode":0,"errmsg":"ok","total":1173,"arr":[{"idjt":"490399","uniqueid":"1","m_code":"WXWZ0001","id":461,"gym":"北京顺义中心","phone":"18600749008","iskeep":1,"status":"未处理","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500106","babyage":"4","babyname":"李东东","parentid":"","openid":"oEGfCjuO0WdRxr9D-ZAKBYqa4DjM","create_time":"2018-05-11T17:42:10.890"},{"idjt":"455322","uniqueid":"2","m_code":"WXWZ0001","id":462,"gym":"北京太阳宫爱琴海中心","phone":"13601339795","status":"处理中","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500008","babyage":"9","babyname":"韩晨霞","parentid":"","openid":"oEGfCjqQXL2mMrM59e7GWhsN26Fg","create_time":"2018-05-11T17:44:43.557"},{"idjt":"81450","idzx":"31142","uniqueid":"3","m_code":"WXWZ0001","id":463,"gym":"上海环球中心","phone":"15821410741","iskeep":1,"status":"处理中","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500012","babyage":"5","babyname":"王睿騏","parentid":"","openid":"oEGfCjuyfnAxXE2SD_CnlLzRse1I","create_time":"2018-05-11T17:45:31.540"},{"idjt":"81450","idzx":"31142","uniqueid":"4","m_code":"WXWZ0001","id":464,"gym":"上海古北中心","phone":"15821410741","iskeep":1,"status":"家长决定不报名","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500051","babyage":"5","babyname":"王睿騏 Edward","parentid":"","openid":"oEGfCjuyfnAxXE2SD_CnlLzRse1I","create_time":"2018-05-11T17:46:09.583"},{"idjt":"416020","uniqueid":"5","m_code":"ZXWX0013","id":465,"gym":"上海嘉定新城中心","phone":"13524177252","status":"未处理","material_code":"ZXWX0013","centerid":"500082","campaign":"2018小小奥运集训营","sign_centerid":"500082","babyage":"3","babyname":"陈晓程","parentid":"","openid":"oEGfCjlh1vcoRitZqB2U0sh9As7o","create_time":"2018-05-11T17:46:13.430"},{"idjt":"537395","uniqueid":"6","m_code":"ZXWX0013","id":466,"gym":"苏州相城天虹中心","phone":"18118135543","iskeep":1,"status":"家长决定不报名","material_code":"ZXWX0013","centerid":"500110","campaign":"2018小小奥运集训营","sign_centerid":"500110","babyage":"3","babyname":"","parentid":"","openid":"oEGfCjlI1hfSTdBO4oIh6Xg3UnlA","create_time":"2018-05-11T17:46:41.657"},{"idjt":"487763","idzx":"374339","uniqueid":"7","m_code":"WXWZ0001","id":467,"gym":"呼和浩特财富港中心","phone":"18504741575","iskeep":1,"status":"家长决定不报名","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500102","babyage":"6","babyname":"杜波","parentid":"","openid":"oEGfCjk-Aj1GTIBjpbNYO53S_SKY","create_time":"2018-05-11T17:49:30.833"},{"idjt":"396418","idzx":"290919","uniqueid":"8","m_code":"WXWZ0001","id":468,"gym":"成都凯德金牛中心","phone":"18683610239","status":"家长决定不报名","material_code":"WXWZ0001","centerid":"","campaign":"2018小小奥运集训营","sign_centerid":"500017","babyage":"5","babyname":"林俊宇","parentid":"","openid":"oEGfCjsviMLPxJTtw0i5BDqBJeyM","create_time":"2018-05-11T17:49:36.897"},{"idjt":"414060","uniqueid":"9","m_code":"ZXWX0013","id":469,"gym":"北京通州北苑中心","phone":"13520325537","status":"未处理","material_code":"ZXWX0013","centerid":"500069","campaign":"2018小小奥运集训营","sign_centerid":"500069","babyage":"5","babyname":"高兴","parentid":"","openid":"oEGfCjr5t2vwjMiXV53s6nC37qYg","create_time":"2018-05-11T17:53:32.150"},{"uniqueid":"10","m_code":"ZXWX0013","id":470,"gym":"北京天通苑中心","phone":"1","status":"未处理","material_code":"ZXWX0013","centerid":"500069","campaign":"2018小小奥运集训营","sign_centerid":"500007","babyage":"4","babyname":"","parentid":"","openid":"oEGfCjv_dsSSBCF23rbRx570hYxM","create_time":"2018-05-11T17:54:41.240"}],"sql":"with tmp as(select crmzdy_82058177 idjt,camp.crmzdy_82053775 idzx,camp.crmzdy_82053602 uniqueid,camp.crmzdy_82053439 m_code,camp.id,camp.crmzdy_82053647 gym,camp.crm_name phone,crmzdy_82053559 iskeep,crmzdy_82053558 remark,isnull(nullif(crmzdy_82053557,quot;quot;),quot;未处理quot;) status,crmzdy_82053439 material_code,crmzdy_82053430 dtenrol,crmzdy_82053429 centerid,crmzdy_82053258 campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,crmzdy_82051553 babyname,crmzdy_82051552 parentid,crmzdy_82051551 openid,camp.create_time from crm_zdytable_238592_27045_238592_view camp where crmzdy_82053258=quot;2018小小奥运集训营quot; )select (select 0 errcode,quot;okquot;errmsg,(select count(1) from tmp)total,isnull((select * from tmp  order by id offset 0 rows fetch next 10 rows only for json path),quot;[]quot;)arr,quot;@sqlquot;sql from (select 1 x)x for json path,without_array_wrapper)"}
+	   }
+   },
+   computed:{
+       pageTotal:function(){
+	     if(this.data&&this.data.total){
+		    return Math.ceil(this.data.total/this.pagenation.pageSize)
+		 }
+		 return 0;
+	   },
+       pagerStart:function(){
+	     return (Math.ceil(this.pagenation.pageNow/this.pagerSpan)-1)*this.pagerSpan+1;
+	   }
+   },
+   methods:{
+      test:function(){
+	  //   this.pagerSpan=3;
+		// this.pagenation.pageNow=3;
+	  console.log(JSON.stringify(this.tbl_data))
+	  },
+      show:function(h){
+	    if(!h) return true;
+	    var isShow=h.label[1];
+		var key=h.value[2]||h.label[0];
+		if (typeof isShow ==="boolean"){
+		    return isShow;
+		}else if(typeof isShow ==="function"){
+		    return isShow(key);
+		}else{
+		    return true;
+		}
+	  },
+      label:function(l){
+	    var decr=l[2];
+		var name=l&&l[0].split("|")[0];
+		if(typeof decr==="function"){
+		   return decr(name);
+		}else{
+		   return name;
+		}
+	  },
+	  value:function(h,item){
+	    var key=h.value[2]||h.label[0].split("|")[0];
+	    var def=h.value[0];
+		var method = h.value[1];
+		if(key){
+		    var res =(key=='row'?item:item[key])||h.value[0]; 
+		    if(typeof method==="function"){
+			   return method(res);
+			}else if(['age','num','amt','dt'].indexOf(method)!=-1){
+			   return this[method](res);
+			}else{
+			   return res;
+			}
+		}else{
+		   return '';
+		}
+	  },
+      align:function(lname){
+	    var p= "";
+	    p = lname&&lname.split("|")[1]||"";
+		p = p.toLowerCase();
+		switch (p){
+		  case "l":
+		     return "left aligned";
+		  case "r":
+		     return "right aligned";
+		  default:
+		     return "center aligned";
+		}
+	  },
+      age:function(a){
+          if(a){ 
+            return a+'岁';
+          }else{
+            return '';
+          }
+      },
+      dt:function(n){
+          if(n==0||!n) return '';
+          return toDate(parseInt(n)*1000)
+      },
+	  num:function(num){
+	     if(!num) return 0;
+	     return parseInt(num);
+	  },
+	  amt:function(num){
+	     if(!num) return '￥0.00';
+	     return '￥'+num.toFixed(2);
+	  }	  
+   },
+   watch:{
+
+   },
+   created:function(){
+     console.log(JSON.stringify(this.data))
+   }
+   
+})
+  new Vue({
+      el: '#box',
+      data: function() {
+        return { 
+          index:0,
+		  tbl_maxheight:"460px",
+          menuGroup:[{id:'camp',name:'Camp'}],
+          menu:'camp',
+		  onlysql:{checked:false,value:""},
+		  noData:false,
+          dtStart:"",
+          dtEnd:"",
+          groups:[{id:"m_code",name:"按宣传资料"},{id:"center",name:"按来源中心"},{id:"is_recnd",name:"按是否来自朋友推荐"}],
+          groups_selected:["m_code","center","is_recnd"],
+          groups2:["按中心","按是否来自朋友推荐"],
+		  arr_status:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status_cur:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+          group_selected:"按中心",
+          reports:[{id:"fansData",label:"新增粉丝量汇总表"},{id:"sumData",label:"预报名和报名汇总表"},{id:"kxjData",label:"开学季活动报名情况汇总"}],
+          report_cur:"fansData",
+          sumData:[],
+		  kxjData:[],
+          by_m_Data:{},
+          by_c_Data:{},
+          by_m_c_Data:{},
+		  by_is_recnd_data:{},
+          summerType:'preEnrol',
+		  typeGroup:[{val:'preEnrol',label:'预报名信息'}],
+		  search:"", 
+		  pagenation:{
+            pageSize :10,
+            pageNow:1,
+		  },
+		  keepInTouch:false,
+          isrecd:false,
+		  myData:null,
+          h5_data:[],
+          fansTotal:0,
+		  disable:{
+		    gym:false,
+			campaign:false
+		  },
+          select: {
+            start: false,
+            isShow: true,
+            campaigns:[{id:'所有',name:'所有活动'}],
+            campaign_selected:"2018小小奥运集训营",
+            acl: "",
+            ids:[],
+            gyms: [],
+            gymNames:{},
+            gym_selected:"",
+            data: {}
+          },
+          alertError:{show:false,title:'错误提示',msg:''},
+    	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
+		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
+          check: {},
+          lack:[]
+		}
+      },
+      components:{
+            vSelect: VueStrap.select,
+        	vOption: VueStrap.option,
+        	alert: VueStrap.alert,
+			modal: VueStrap.modal,
+			checkbox: VueStrap.checkbox,
+            dropdown: VueStrap.dropdown,
+            datepicker: VueStrap.datepicker,
+			bsInput: VueStrap.input,
+            formGroup:VueStrap.formGroup,	
+      },
+      filters: {
+            gymName:function(code){
+                if(code=="")  return "总部";
+                 if(this.select.gymNames[code]){
+                     return this.select.gymNames[code];
+                 }else{
+                    return code;
+                 };
+            },
+			n_fmt:function(num){
+			  if(num=="") return 0;
+			  return parseInt(num);
+			},
+			m_codeName:function(code){
+			  if(code=="")  return "无";
+			  return code;
+			},
+			isrecd:function(val){
+			  if(val==1){
+			    return "是";
+			  }else{
+			    return "否";
+			  }
+			},
+            age:function(a){
+                if(a){ 
+                return a+'岁';
+                }else{
+                return '';
+                }
+            },
+            tuijian:function(id){
+                if(id!=""){
+                    return "是";
+                }else{
+                    return "否";
+                }
+            },
+            keep:function(k){
+                if(k){return true}
+                return false;
+            }
+
+      },
+	  watch:{
+         isrecd:function(){
+			 this.pageNow = 1;
+		 },
+	  	 keepInTouch:function(){
+			 this.pageNow = 1;
+		 },
+	  	 arr_status_cur:function(){
+			 this.pageNow = 1;
+		 },
+         pagenation:{
+	       handler(newValue, oldValue) {
+　　　   　　　console.log(newValue.pageSize)
+               //this.getEnrol();
+　　　   　},
+　　　   　deep: true
+	     }
+	  },
+	  computed:{
+		  theader: function(){
+		    return [
+		       //{lable:['name','fn_show','fn_label_ch'],value:['default','fn_handle','key_override']}
+		       {label:['操作',false],value:['',this.urlEdit,'row']},
+			   {label:['家长手机'],value:['',this.urlView,'row']},
+			   {label:['孩子姓名|l','',this.decorate],value:['','','babyname']},
+			   {label:['孩子年龄',this.field_show],value:['','','babyage']},
+			   {label:['报名中心|l'],value:['','','sign_centerid']},
+			   {label:['报名日期'],value:['','dt','dtenrol']},
+			   {label:['创建时间'],value:['','','create_time']},
+			   {label:['物料编号',this.isadmin && this.select.campaign_selected.indexOf('集训营')!=-1],value:['','','m_code']},
+			   {label:['来自朋友推荐',this.select.campaign_selected.indexOf('集训营')!=-1],value:['','','parentid']},
+			   {label:['处理状态'],value:['','','m_code']},
+			   {label:['活动名称'],value:['','','campaign']},
+			   {label:['备注',this.field_show],value:['','','remark']}
+		     ]
+		    },
+	        rowGroup:function(){
+			    if(this.kxjData.length==0) return [];
+				var rowGroup=this.kxjData.map(function(item){
+				  //console.error(item.time)
+				  return item.time;
+				})
+				rowGroup=this.arr_stat(rowGroup);
+				//console.error(JSON.stringify(rowGroup));
+				return rowGroup
+			},
+
+            url_export:function(){
+              var url="https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_excel.aspx"
+              var sql="select camp.crmzdy_82053602 记录ID,isnull(gym.crm_name,'总部') 来源中心,camp.crmzdy_82053439 物料编号,case when isnull(crmzdy_82053430,'')='' then null else dateadd(S,cast(crmzdy_82053430 as int),'1970-01-01 08:00:00') end  预报名日期,camp.crmzdy_82053647 报名中心,camp.crm_name 报名手机,crmzdy_82051553  孩子姓名 ,crmzdy_82051554 孩子年龄,crmzdy_82053557 报名状态,crmzdy_82053258 活动动名称,camp.create_time 创建时间 from crm_zdytable_238592_27045_238592_view camp left join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116 =camp.crmzdy_82053429 where crmzdy_82053258='@campaign' order by 报名中心,camp.create_time desc;"
+              sql = GB2312UnicodeConverter.ToUnicode(sql.replace('@campaign',this.select.campaign_selected));
+              filename = GB2312UnicodeConverter.ToUnicode(this.select.campaign_selected+"_"+CurTime());
+              return url+'?sql='+sql+'&filename='+filename;
+            },
+            dataFilter:function(){
+              var self=this;
+              return self.myData.filter(function(d,i){
+                    var filt_search=false;
+                    if($.trim(self.search)=='') {
+                        filt_search=true;
+                    }else{
+                        filt_search=(JSON.stringify(d).indexOf($.trim(self.search))!=-1);
+                    }
+
+                    var filt_keep=false;
+                    if(self.keepInTouch) {
+                        filt_keep=(d.iskeep==1);
+                    }else{
+                        filt_keep=true;
+                    }
+                    var filt_isrecd=false;
+                    if(self.isrecd) {
+                        filt_isrecd=(d.parentid!="");
+                    }else{
+                        filt_isrecd=true;
+                    }
+					
+                    var filt_status=false;
+                    filt_status=(JSON.stringify(self.arr_status_cur).indexOf(d.status)!=-1);
+                     
+                    return  filt_search&&filt_keep&&filt_isrecd&&filt_status;
+                })
+            },
+            dataSort:function(){
+                this.dataFilter.sort(function(a,b){
+                    if(!type){
+                        return a[item]-b[item];
+                    }else{
+                        return b[item]-a[item];
+                    }
+                });
+            },
+            sql_cur:function(){
+                switch(this.summerType){
+                case 'preEnrol':
+                    return sql_preEnrol;
+                    break;
+                default:
+                    return sql_preEnrol;
+                }
+            },
+            sqlBuilder:function () {
+                var id =this.select.gym_selected;
+                var sql=this.sql_cur;
+                if(id=="all"){
+                    sql= sql.replace(/@gymWhere/gi,"")
+                }else{
+                    sql= sql.replace(/@gymWhere/gi,'and crmzdy_82051555='+id)
+				}
+				if(this.select.campaign_selected=="所有"){
+				    sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''")
+				}else{
+                    sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.select.campaign_selected+"'");
+				}
+           
+				sql=fn_pager(sql,{pageSize:this.pagenation.pageSize,pageNow:this.pagenation.pageNow})
+			 
+                sql = GB2312UnicodeConverter.ToUnicode(sql);
+                return sql; 
+                
+            },
+            navSize:function () {
+                if(this.myData.length>0){
+                    this.pageSpan=Math.ceil(this.myData[0].num/this.pagenation.pageSize);
+                    return this.pageSpan>8 ? 8: this.pageSpan;
+                }
+                return 0;
+            }, 
+            dataFilterPage:function(){
+                var pageDate=[];
+                var row={};
+                for(var i= this.pagenation.pageSize*(this.pageNow-1);i<this.dataFilter.length;i++)
+                {
+                    if (i-(this.pagenation.pageSize*(this.pageNow-1))>this.pagenation.pageSize-1) break;
+                    row=this.dataFilter[i];
+                    row.checked=(this.dataFilter[i].iskeep==1?true:false);
+                    //console.log(JSON.stringify(row))
+                    pageDate.push(row)
+                }
+                return pageDate;
+            },
+            pageSpan:function () {
+                return Math.ceil(this.dataFilter.length/this.pagenation.pageSize)
+            },
+		    navSize:function () {
+               //console.log(this.users.length)
+               return  this.pageSpan>8 ? 8:this.pageSpan
+            },
+            gyms:function(){
+                var self=this;
+                var gyms=self.select.gyms;
+                if(!(self.select.acl.indexOf("系统管理员")==-1
+                  &&self.select.acl.indexOf("运营顾问")==-1
+                  &&self.select.acl.indexOf("市场专员")==-1
+                  &&self.select.acl.indexOf("市场顾问")==-1)){
+                    gyms.unshift({id:"all",name:"所有中心"})
+                }
+                if(gyms[0]){
+                   self.select.gym_selected=gyms[0].id;
+                }
+                return gyms;
+            },
+            isadmin:function(){
+    	      if(this.select.acl.indexOf('系统管理员')!=-1
+              ||this.select.acl.indexOf('市场顾问')!=-1
+              ||this.select.acl.indexOf('运营顾问')!=-1
+              ||this.select.acl.indexOf('市场专员')!=-1){
+    		     return true;
+    		  }
+    		  return false;
+            },
+            /*report*/
+            where_dt:function(){
+                return "camp.create_time between '"+this.dtStart+" 00:00:00' and '"+this.dtEnd+" 23:59:59'";
+            },
+            where_ht_dt:function(){
+                return "ht.crmzdy_80646021 between '"+this.dtStart+" 00:00:00' and '"+ this.dtEnd+" 23:59:59'";
+            },
+            where_bk_dt:function(){
+                return "bk.create_time between '"+this.dtStart+" 00:00:00' and '"+ this.dtEnd+" 23:59:59'";
+            },
+            where_bmks_dt:function(){
+                return "bmks.create_time between '"+this.dtStart+" 00:00:00' and '"+ this.dtEnd+" 23:59:59'";
+            },
+            where_update_dt:function(){
+                return "camp.update_time between '"+this.dtStart+" 00:00:00' and '"+ this.dtEnd+" 23:59:59'";
+            },
+            where_gymcode:function(){
+                if(this.select.gym_selected=='all'){
+                    return "camp.crmzdy_82051555 between '500005' and '600005'";
+                }else{
+                    return "camp.crmzdy_82051555="+this.select.gym_selected;
+                }
+            },
+            where_bj_gymcode:function(){
+                if(this.select.gym_selected=='all'){
+                    return "bj.crmzdy_81803719 between '500005' and '600005'";
+                }else{
+                    return "bj.crmzdy_81803719="+this.select.gym_selected;
+                }
+            },
+            where_ht_gymcode:function(){
+                if(this.select.gym_selected=='all'){
+                    return "ht.crmzdy_81757911 between '500005' and '600005'";
+                }else{
+                    return "ht.crmzdy_81757911="+this.select.gym_selected;
+                }
+            },
+            where_campaign:function(){
+                return "camp.crmzdy_82053258='"+this.select.campaign_selected+"'";
+            },
+            sqlEnrolTotal:function () {
+                if(this.group_selected=="按中心"){
+                   var sql = sql_pre_enrol_total;
+                }else{
+                   var sql = sql_pre_enrolByRecnd;
+                }
+                sql = sql.replace(/@where_ht_dt/ig,this.where_ht_dt)
+                .replace(/@where_bk_dt/ig,this.where_bk_dt)
+                .replace(/@where_bmks_dt/ig,this.where_bmks_dt)
+                .replace(/@where_dt/ig,this.where_dt)
+                .replace(/@where_campaign/ig,this.where_campaign)
+                .replace(/@where_gymcode/ig,this.where_gymcode)
+                .replace(/@where_bj_gymcode/ig,this.where_bj_gymcode)
+                .replace(/@where_ht_gymcode/ig,this.where_ht_gymcode)
+				.replace(/@where_update_dt/ig,this.where_update_dt);
+                
+                    //console.log(sql);
+                sql = GB2312UnicodeConverter.ToUnicode(sql);
+                return sql; 
+            },
+            total:function(){
+                var total={num_pre:0,enrol_num:0,enrol_num:0,enrol_amt:0,enrol_num2:0,enrol_amt2:0,kcht_num:0,kcht_amt:0};
+                this.sumData.map(function(s){
+                    total['num_pre']+=parseInt(s.num_pre||0);
+                    total['enrol_num']+=parseInt(s.enrol_num||0);
+                    total['enrol_amt']+=parseInt(s.enrol_amt||0);
+                    total['enrol_num2']+=parseInt(s.enrol_num2||0);
+                    total['enrol_amt2']+=parseInt(s.enrol_amt2||0);
+                    total['kcht_num']+=parseInt(s.kcht_num||0);
+                    total['kcht_amt']+=parseInt(s.kcht_amt||0);
+					
+                })
+				//console.error(JSON.stringify(total))
+                return total;
+				
+            } 
+	  },
+      methods: {
+        urlEdit:function(row){
+            var u= "<a class='btn btn-small btn-default' href='https://bbk.800app.com/index.jsp?mfs=crm_zdytable_238592_27045&mid=@id&menu=1109&gym=@gym' target='_blank'>修改</a>";
+            return u.replace('@id',row.id).replace('@gym',GB2312UnicodeConverter.ToUnicode(this.select.gymNames[row.sign_centerid]));
+        },
+        urlView:function(item){
+            if(item.idjt&&item.idjt!="undefined"&&$.trim(item.idjt)!=""){
+		    var u= "<a title='点击进入家庭' href='https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_sj&mid=@idjt&menu=3' target='_blank'>@phone</a>";
+            //var u= "<a title='点击进入家庭' href='https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_zdytable_238592_25111&menu=3&mzdyshowname=咨询中心&mRelateClassName=crm_sj&mRelateID=82078&mid=@idzx' target='_blank'>@phone</a>";
+            return u.replace('@idjt',item.idjt).replace('@phone',item.phone);
+            }
+            return item.phone;
+        },	  
+	    field_show:function(item){
+		  //年龄隐藏
+		  var arr=['婴芭莎展会'];
+		  if (item=='age' && arr.indexOf(this.select.campaign_selected)!=-1)return false;
+		  //备注显示
+		  var arr=['婴芭莎展会线下'];
+		  if (item=='remark' && arr.indexOf(this.select.campaign_selected)==-1)return false;
+
+		  return true;
+		},
+	    arr_stat:function(_arr){
+		  var res={},key;
+		  
+           _arr.sort();
+           for (var i = 0; i < _arr.length;) {
+               var count = 0;
+               for (var j = i; j < _arr.length; j++) {
+                   if (_arr[i] == _arr[j]) {
+                       count++;
+                   }
+               }
+			   key =_arr[i];
+               res[key]= count;
+               i += count;
+			}
+			return res;
+		},
+	    decorate:function(field){
+			  var arr=['婴芭莎展会'];
+			  if(arr.indexOf(this.select.campaign_selected)!=-1)return '家长姓名';
+			  return field;
+		},
+	    add:function(a,b){
+		   a=a||0;
+		   b=b||0;
+		   return parseInt(a)+parseInt(b);
+	    },
+        checkResult:function(){
+            if(this.lack.length>0){
+                this.alertError.title="接口数据核对结果";
+                this.alertError.msg="接口总记录数:"+this.count_actual+",oasis总记录数:"+this.myData.length+";缺少数据ID:"+this.lack.join(",");
+                this.alertError.show=true;
+            }else{
+                this.alertInfo.title="接口数据核对结果";
+                this.alertInfo.msg="接口总记录数:"+this.count_actual+",oasis总记录数:"+this.myData.length+"！核对成功，没有差异！";
+                this.alertInfo.show=true;
+            }
+        },  
+        menuChange:function(m){
+            this.menu=m.id;
+            this.init();
+        },
+        getAcl_jsonp:function(){
+	        var param =GetRequest();
+            this.$http.jsonp(url_jsonp,{
+                sql1:sql_quanxian
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+			    var self=this;
+                if(res.data.info[0].rec.constructor !=String){
+                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
+                     if(self.select.acl.indexOf('系统管理员')!=-1||self.select.acl.indexOf('运营顾问')!=-1
+                     ||self.select.acl.indexOf('市场顾问')!=-1||self.select.acl.indexOf('市场专员')!=-1){
+                         if(param.menu&&param.menu==1){
+                           self.menuGroup.push({id:'report',name:'数据分析报表'});
+                           self.menu='report';
+                         }
+                     }
+   
+                }
+            },function(res){
+                console.log(res.status);
+            });
+        },
+        getgym:function(func){
+		     var self=this;
+			 sql_getGym = GB2312UnicodeConverter.ToUnicode(sql_getGym);
+             self.$http.jsonp(url_jsonp,{
+                 sql1: sql_getGym
+             },{
+                 jsonp:'callback'
+             }).then(function(res){
+                 self.select.gyms = res.data.info[0].rec;
+                 self.select.gyms.map(function(g){
+                    self.select.gymNames[g.id]=g.name;
+                 }) 
+				var param =GetRequest();
+                if(param.menu==1){
+                   // this.getFans();
+				}else{
+                    if(!self.select.gym_selected){
+                       this.getEnrol();  
+                    }
+				}
+             },function(res){
+                 console.log(res.status);
+             });
+       },
+       getCampaign:function(func){
+		     var self=this;
+             self.$http.jsonp(url_jsonp,{
+                 sql1: sql_campaign
+             },{
+                 jsonp:'callback'
+             }).then(function(res){
+                 var campaigns= res.data.info[0].rec;
+                 campaigns.map(function(g){
+                    self.select.campaigns.push({id:g.name,name:g.name});
+                 }) 
+             },function(res){
+                 console.log(res.status);
+             });
+       },
+       groupshow:function(t){
+                 var context = JSON.stringify(this.groups_selected)
+                 return context.indexOf(t)!=-1;
+       },
+       init:function(){
+            this.noData=false;
+            this.sumData=[];
+            this.myData=[];
+            this.by_c_Data=[];
+            this.by_m_c_Data=[];
+            this.by_m_Data=[];
+            var mydate=new Date();
+            var timestamp = new Date().getTime();
+            var myddy=mydate.getDay()
+            if(myddy==0){
+                myddy=6;
+            }else{
+                myddy--;
+            }
+            this.dtEnd=toDate_s(mydate)
+            this.dtStart=toDate_s(new Date(timestamp-myddy*24*3600*1000));
+	 
+			if(this.report_cur=="kxjData"&&this.menu=='report'){
+               this.dtEnd=toDate_s(timestamp+1*24*3600*1000)
+               this.dtStart=toDate_s(new Date(timestamp-250*24*3600*1000));
+			   this.select.campaign_selected="开学季";
+			   this.disable.gym=true;
+			   this.disable.campaign=true;
+			}else{
+			   this.disable.gym=false;
+			   this.disable.campaign=false;
+			}
+            //alert((new Date(this.dtStart)).getTime())
+            //alert(toDate_s(new Date(1525881600000)))
+       },
+         /*preEnrol*/
+       editContact:function(){
+	     var self=this;
+		 if(!self.select.gym_selected){
+	        this.alertError.title="错误提示";
+            this.alertError.msg="请先选择中心！";
+            this.alertError.show=true;
+			return;
+		 }
+		 var sql_phones="select crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='"+self.select.gym_selected+"'";
+         self.$http.jsonp(url_jsonp,{
+             sql1: sql_phones
+         },{
+             jsonp:'callback'
+         }).then(function(res){
+             var res= res.data.info[0].rec;
+			 
+			 if(typeof res=='object'){
+			    res = res[0].phones.split("|");
+				self.contactModal.phones= new Array(res[0]||'',res[1]||'');
+			 }
+			 //console.log(JSON.stringify(self.contactModal.phones))
+         },function(res){
+             console.log(res.status);
+         });
+	 
+	     this.contactModal.show = true;
+		 
+	   },
+	   saveCon:function(){
+		 var self=this;
+		 self.contactModal.valid=true
+	     var res=self.contactModal.phones.filter(function(p){
+		    if(p!="" && !self.contactModal.phone_reg.test(p)){
+			  self.contactModal.valid=false;
+			}
+			return p!='';
+		 });
+		 if(!this.contactModal.valid){
+	            this.alertError.title="错误提示";
+                this.alertError.msg="手机号录入不正确！";
+                this.alertError.show=true;
+				return;
+		 } 
+		 if($.trim(res.join(''))==''){
+	            this.alertInfo.title="警告";
+                this.alertInfo.msg="请至少录入一个手机号信息！";
+                this.alertInfo.show=true;
+				return;
+		 } 
+		 var sql_update_phones = "merge into crm_zdytable_238592_27059_238592_view t using (select '@phones' phones,'@gymcode' gymcode ) s on t.crmzdy_82053884=s.gymcode when matched then update set t.crm_name= s.phones";
+         sql_update_phones += " when not matched by target then insert (org_id,cust_id,crm_syrID,create_time,crm_name,crmzdy_82053884/*gymcode*/) values (238592,279833,279833,getdate(),s.phones,s.gymcode);select 'ok' status;"; 
+         sql_update_phones = sql_update_phones.replace('@phones',res.join('|')).replace('@gymcode',self.select.gym_selected);
+         self.$http.jsonp(url_jsonp,{
+             sql1: sql_update_phones
+         },{
+             jsonp:'callback'
+         }).then(function(res){
+             var res= res.data.info[0].rec;
+			 if(typeof res=='object'){
+                this.alertInfo.title="提示";
+                this.alertInfo.msg="操作成功";
+                this.alertInfo.show=true;
+			 }else{
+	            this.alertError.title="提示";
+                this.alertError.msg="保存失败";
+                this.alertError.show=true;
+			 }
+         },function(res){
+             console.log(res.status);
+         });
+		  
+		 this.contactModal.show = false;
+		 
+	   },
+	   saveFam:function(){
+	     alert(JSON.stringify(this.dataFilterPage))
+	   },
+       hanleKeep:function(item){
+	     var iskeep=0;
+	     if(item.iskeep==1){
+		   iskeep=0;
+         }else{
+           iskeep=1;
+		 }
+	     updatesql='update crm_zdytable_238592_27045_238592_view set crmzdy_82053559='+iskeep+' where id='+item.id;
+		 item.iskeep=iskeep;
+	     this.putSQl(updatesql);
+	   },
+	   turnTo:function(num){
+	     if(num<1) {num=1}
+	     if(num>this.pageSpan) {num=this.pageSpan}
+	     this.pagenation.pageNow = num;
+		 //this.getEnrol();
+	   },
+	   putSQl:function(sql){
+	      var self=this;
+          self.$http.jsonp(url_jsonp,{
+               sql1: sql,
+           },{
+               jsonp:'callback'
+           }).then(function(res){
+			  var sql =res.data.info[1].sql;
+			  sql =sql.replace(/quot;/gi,"'")
+           },function(res){
+           });
+		
+	    },
+        getSignlist:function(){
+            var self=this;
+            self.$http.jsonp(url_signlist,{
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var res_data = res.data;
+                if(!res_data.code){ 
+                    arr_uniqueid=res_data.uniqueid.split(",");
+                    arr_uniqueid.map(function(u){
+                        if(!self.check[u]){
+                            self.check[u]=0;
+                        }
+                        self.check[u]+=1;
+                    })
+                    self.lack=[];
+                    for(var key in self.check){
+                        if(self.check[key]==1){
+                            self.lack.push(key)
+                        }
+                    }
+                    self.count_actual=res_data.count;
+                    self.count_actual=res_data.count;
+                    self.count_actual=res_data.count;
+                }else{
+                    self.noData=true;
+                }
+                self.select.start=false;
+                
+            },function(res){
+                self.select.start=false;
+            });
+        },
+	    getEnrol:function(){
+
+            if (!this.select.gym_selected) return;
+			var self=this;
+			self.myData=[];
+            self.noData=false;
+            self.select.start=true;
+            self.$http.jsonp(url_local,{
+                sql1: self.sqlBuilder,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                   if(res.data.errcode==0){
+				     self.myData=res.data;
+				   }
+                console.log(JSON.stringify(self.myData))
+                self.select.start=false;
+                //fn_pager
+            },function(res){
+                self.select.start=false;
+            });
+ 
+	    },
+         /*report*/
+         toTimeStamp:function(dt){
+            return (new Date(dt).getTime())/1000;
+         },
+         getQuery:function(){
+            if(this.report_cur=="fansData"){
+                this.getFans();
+            }else if(this.report_cur=="sumData"){
+                this.getEnrolTotal(); 
+            }else if(this.report_cur=="kxjData"){
+                this.getKxjTotal(); 
+            }
+         },
+		 getKxjTotal:function(){
+            var self=this;
+            self.select.start=true;
+            self.kxjData=[];
+            self.check={};
+            self.noData=false;
+			var sql = sql_kxj_ht;
+			sql = sql.replace("@where_ht_dt",this.where_ht_dt);
+			sql = GB2312UnicodeConverter.ToUnicode(sql);
+            self.$http.jsonp(url_jsonp,{
+                sql1: sql ,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value=sql;
+                var res_data = res.data.info[0].rec;
+                if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                    self.kxjData=res_data;
+					//console.log(JSON.stringify(self.rowGroup))
+                }else{
+                    self.noData=true;
+                }
+				self.select.start=false; 
+            },function(res){
+                self.select.start=false;
+                console(res.status);
+            });
+         }, 
+         getEnrolTotal:function(){
+            var self=this;
+            self.select.start=true;
+            self.sumData=[];
+            self.check={};
+            self.noData=false;
+            self.$http.jsonp(url_jsonp,{
+                sql1: self.sqlEnrolTotal,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value=sql;
+                var res_data = res.data.info[0].rec;
+                if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                    self.sumData=res_data;
+                    self.sumData=self.sumData.sort(function(a,b){
+                            return b['num_pre']-a['num_pre'];
+                    });
+                }else{
+                    self.noData=true;
+                }
+                self.select.start=false; 
+            },function(res){
+                self.select.start=false;
+                console(res.status);
+            });
+         },
+         getFans:function(){
+			var self=this;
+            self.fansTotal=0;
+			self.by_m_Data=[];
+            self.by_c_Data=[];
+            self.by_m_c_Data=[];
+			self.by_is_recnd_data=[];
+            self.select.start=true;
+            self.noData=false;
+            self.$http.jsonp(url_fans,{
+                start:this.toTimeStamp(this.dtStart),
+                end:this.toTimeStamp(this.dtEnd+" 23:59:59")
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =self.sqlBuilder;
+                self.onlysql.value=sql;
+                var res_data = res.data;
+                if(!res.code&&!self.onlysql.checked){ 
+                   self.h5_data=res_data.data;
+                   if(res_data.data.length>0){
+                        var m_code={};
+                        var centerid={};
+						var is_recnd={};
+                        res_data.data.map(function(f){
+                            //if($.trim(f.materialcode)!=""){
+                                if(!m_code[f.materialcode]){
+                                    m_code[f.materialcode]=0;
+                                }
+                                if(!centerid[f.centerid]){
+                                    centerid[f.centerid]=0;
+                                }
+                                if(!is_recnd[f.parentid]){
+                                    is_recnd[f.parentid]=0;
+                                }
+                                self.fansTotal+=f.sum;
+                                self.by_m_c_Data.push(f) 
+                                m_code[f.materialcode]+=parseInt(f.sum);
+                                centerid[f.centerid]+=parseInt(f.sum);
+								//console.error(f.parentid+"vs"+f.sum)
+								is_recnd[f.parentid]+=parseInt(f.sum);
+                           //}
+                            //console.log(m_code[f.materialcode]+"vs"+f.sum)
+                        })
+                        for(var k in m_code){
+                            self.by_m_Data.push({key:k,sum:m_code[k]})
+                            //console.error(k+"vs"+m_code[k])
+                        }
+                        for(var k in centerid){
+                            self.by_c_Data.push({key:k,sum:centerid[k]})
+                        }
+                        for(var k in is_recnd){
+                            self.by_is_recnd_data.push({key:k,sum:is_recnd[k]})
+                        }
+                    
+					    //alert(JSON.stringify(is_recnd))
+                        self.by_m_Data=self.by_m_Data.sort(function(a,b){
+                            return b['sum']-a['sum'];
+                        });
+                        self.by_c_Data=self.by_c_Data.sort(function(a,b){
+                            return b['sum']-a['sum'];
+                        });
+                        self.by_m_c_Data=self.by_m_c_Data.sort(function(a,b){
+                            return b['sum']-a['sum'];
+                        });
+                    }  
+                } 
+                self.select.start=false; 
+                self.noData=true;
+            },function(res){
+                self.select.start=false;
+                console(res.status);
+            });
+	    },
+        debug: function () {
+	       alert(JSON.stringify(this.check["msg"]))
+           alert(JSON.stringify(this.check))
+        } 
+      },
+      created: function () {
+           this.getAcl_jsonp();
+           this.init();
+		   this.getCampaign();
+           this.getgym();
+      },
+  }) 
+</script>
+</body>
+</html>

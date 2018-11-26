@@ -1,17 +1,31 @@
 <template>
-  <doc-section id="mz-datepicker" name="Daterange">
+  <doc-section id="datepicker" name="Datepicker">
     <div class="bs-example">
-        <div>StartTime:{{startTime}}</div>
-        <div>EndTime:{{endTime}}</div>
-        <div>Time:{{time}}</div>
-        <mz-datepicker ch></mz-datepicker>
-        <mz-datepicker format="yyyy-MM-dd" :start-time.sync="startTime" :end-time.sync="endTime" range en confirm :on-confirm="confrim"></mz-datepicker>
-        <mz-datepicker format="yyyy-MM-dd" :start-time.sync="startTime" :end-time.sync="endTime" range ch ></mz-datepicker>
-        <mz-datepicker format="yyyy-MM-dd HH:mm:ss" clearable :time.sync="time"></mz-datepicker>
-        <mz-datepicker disabled></mz-datepicker>
- 
+      <p>
+        <pre>Selected date is: {{new Date($refs.dp.parse()).toString()}}</pre>
+      </p>
+      <datepicker v-ref:dp :value.sync="value" :disabled-days-of-Week="disabled" :format="format.toString()" :clear-button="clear" :placeholder="placeholder" width="370px"></datepicker>
+      <h4>Disabled days of week</h4>
+
+      <v-select multiple :value.sync="disabled" :options="[0,1,2,3,4,5,6]"></v-select>
+
+      <h4>Format</h4>
+      <v-select :value.sync="format" :options="formats"></v-select>
+
+      <h4>Reset button</h4>
+      <checkbox :checked.sync="clear" type="primary">toggle clear button</checkbox>
+
+      <h4>Placeholder</h4>
+      <input :value="placeholder" type="text" style="width: 370px"></input>
+    </div>
     <doc-code language="markup">
-        <mz-datepicker format="yyyy-MM-dd" :start-time.sync="startTime" :end-time.sync="endTime" range ch ></mz-datepicker>
+      <datepicker
+        :value.sync="value"
+        :disabled-days-of-Week="disabled"
+        :format="format"
+        :clear-button="clear"
+        :placeholder="placeholder">
+      </datepicker>
     </doc-code>
     <doc-table>
       <div>
@@ -62,7 +76,7 @@ import docSection from './docSection.vue'
 import docTable from './docTable.vue'
 import docCode from './docCode.vue'
 import checkbox from 'src/Checkbox.vue'
-import mzDatepicker from 'src/Daterange.vue'
+import datepicker from 'src/Datepicker.vue'
 import vSelect from 'src/Select.vue'
 import vOption from 'src/Option.vue'
 
@@ -72,22 +86,37 @@ export default {
     docTable,
     docCode,
     checkbox,
-    mzDatepicker,
+    datepicker,
     vSelect,
     vOption
   },
   data () {
     return {
-      time: '2016-05-15',
-      startTime: new Date('2016-03-31').getTime(),
-      endTime: new Date('2016-03-31').getTime()
+      disabled: [],
+      value: '2015-06-10',
+      formats: [
+        {value: 'dd/MM/yyyy', label: 'dd/MM/yyyy'},
+        {value: 'dd-MM-yyyy', label: 'dd-MM-yyyy'},
+        {value: 'yyyy,MM,dd', label: 'yyyy,MM,dd'},
+        {value: 'yyyy-MM-dd', label: 'yyyy-MM-dd'},
+        {value: 'yyyy.MM.dd', label: 'yyyy.MM.dd'},
+        {value: 'MMM/dd/yyyy', label: 'MMM/dd/yyyy'},
+        {value: 'MMMM/dd/yyyy', label: 'MMMM/dd/yyyy'},
+        {value: 'MM/dd/yyyy', label: 'MM/dd/yyyy'},
+        {value: 'MM-dd-yyyy', label: 'MM-dd-yyyy'}
+      ],
+      format: ['yyyy-MM-dd'],
+      clear: true,
+      placeholder: 'placeholder is displayed when value is null or empty'
     }
   },
-  methods:{
-      confrim:function(startTime,endTime){
-          console.log(startTime);
-          console.log(endTime);
-      }
+  watch: {
+    disabled () {
+      this.$refs.dp.getDateRange()
+    },
+    format (newV) {
+      this.value = this.$refs.dp.stringify()
+    }
   }
 }
 </script>

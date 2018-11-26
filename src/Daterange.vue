@@ -1,7 +1,7 @@
 <template>
            <div class="mz-datepicker" v-bind:style="{width:width+'px'}"> 
             <input :value="value" readonly :disabled="disabled" :class="{focus:show}" @click="click" @mousedown="$event.preventDefault()"/><a v-if="clearable&&value" @click.stop="clear"></a><i @click="click"></i> 
-            <div class="mz-datepicker-popup" :class="{'mz-datepicker-popup-left':left}" v-if="show" transition="mz-datepicker-popup" tabindex="-1" @blur="show = false" @mousedown="$event.preventDefault()" @keyup.up="changeMonth(-1,1)" @keyup.down="changeMonth(1,1)" @keyup.left="changeYear(-1,1)" @keyup.right="changeYear(1,1)" v-el:popup> 
+            <div class="mz-datepicker-popup" :class="{'mz-datepicker-popup-left':left}" v-if="show" transition="mz-datepicker-popup" tabindex="-1" @blur="show = false" @dblclick="show = false" @mousedown="$event.preventDefault()" @keyup.up="changeMonth(-1,1)" @keyup.down="changeMonth(1,1)" @keyup.left="changeYear(-1,1)" @keyup.right="changeYear(1,1)" v-el:popup> 
             <div class="mz-calendar-top" v-if="range&&!en"> 
                 <template v-for="item in ranges"> 
                     <i v-if="$index"></i><a v-text="item.name" @click="selectRange(item)"></a> 
@@ -757,7 +757,7 @@ export default {
     background: #006CCA;
 }
 .mz-calendar-range {
-    width: 423px;
+    width: 431px;
 }
 .mz-calendar-separator {
     display: inline-block;
