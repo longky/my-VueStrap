@@ -1,0 +1,21 @@
+import Vue from '../docs/js/vue.min.js'
+import VueRouter from '../docs/js/vue-router.min.js'
+import Campaign from './Campaign.vue'
+import routerConfig from './router.campaign.js'
+
+Vue.use(VueRouter);
+
+
+//配置路由
+const router=new VueRouter();
+
+router.map(routerConfig);
+
+/*
+router.redirect({
+	'/':'/home'
+});
+*/
+
+router.start(Campaign,'#app');
+
