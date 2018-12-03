@@ -230,7 +230,7 @@ export default {
                 opacity: 0.5; /*其他，透明度50%*/
     }
     #span{
-        padding-top:2.1%!important;
+        padding-top:2%!important;
         height: 150%;   
         border: none;
     }

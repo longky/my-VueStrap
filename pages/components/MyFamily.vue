@@ -4,8 +4,8 @@
 				<div class="ui four column stackable grid">
 					<div class="column left aligned">
 						<div class="input-group">
-							<span class="input-group-addon">视图</span>          
-							<v-select :value.sync="view_selected" placeholder="请选择视图" :options="viewGroup" options-label="label" options-value="val"  search close-on-select>
+							<span class="input-group-addon">市场活动</span>          
+							<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  search close-on-select>
 							</v-select>					
 						</div>
 					</div>
@@ -15,8 +15,6 @@
 					</div>
 					<div class="column left aligned">
 						<div class="input-group" :style="{width:'250px'}">
-							<v-select :value.sync="searchType" :options="searchTypes" options-label="label" options-value="val" close-on-select v-model="searchType" @change="filterChange">
-							</v-select>
 							<input type="text" v-model="search"  placeholder="关键字：手机号/姓名" class="form-control"/>
 							<span class="input-group-addon" ><a href="#" @click.prevent="init()"><i class="glyphicon glyphicon-search"><span > 搜索</span></i></a></span>
 						</div>
@@ -125,28 +123,26 @@ export default {
   },
   data(){
     return{
-		 tbl_maxheight:"600px",	 
-		 view_selected:'recent',
-		 viewGroup:[
-			 {val:'recent',label:'本中心今天查看过的家庭'},{val:'potential',label:'我负责的潜在客户'},
-		     {val:'active',label:'我负责的活跃会员'},{val:'history',label:'我负责的历史会员'}
-		 ],
-         searchType:this.searchTypes[0].label,
-		 searchTypes:[
-			 {label:"孩子年龄",show:"active,history,potential"},{label:"孩子",show:""},{label:"家长手机",show:""},
-		     {label:"质量评估",show:"potential"},{label:"负责老师",show:""},{label:"获得家长信息的渠道",show:"potential"},{label:"最近浏览时间",show:"recent,potential"}
-		],
-		searchGrp:[{val:"",placeholder:"",show:true},{val:"",placeholder:"年龄上限(个月)",show:false}],
-    	alertError:{show:false,title:'错误提示',msg:''},
-    	alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
-		pagenation:{
+		  tbl_maxheight:"600px",	 
+		  arr_status:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status_cur:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+          summerType:'preEnrol',
+		  typeGroup:[{val:'preEnrol',label:'预报名信息'},{val:'coupon',label:'礼券名单'}],
+		  isrecd:false,
+          search:"",
+		  pagenation:{
             pageSize :10,
 			pageNow:1,
 			order:""
-		},
-		sql_cur:sql_preEnrol,
-		getQuery:this.getEnrol,
-		theader:[]
+		  },
+          alertError:{show:false,title:'错误提示',msg:''},
+    	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
+		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
+          check: {},
+		  lack:[],
+		  sql_cur:sql_preEnrol,
+		  getQuery:this.getEnrol,
+		  theader:[]
 	}
   },
   computed:{
