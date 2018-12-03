@@ -6,7 +6,8 @@
 					<div class="ui one column stackable grid">
 						<div class="column" >
 							<div class="ui tabular menu">
-				               <a v-for="m of select.menuGroup" :key="m.name" v-show="m.enabled" class="item" :class="{active:m.isActive}" @click="menuChange(m)" v-link="{path:m.path}" v-text="m.name"></a>
+				               <a v-for="m of select.menuGroup" :key="m.name" v-show="m.enabled" class="item" :class="{active:m.name==cur_menu}" @click="menuChange(m)" v-link="{path:m.path}" v-text="m.name"></a>
+                               <a class="item">批量导入家庭</a>
 							</div>
 						</div>
 					</div>
@@ -21,7 +22,6 @@
                         </div>
                     </div>
                  </div>
-                 
 			</div>
             <router-view :select="select"></router-view> 
 		</div>
@@ -35,10 +35,7 @@ export default {
 		return  { 
 			select: {
                 onlysql:false,
-                menuGroup:[
-                    {name:'Home',path:"/home/1",isActive:true,enabled:true},
-                    {name:'Report',path:"/report",isActive:false,enabled:false}
-                ],
+                cur_menu:'family',
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
                 isShow: true,
@@ -61,12 +58,6 @@ export default {
             gyms:function(){
                 var self=this;
                 var gyms=self.select.gyms;
-                if(!(self.select.acl.indexOf("系统管理员")==-1
-                  &&self.select.acl.indexOf("运营顾问")==-1
-                  &&self.select.acl.indexOf("市场专员")==-1
-                  &&self.select.acl.indexOf("市场顾问")==-1)){
-                    gyms.unshift({id:"all",name:"所有中心"})
-                }
                 if(gyms[0]){
                    self.select.gym_selected=gyms[0].id;
                 }
@@ -74,20 +65,22 @@ export default {
             },
             isadmin:function(){
     	      if(this.select.acl.indexOf('系统管理员')!=-1
-              ||this.select.acl.indexOf('市场顾问')!=-1
-              ||this.select.acl.indexOf('运营顾问')!=-1
-              ||this.select.acl.indexOf('市场专员')!=-1){
+              ||this.select.acl.indexOf('中心运营总监')!=-1
+              ||this.select.acl.indexOf('运营顾问')!=-1){
     		     return true;
     		  }
     		  return false;
+            },
+            menuGroup:function(){
+                return [
+                    {name:'我的家庭',path:"/family",enabled:true},
+                    {name:'查看/修改家庭负责老师',path:"/tutor",enabled:this.isadmin}
+                ]
             }
 	  },
       methods: {
         menuChange(cur){
-            this.select.menuGroup.map((n)=>{
-                n.isActive=false;
-            });
-            cur.isActive=true;
+            this.cur_menu='family';
         },
         getAcl_jsonp:function(){
             this.$http.jsonp(url_jsonp,{
@@ -119,22 +112,6 @@ export default {
                  console.log(res.status);
              });
        },
-       getCampaign:function(func){
-		     var self=this;
-             self.$http.jsonp(url_jsonp,{
-                 sql1: sql_campaign
-             },{
-                 jsonp:'callback'
-             }).then(function(res){
-                 var campaigns= res.data.info[0].rec;
-                 campaigns.map(function(g){
-                    self.select.campaigns.push({id:g.name,name:g.name});
-                 }) 
-             },function(res){
-                 console.log(res.status);
-             });
-       },
-
         debug: function () {
 	       alert(JSON.stringify(this.check["msg"]))
            alert(JSON.stringify(this.check))
