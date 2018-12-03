@@ -16,11 +16,10 @@ const router=new VueRouter();
 
 router.map(routerConfig);
 
-/*
 router.redirect({
-	'/':'/home'
+	'/':'/home/1'
 });
-*/
+
 router.start(Campaign,'#app');
 
 

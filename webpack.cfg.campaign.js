@@ -32,7 +32,7 @@ module.exports = {
   },
   babel: {
     presets: ['es2015'],
-    plugins: ['transform-runtime','transform-object-rest-spread']
+    plugins: ['transform-runtime']
   },
   devtool: 'source-map'
 //   devServer:{
@@ -47,7 +47,10 @@ module.exports = {
 //     }      
 };
 
-if (process.env.NODE_ENV === 'production') {
+const argv = require('minimist')(process.argv.slice(2));
+ 
+
+if (argv.env=== 'production') {
   delete module.exports.devtool;
   module.exports.plugins = [
     new webpack.DefinePlugin({
@@ -57,8 +60,10 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
+        drop_console: true,
         warnings: false
       }
     })
   ];
 }
+ 

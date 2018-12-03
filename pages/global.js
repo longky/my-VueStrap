@@ -1,5 +1,13 @@
 export default{
     methods:{
+		gymName:function(code){
+			if(code=="")  return "总部";
+			if(this.select.gymNames[code]){
+				return this.select.gymNames[code];
+			}else{
+			return code;
+			};
+		},
         obj2Arr(obj){
             var arr = []
             for (let i in obj) {
@@ -44,12 +52,14 @@ export default{
             if(/with.+as/.test(str)){
               header=","
             } 
-            if(/((select.*)\/\*main\*\/(.*?))[;]?$/.test(str)){
-                var pager = "select * from tmp "+(!option.kw?"":"where "+option.kw)+ " order by id"+(!option.sw?"":","+option.sw);
+            if(/^(.*)(select\s*?)\/\*main\*\/(.*?)[;]?$/.test(str)){
+                var pager = "select * from p order by @order id"+(!option.sw?"":","+option.sw);
                 pager += " offset "+(option.pageNow-1)*option.pageSize+" rows fetch next "+option.pageSize+" rows only"
-                str = header+"tmp as("+RegExp.$2+RegExp.$3+")select (select 0 errcode,'ok'errmsg,(select count(1) from tmp)total,isnull((@pager for json path),'[]')arr,'@sql'sql from (select 1 x)x for json path,without_array_wrapper)";
-                str = str.replace("@pager",pager);
-            } 
+                str = RegExp.$1+header+"p1 as("+RegExp.$2+RegExp.$3+"),p as(select * from p1 @c) select (select 0 errcode,'ok'errmsg,(select count(1) from p)total,isnull((@pager for json path),'[]')arr,'@sql'sql from (select 1 x)x for json path,without_array_wrapper)";
+                str = str.replace("@c",!option.condition?"":"where "+option.condition).replace("@pager",pager).replace("@order",option.order);
+            }else{
+                throw new Error("sql没有main标识！")
+            }
             str=str.replace(/'/ig,"quot;")
             str=str.replace(/\+/ig,"add;")
             return str;

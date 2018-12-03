@@ -1,17 +1,22 @@
 <template>
-    <div class="ui segment">
-        <div  v-show="loading" style="text-align:center" @click="test()" ><img src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif" width="40px" height="40px"></div>
-        <div  v-show="select.onlysql"><pre v-text="select.data&&select.data.sql"></pre></div>
-        <div  class="table" v-if="select.data&&select.data.arr&&header" :style="{height:maxheight}">
-            <table class="ui selectable celled table" :style="{height:height}">
+    <div class="ui segment" v-if="select">
+        <div  v-show="loading" style="text-align:center" ><img :src="select.loading_pic" width="40px" height="40px"></div>
+        <div  v-show="select.onlysql"><pre v-text="select.data&&select.data.sql|sql"></pre></div>
+        <div  class="outer" :class="{'scroll':isScoll}" v-if="select.data&&select.data.arr&&header" :style="{height:maxheight}">
+            <table v-el:container class="ui selectable celled table">
                 <thead>
                     <tr class="positive">
-                        <th v-for="h of header" :class="align(h&&h.label[0])" v-show="show(h)" v-text="label(h.label)"></th>
+                        <th v-for="h of header" class="is-leaf is-sortable" :class="align(h&&h.label[0],h.order)"  v-show="show(h)">
+                            <div class="cell">{{label(h.label)}}<span class="caret-wrapper" v-if="h.order">
+                                <i class="sort-caret ascending"  @click="paiXu(h,1)"></i>
+                                <i class="sort-caret descending" @click="paiXu(h,2)"></i></span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody v-if="select.data && select.data.total==0">
                     <tr>
-                        <td colspan="11" style="text-align: center">
+                        <td :colspan="header.length" style="text-align: center">
                             <div class="ui pointing red  label">
                                 OOPS! No Record!
                             </div>
@@ -23,31 +28,33 @@
                         <td v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
                     </tr>
                 </tbody>
-                <tfoot>
-                <tr><th colspan="11" v-show="select.data && select.data.arr && select.data.arr.length && select.data.total>0">
-                    <div class="ui compact menu">
-                        <a class="item">
-                            <i class="icon users"></i> 记录总数
-                            <div class="floating ui red label" v-text="select.data.total"></div>
-                        </a>
-                        <a class="item">
-                            <i class="icon user"></i> 当前记录数
-                            <div class="floating ui teal label" v-text="select.data.arr.length"></div>
-                        </a>
-                    </div>
-                    <div v-show="pageTotal>0" class="ui right floated menu">
-                        <a href="javascript:void(0)" class="item pager" v-text="'共 '+pageTotal+' 页'"></a>
-                        <select class="ui fluid dropdown" id="span" @change="pagenation.pageNow=1" v-model="pagenation.pageSize">
-                            <option v-for="p in arr_pageSize" :value="p.val" v-text="p.label" :selected="$index === 0 ? true : false"></option>
-                        </select>
-                        <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow<=1}" v-on:click.prevent="pagenation.pageNow--;"><i class="left chevron icon"></i></a>
-                        <a href="javascript:void(0)" v-for="i in pagerSpan" :class="{'active':i+pagerStart==pagenation.pageNow}" v-show="i+pagerStart<=pageTotal" class="item pager" v-text="i+pagerStart" v-on:click.prevent="pagenation.pageNow=i+pagerStart"></a>
-                        <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow>=pageTotal}" v-on:click.prevent="pagenation.pageNow++;alert(1)"><i class="right chevron icon"></i></a>
-                    </div>
-                </th></tr>
-                </tfoot>
             </table>
         </div>
+        <div class="ui segment">
+                <tfoot>
+                    <tr><th :colspan="header.length" v-show="select.data && !select.data.errcode && select.data.total>0">
+                        <div class="ui compact menu">
+                            <a class="item">
+                                <i class="icon users"></i> 记录总数
+                                <div class="floating ui red label" v-text="select.data&&select.data.total"></div>
+                            </a>
+                            <a class="item">
+                                <i class="icon user"></i> 当前记录数
+                                <div class="floating ui teal label" v-text="select.data&&select.data.arr&&select.data.arr.length"></div>
+                            </a>
+                        </div>
+                        <div v-show="pageTotal>0" class="ui right floated menu">
+                            <a href="javascript:void(0)" class="item pager" v-text="'共 '+pageTotal+' 页'"></a>
+                            <select class="ui fluid dropdown" id="span" @change="pagenation.pageNow=1" v-model="pagenation.pageSize">
+                                <option v-for="p in arr_pageSize" :value="p.val" v-text="p.label" :selected="$index === 0 ? true : false"></option>
+                            </select>
+                            <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow<=1}" v-on:click.prevent="pagenation.pageNow--;"><i class="left chevron icon"></i></a>
+                            <a href="javascript:void(0)" v-for="i in pagerSpan" :class="{'active':i+pagerStart==pagenation.pageNow}" v-show="i+pagerStart<=pageTotal" class="item pager" v-text="i+pagerStart" v-on:click.prevent="pagenation.pageNow=i+pagerStart"></a>
+                            <a href="javascript:void(0)" class="icon pager" :class="{'disabled':pagenation.pageNow>=pageTotal}" v-on:click.prevent="pagenation.pageNow++;alert(1)"><i class="right chevron icon"></i></a>
+                        </div>
+                    </th></tr>
+                </tfoot>
+        </div>    
      </div>      
  </template>
 
@@ -67,16 +74,15 @@ export default {
 	       type: String,
            default: "auto"
        },
-       height: {
-	       type: String,
-           default: "auto"
-       },
        //输入表头
        header: {
-           type: Array 
+           type: Array,
+           default:[] 
        },
        //表格填充数据
        select: {
+           type : Object,
+           default: {}
        },
 	   pagenation:{
 	       type : Object
@@ -92,6 +98,9 @@ export default {
        }
    },
    computed:{
+       isScoll:function(){
+           return this.maxheight&&this.maxheight!='auto'&&this.pagenation.pageSize>10;
+       },
        pageTotal:function(){
 	     if(this.select.data&&this.select.data.total){
 		    return Math.ceil(this.select.data.total/this.pagenation.pageSize)
@@ -103,18 +112,29 @@ export default {
 	   }
    },
    methods:{
-      test:function(){
-	  //   this.pagerSpan=3;
-		// this.pagenation.pageNow=3;
-	  console.log(JSON.stringify(this.pageTotal))
-	  },
+	  paiXu:function(h,order){
+         this.header.map(function(h){
+		   if(h.order)h.order=-1;
+		 })
+         h.order=order;
+		this.pagenation.order=(h.value[2]||this.label(h.label))+" "+(order==1?"asc":"desc")+",";
+		console.log(JSON.stringify(this.header))
+	  }, 
       show:function(h){
 	    if(!h) return true;
 	    var isShow=h.label[1];
-		var key=h.value[2]||h.label[0];
+        var key=h.value[2]||h.label[0];
+        // if(key=="m_code"){
+        //     console.error(isShow)
+        // }
+        //数据不存在的key字段,不显示
+        if(key!="row"&&this.select.data&&this.select.data.arr[0]&&
+          !this.select.data.arr[0].hasOwnProperty(key))return false;
+        //其他附加不显示
 		if (typeof isShow ==="boolean"){
 		    return isShow;
 		}else if(typeof isShow ==="function"){
+    
 		    return isShow(key);
 		}else{
 		    return true;
@@ -122,7 +142,7 @@ export default {
 	  },
       label:function(l){
 	    var decr=l[2];
-		var name=l&&l[0].split("|")[0];
+        var name=l[0]&&l[0].split("|")[0];
 		if(typeof decr==="function"){
 		   return decr(name);
 		}else{
@@ -146,18 +166,24 @@ export default {
 		   return '';
 		}
 	  },
-      align:function(lname){
+      align:function(lname,order){
 	    var p= "";
 	    p = lname&&lname.split("|")[1]||"";
-		p = p.toLowerCase();
+        p = p.toLowerCase();
+        var cls="";
 		switch (p){
 		  case "l":
-		     return "left aligned";
+             cls= "left aligned";
+             break;
 		  case "r":
-		     return "right aligned";
+		     cls= "right aligned";
 		  default:
-		     return "center aligned";
-		}
+		     cls= "center aligned";
+        }
+        if(order>-1){
+            cls+=order==1?' ascending':' descending';
+        }
+        return cls;
 	  },
       age:function(a){
           if(a){ 
@@ -168,7 +194,7 @@ export default {
       },
       dt:function(n){
           if(n==0||!n) return '';
-          return this.fmtDate(n)
+          return  this.fmtDate_s(n)
       },
 	  num:function(num){
 	     if(!num) return 0;
@@ -180,18 +206,153 @@ export default {
 	  }	  
    },
    watch:{
+//     pagenation:{
+// 		handler(newValue, oldValue) {
+//             console.log(this.$els.container.clientHeight);
+// 　　　　   },
+// 　　   deep: true
+// 	}
    },
    created:function(){
-
-       console.log(JSON.stringify(this.select.data))
-       console.log(JSON.stringify(this.header))
+      // console.log(JSON.stringify(this.header))
    }
 }
 </script>
 <style scoped>
-   .table{
+    .scroll{
+        overflow-y: scroll;
+    }
+    
+    a.disabled {
+                pointer-events: none;
+                filter: alpha(opacity=50); /*IE滤镜，透明度50%*/
+                -moz-opacity: 0.5; /*Firefox私有，透明度50%*/
+                opacity: 0.5; /*其他，透明度50%*/
+    }
+    #span{
+        padding-top:2.1%!important;
+        height: 150%;   
+        border: none;
+    }
+    pre {
+        display: block;
+        padding: 9.5px;
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.42857143;
+        color: #333;
+        word-break: break-all;
+        word-wrap: break-word;
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    pre {
+        white-space: pre-wrap;
+    }
+    .container{
+        width: 58%;
+    }
+    .checkbox{
+        cursor: pointer;
+    }
+    .alert-icon-float-left {
+        font-size: 32px;
+        float: left;
+        margin-right: 5px;
+    }
+    .pager {
+        margin: 0!important;
+    }
+    .icon.pager {
+        position: relative;
+        padding-top:;
+        vertical-align: middle;
+        line-height: 1;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-box-flex: 0;
+        -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+        flex: 0 0 auto;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background: 0 0;
+        padding: 0 0.6em;
+        padding-top:1em; 
+        text-transform: none;
+        color: rgba(0,0,0,.87);
+        font-weight: 400;
+        -webkit-transition: background .1s ease,box-shadow .1s ease,color .1s ease;
+        transition: background .1s ease,box-shadow .1s ease,color .1s ease;
+    }
 
-       overflow-y:scroll;
-   }
+    .sort-caret {
+        width: 0;
+        height: 0;
+        border: 5px solid transparent;
+        position: absolute;
+        left: 7px;
+    }
+    .sort-caret.ascending {
+        border-bottom-color: #c0c4cc;
+        top: 5px;
+    }
+    .sort-caret.descending {
+        border-top-color: #c0c4cc;
+        bottom: 7px;
+    }
+
+
+
+    .ascending .sort-caret.ascending {
+        border-bottom-color: #409EFF
+    }
+
+    .descending .sort-caret.descending {
+        border-top-color: #409EFF
+    }
+
+    th {
+        white-space: nowrap;
+        overflow: hidden;
+        user-select: none;
+        text-align: left;
+    }
+    th.is-sortable {
+        cursor: pointer;
+    }
+
+    td,th.is-leaf {
+    border-bottom: 1px solid #ebeef5;
+    }
+    .caret-wrapper {
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        height: 34px;
+        width: 24px;
+        vertical-align: middle;
+        cursor: pointer;
+        overflow: initial;
+        position: relative;
+    }
+    .cell {
+        position: relative;
+        word-wrap: normal;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
 </style>

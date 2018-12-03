@@ -6,7 +6,7 @@
 					<div class="ui one column stackable grid">
 						<div class="column" >
 							<div class="ui tabular menu">
-				               <a v-for="m of select.menuGroup" v-show="m.isEnalbe" class="item" :class="{active:m.isActive}" @click="menuChange(m)" v-link="{path:m.path}" v-text="m.name"></a>
+				               <a v-for="m of select.menuGroup" :key="m.name" v-show="m.enabled" class="item" :class="{active:m.isActive}" @click="menuChange(m)" v-link="{path:m.path}" v-text="m.name"></a>
 							</div>
 						</div>
 					</div>
@@ -14,8 +14,8 @@
                 <div class="ui segment">
                     <div class="ui one column stackable grid">
                         <div class="column left aligned">
-                           <div class="ui mini input">
-                             <div class="ui button">中心</div>          
+						   <div class="input-group">
+							  <span class="input-group-addon">中心</span>           
 			                  <v-select :value.sync="select.gym_selected" :options="gyms" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
                            </div>
                         </div>
@@ -36,13 +36,14 @@ export default {
 			select: {
                 onlysql:false,
                 menuGroup:[
-                    {name:'Home',path:"/home",isActive:true,isEnalbe:true},
-                    {name:'Report',path:"/report/1",isActive:false,isEnalbe:false}
+                    {name:'Home',path:"/home/1",isActive:true,enabled:true},
+                    {name:'Report',path:"/report",isActive:false,enabled:false}
                 ],
-				start: false,
+                start: false,
+                loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
                 isShow: true,
 				campaigns:[{id:'所有',name:'所有活动'}],
-				campaign_selected:"2018小小奥运集训营",
+				campaign_selected:null,
 				acl: "",
 				ids:[],
 				gyms: [],
@@ -83,7 +84,7 @@ export default {
 	  },
       methods: {
         menuChange(cur){
-            this.menuGroup.map((n)=>{
+            this.select.menuGroup.map((n)=>{
                 n.isActive=false;
             });
             cur.isActive=true;
