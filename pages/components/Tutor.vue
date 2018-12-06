@@ -1,4 +1,3 @@
-
 <template>
 	<div class="ui segments">
 			<div class="ui segment">
@@ -15,22 +14,22 @@
 						</v-select>
 					</div>
 					<div class="column left aligned">
-						<div class="input-group" :style="{width:'240px'}">
+						<div class="input-group" :style="{width:'250px'}">
 							<input type="text" v-model="search"  placeholder="关键字：手机号/姓名" class="form-control"/>
 							<span class="input-group-addon" ><a href="#" @click.prevent="init()"><i class="glyphicon glyphicon-search"><span > 搜索</span></i></a></span>
 						</div>
 					</div>
-					<div class="column left aligned">
+					<div class="column middle aligned">
 							<div class="ui mini action input">
-								<button type="submit" class="btn btn-danger" @click="editContact"
-								v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
+						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 
 							</div>
 							<div class="ui mini action input">
-						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-sm btn-danger" v-show="isadmin">导出Excel</a> 
+							<button type="submit" class="btn btn-danger" @click="editContact"
+							v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
 							</div>
 							<div class="ui mini action input">
-								<button type="submit" class="btn btn-sm btn-danger" @click="getSignlist"
-								v-show="select.acl.indexOf('系统管理员')!=-1">数据核对</button>                
+							<button type="submit" class="btn btn-danger" @click="getSignlist"
+							v-show="select.acl.indexOf('系统管理员')!=-1">数据核对</button>                
 							</div>
 					</div>
 				</div>	
@@ -76,7 +75,7 @@
 					</h4>
 				</div>
 				<div slot="modal-body" class="modal-body">
-					<bs-input maxlength=11 track-by="$index"  v-for="(index,phone) of contactModal.phones" :value.sync="phone" :placeholder="'手机号'+(index+1)" :pattern="contactModal.phone_reg" icon></bs-input>
+					<bs-input maxlength=11 track-by="$index" v-for="phone of contactModal.phones" :value.sync="phone" :label="'手机号'+($index+1)"  placeholder="手机号" :pattern="contactModal.phone_reg" icon></bs-input>
 				</div>
 				<div slot="modal-footer" class="modal-footer">
 					<button type="button" class="btn btn-success" @click="saveCon">保存</button>
@@ -108,6 +107,7 @@ import alert from '@/src/Alert.vue'
 import modal from '@/src/Modal.vue'
 import bsInput from '@/src/Input.vue'
 import tlgTable from '@/src/Table.vue'
+
 export default {
   props: {
     select: {
@@ -160,7 +160,7 @@ export default {
 		}, 
 		theader_pre: function(){
 		    return [
-		       //{lable:['name','fn_show','fn_lable_handle'],value:['default','fn_value_handle','key_override']}
+		       //{label:['name','fn_show','fn_label_handle'],value:['default','fn_value_handle','key_override']}
 		       {label:['操作'],value:['',this.urlEdit,'row']},
 			   {label:['家长手机'],value:['',this.urlView,'row']},
 			   {label:['孩子姓名|l','',this.decorate],value:['','','babyname'],order:-1},
@@ -318,7 +318,7 @@ export default {
 					res = res[0].phones.split("|");
 					self.contactModal.phones= new Array(res[0]||'',res[1]||'');
 				}
-				console.log(JSON.stringify(self.contactModal.phones))
+				//console.log(JSON.stringify(self.contactModal.phones))
 			},function(res){
 				console.log(res.status);
 			});
@@ -371,6 +371,7 @@ export default {
        getCouponlist:function(){
 		    if(!this.validate()) return;
 			var self=this;
+			self.theader=self.theader_coupon;
 			self.select.start=true;
 			self.$http.jsonp(url_coupon,{
                 page: self.pageNow,
@@ -422,6 +423,7 @@ export default {
         },
 	    getEnrol:function(){
 			if(!this.validate()) return;
+			this.theader=this.theader_pre;
 			var self=this;
             self.select.start=true;
             self.$http.jsonp(url_local,{
@@ -441,53 +443,46 @@ export default {
 			});
 		},
 		init(){
-			switch(this.summerType){
-				case 'coupon':
-					this.sql_cur=sql_coupon;
-					this.theader=this.theader_coupon;
-					this.getQuery= this.getCouponlist;
-					break;
-				default:
-					this.sql_cur=sql_preEnrol;
-					this.theader=this.theader_pre;
-					this.getQuery= this.getEnrol;
-					break;
-			}
-			this.select.data=null;
-			var order="";
-			var h=this.theader.find(function(h){
-                return h.order&&h.order>-1;
-			})
-			if(h){
-				var order=(h.value[2]||this.labelify(h.label))+" "+(h.order==1?"asc":"desc")+",";
-			}
+            this.select.data=null;
 			var v = {
 				pageSize :10,
 				pageNow:1,
-				order:order
+				order:""
 			}
-			//if(this.isEqual(this.pagenation,v)){
-			this.pagenation=v;
-			//}
+			if(this.isEqual(this.pagenation,v)){
+				this.pagenation=v;
+				this.getQuery();
+			}else{
+				this.pagenation=v;
+			}
+			
 		}
   },
   watch: {
     summerType (newval) {
+		switch(newval){
+			case 'coupon':
+				this.sql_cur=sql_coupon;
+				this.getQuery= this.getCouponlist;
+				break;
+			default:
+				this.sql_cur=sql_preEnrol;
+				this.getQuery= this.getEnrol;
+				break;
+		}
 		this.init();
 	},
     pagenation:{
 		handler(newValue, oldValue) {
-			//if(this.validate()){
+			if(this.validate(false)){
 			   this.getQuery();
-			//}
+			}
 　　　   },
 　　　   deep: true
 	}
   },
   created(){
-      if(this.$route.params.id=='4'){
-		  this.select.menuGroup[1].enabled=true;
-	  }
+	  this.select.cur_menu="tutor";
   }
 }
 </script>

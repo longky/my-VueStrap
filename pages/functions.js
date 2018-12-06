@@ -70,6 +70,7 @@ var myFun = {
             //new Function+repalce变量
             fmt = fmt || "yyyy-MM-dd";
             let tmp =function (dt) {
+                if(!dt) return '';
                 var fmt="@fmt"
                 if(typeof dt!=="object"){
                     //ie不兼容问题
@@ -106,14 +107,13 @@ var myFun = {
             let tmp =function () {
                 //取代普通域变量,使用对象arguments+bind闭函数，相当于php function use();
                 let dt=arguments[1];
+                if(!dt) return '';
                 let fmt=arguments[0]|| "yyyy-MM-dd hh:mm:ss";
-                console.log(typeof dt)
                 if(typeof dt!=="object"){
                     //ie不兼容问题
                     if(dt.indexOf("T")==-1) dt = dt.replace(/-/g,"/")
                     dt = new Date(dt||'');
                 }
-                console.log(dt)
                 if (/(y+)/.test(fmt)) {
                     fmt = fmt.replace(RegExp.$1, (dt.getFullYear() + '').substr(4 - RegExp.$1.length));
                 }
@@ -140,6 +140,7 @@ var myFun = {
 
         function fmtDt2(fmt){ 
             let tmp =function (dt,fmt) {
+                if(!dt) return '';
                 //取代普通域变量,函数参数+函数执行;
                 fmt=fmt|| "yyyy-MM-dd hh:mm:ss";
                 if(typeof dt!=="object"){

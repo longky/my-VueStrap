@@ -70,6 +70,8 @@
     "builddocs": "webpack --progress --hide-modules && set NODE_ENV=production webpack --progress --hide-modules",
     "buildcamp": "webpack --progress --hide-modules --config webpack.cfg.campaign.js --env=production",
     "campaign": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.campaign.js",
+    "buildFam": "webpack --progress --hide-modules --config webpack.cfg.family.js --env=production",
+    "family": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.family.js",
     "docs": "webpack-dev-server --inline --hot --quiet",
     "gpages": "gh-pages -d build",
     "postversion": "git push && git push --tags",

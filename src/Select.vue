@@ -11,7 +11,7 @@
     </div>
     <select v-el:sel v-model="value" v-show="show" name="{{name}}" class="secret" :multiple="multiple" :required="required" :readonly="readonly" :disabled="disabled">
       <option v-if="required" value=""></option>
-      <option v-for="option in options" :value="option[optionsValue]||option">{{ option[optionsLabel]||option }}</option>
+      <option v-for="option in options" :value="option[optionsValue]||option|json">{{ option[optionsLabel]||option }}</option>
     </select>
     <ul class="dropdown-menu">
       <template v-if="options.length">

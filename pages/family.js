@@ -1,10 +1,13 @@
 ﻿import Vue from 'vue'
-import VueRouter from 'vue-router'
+import VueRouter from '../docs/js/vue-router.min.js'
 import Family from './Family.vue'
 import routerConfig from './router.family.js'
 import functions from './functions'
+import global from './global'
+import axios from  '@/docs/js/axios.min.js'
  
 
+Vue.prototype.$axios = axios;
 Vue.use(functions); 
 Vue.mixin(global);
 Vue.use(VueRouter);
@@ -16,7 +19,7 @@ const router=new VueRouter();
 router.map(routerConfig);
 
 router.redirect({
-	'/':'/family'
+	'/':'/family/'
 });
 
 router.start(Family,'#app');

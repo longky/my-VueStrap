@@ -6,8 +6,8 @@
 					<div class="ui one column stackable grid">
 						<div class="column" >
 							<div class="ui tabular menu">
-				               <a v-for="m of select.menuGroup" :key="m.name" v-show="m.enabled" class="item" :class="{active:m.name==cur_menu}" @click="menuChange(m)" v-link="{path:m.path}" v-text="m.name"></a>
-                               <a class="item">批量导入家庭</a>
+				               <a v-for="m of select.menuGroup" :key="m.id" v-show="enabled(m.id)" class="item" :class="{active:m.id==select.cur_menu}" @click="menuChange(m.id)" v-link="{path:m.path}" v-text="m.name"></a>
+                               <a class="item" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/import_family_head.aspx" target="_blank">批量导入家庭</a>
 							</div>
 						</div>
 					</div>
@@ -17,7 +17,7 @@
                         <div class="column left aligned">
 						   <div class="input-group">
 							  <span class="input-group-addon">中心</span>           
-			                  <v-select :value.sync="select.gym_selected" :options="gyms" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
+			                  <v-select :value.sync="select.gym_selected" :options="gyms" options-label="name" options-value="gym" placeholder="请选择中心" search close-on-select></v-select>	
                            </div>
                         </div>
                     </div>
@@ -35,18 +35,18 @@ export default {
 		return  { 
 			select: {
                 onlysql:false,
+                menuGroup: [
+                    {id:"family",name:'我的家庭',path:"/family/"}
+                ],
                 cur_menu:'family',
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
-                isShow: true,
-				campaigns:[{id:'所有',name:'所有活动'}],
-				campaign_selected:null,
 				acl: "",
-				ids:[],
 				gyms: [],
 				gymNames:{},
 				gym_selected:"",
-				data: null
+                data: null,
+                ids:[]
             }
             
 		}
@@ -59,68 +59,60 @@ export default {
                 var self=this;
                 var gyms=self.select.gyms;
                 if(gyms[0]){
-                   self.select.gym_selected=gyms[0].id;
+                   self.select.gym_selected=gyms[0].gym;
                 }
                 return gyms;
             },
             isadmin:function(){
-    	      if(this.select.acl.indexOf('系统管理员')!=-1
-              ||this.select.acl.indexOf('中心运营总监')!=-1
-              ||this.select.acl.indexOf('运营顾问')!=-1){
-    		     return true;
-    		  }
-    		  return false;
+                if(this.select.acl.indexOf('系统管理员')!=-1
+                ||this.select.acl.indexOf('中心运营总监')!=-1
+                ||this.select.acl.indexOf('运营顾问')!=-1){
+                    return true;
+                }
+                return false;
             },
-            menuGroup:function(){
-                return [
-                    {name:'我的家庭',path:"/family",enabled:true},
-                    {name:'查看/修改家庭负责老师',path:"/tutor",enabled:this.isadmin}
-                ]
-            }
 	  },
       methods: {
-        menuChange(cur){
-            this.cur_menu='family';
+        enabled(name){
+            if(name=="tutor" && !this.isadmin) return false;
+            return true;
         },
-        getAcl_jsonp:function(){
-            this.$http.jsonp(url_jsonp,{
-                sql1:sql_quanxian
-            },{
-                jsonp:'callback'
-            }).then(function(res){
-			    var self=this;
-                if(res.data.info[0].rec.constructor !=String){
-                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
-				}
+        menuChange(cur){
+            this.cur_menu=cur;
+        },
+        getAcl:function(){
+            var self=this;
+            this.$axios.get(url_jsonp,{
+                params:{sql1:sql_quanxian}
+            })
+            .then(function(res){
+                if(res.status==200 && res.data.info[0].rec.constructor !=String){
+                    self.select.acl = res.data.info[0].rec[0].crm_jiandang;
+                }  
             },function(res){
-                console.log(res.status);
+                console.error(res)    ;
             });
         },
-        getgym:function(func){
+        getGym:function(func){
 		     var self=this;
 			 sql_getGym = this.convertor.ToUnicode(sql_getGym);
-             self.$http.jsonp(url_jsonp,{
-                 sql1: sql_getGym
-             },{
-                 jsonp:'callback'
+             self.$axios.get(url_jsonp,{
+                 params:{sql1: sql_getGym}
              }).then(function(res){
-                 self.select.gyms = res.data.info[0].rec;
-                 self.select.gyms.map(function(g){
-                    self.select.gymNames[g.id]=g.name;
-                 }) 
+                 if(res.status==200){
+                    self.select.gyms = res.data.info[0].rec;
+                    self.select.gyms.map(function(g){
+                        self.select.gymNames[g.id]=g.name;
+                    })
+                 } 
              },function(res){
-                 console.log(res.status);
+                 console.error(res.status);
              });
-       },
-        debug: function () {
-	       alert(JSON.stringify(this.check["msg"]))
-           alert(JSON.stringify(this.check))
-        } 
+        }
       },
       created: function () {
-           this.getAcl_jsonp();
-           this.getCampaign();
-           this.getgym();
+           this.getAcl();
+           this.getGym();
       }
   } 
 

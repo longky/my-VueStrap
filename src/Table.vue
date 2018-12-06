@@ -6,7 +6,10 @@
             <table v-el:container class="ui selectable celled table">
                 <thead>
                     <tr class="positive">
-                        <th v-for="h of header" class="is-leaf is-sortable" :class="align(h&&h.label[0],h.order)"  v-show="show(h)">
+                        <td v-show="checked">
+                            <input name="update" type="checkbox" value="1"  v-model="checkall">
+                        </td>
+                        <th v-for="h of header" :style="tb_style&&tb_style.th" class="is-leaf is-sortable" :class="align(h&&h.label[0],h.order)"  v-show="show(h)">
                             <div class="cell">{{label(h.label)}}<span class="caret-wrapper" v-if="h.order">
                                 <i class="sort-caret ascending"  @click="paiXu(h,1)"></i>
                                 <i class="sort-caret descending" @click="paiXu(h,2)"></i></span>
@@ -25,7 +28,10 @@
                 </tbody>
                 <tbody v-if="select.data && select.data.total>0">
                     <tr v-for="item of select.data.arr">
-                        <td v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
+                        <td v-show="checked">
+                            <input name="update" type="checkbox" :value="item.idls" :id="account" v-model="select.ids" @click="test(ls)">
+                        </td>
+                        <td :style="tb_style&&tb_style.td" v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
                     </tr>
                 </tbody>
             </table>
@@ -69,6 +75,13 @@ export default {
            type: Boolean,
            default: false
        },
+       checked: {
+           type: Boolean,
+           default: false
+       },
+       tb_style:{
+           
+       },
        //显示高度
        maxheight: {
 	       type: String,
@@ -94,7 +107,8 @@ export default {
 		 arr_pageSize:[
 		    {val:10,label:"每页 10 条"},{val:20,label:"每页 20 条"},{val:30,label:"每页 30 条"},{val:50,label:"每页 50 条"},
 		    {val:100,label:"每页 100 条"},{val:200,label:"每页 200 条"},{val:500,label:"每页 500 条"},{val:1000,label:"每页1000条"}
-         ]
+         ],
+         checkall:0
        }
    },
    computed:{
@@ -117,24 +131,24 @@ export default {
 		   if(h.order)h.order=-1;
 		 })
          h.order=order;
-		this.pagenation.order=(h.value[2]||this.label(h.label))+" "+(order==1?"asc":"desc")+",";
-		console.log(JSON.stringify(this.header))
+         this.pagenation.order=(h.value[2]||this.label(h.label))+" "+(order==1?"asc":"desc")+",";
+         this.pagenation.pageNow=1;
 	  }, 
       show:function(h){
 	    if(!h) return true;
 	    var isShow=h.label[1];
-        var key=h.value[2]||h.label[0];
+        var key=h.value[2]||h.label[0].split("|")[0];
         // if(key=="m_code"){
         //     console.error(isShow)
         // }
         //数据不存在的key字段,不显示
         if(key!="row"&&this.select.data&&this.select.data.arr[0]&&
-          !this.select.data.arr[0].hasOwnProperty(key))return false;
+          !this.select.data.arr[0].hasOwnProperty(key)){
+            return false;
         //其他附加不显示
-		if (typeof isShow ==="boolean"){
+		}else if (typeof isShow ==="boolean"){
 		    return isShow;
 		}else if(typeof isShow ==="function"){
-    
 		    return isShow(key);
 		}else{
 		    return true;
@@ -158,7 +172,9 @@ export default {
 		    if(typeof method==="function"){
 			   return method(res);
 			}else if(['age','num','amt','dt'].indexOf(method)!=-1){
-			   return this[method](res);
+                //console.error(this[method])
+               return this[method](res);
+               return '';
 			}else{
 			   return res;
 			}
@@ -194,7 +210,7 @@ export default {
       },
       dt:function(n){
           if(n==0||!n) return '';
-          return  this.fmtDate_s(n)
+          return  this.fmtDt_s(n)
       },
 	  num:function(num){
 	     if(!num) return 0;
@@ -208,7 +224,8 @@ export default {
    watch:{
 //     pagenation:{
 // 		handler(newValue, oldValue) {
-//             console.log(this.$els.container.clientHeight);
+//             console.log(this.$els.container&&this.$els.container);
+//             console.log(JSON.stringify(this.header))
 // 　　　　   },
 // 　　   deep: true
 // 	}

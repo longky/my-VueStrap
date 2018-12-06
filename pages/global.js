@@ -1,5 +1,14 @@
 export default{
     methods:{
+		labelify:function(l){
+			var decr=l[2];
+			var name=l[0]&&l[0].split("|")[0];
+			if(typeof decr==="function"){
+			  return decr(name);
+			}else{
+			  return name;
+			}
+		},
 		gymName:function(code){
 			if(code=="")  return "总部";
 			if(this.select.gymNames[code]){
@@ -45,6 +54,18 @@ export default{
             return u.replace('@idjt',row.idjt).replace('@phone',row.phone);
             }
             return row.phone;
+        },
+        urlView_zx:function(label){
+            let tmp=function (row,label){
+                if(row.idzx){
+                    var u ='<a title="点击进入咨询中心" href="https://bbk.800app.com/index.jsp?mlist=1&amp;mfs1=crm_zdytable_238592_25111&amp;mid=@idzx&amp;menu=3" target="_blank">@label</a>';
+                    return u.replace('@idzx',row.idzx).replace('@label',row[label]||"查看");
+                }
+                return '查看';
+            }
+            return function(row){
+                return tmp(row,label);
+            };
         },
         fn_pager:function(str,option){
             if(!(typeof option==="object"&&option.pageNow&&option.pageSize)){throw new Error("函数fn_pager的option参数不正确"); }

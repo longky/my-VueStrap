@@ -1,56 +1,44 @@
 <template>
 	<div class="ui segments">
 			<div class="ui segment">
-				<div class="ui four column stackable grid">
+				<div class="ui three column stackable grid">
 					<div class="column left aligned">
 						<div class="input-group">
-							<span class="input-group-addon">市场活动</span>          
-							<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  search close-on-select>
-							</v-select>					
+							<span class="input-group-addon">家庭视图</span>          
+							<v-select :value.sync="familyType" :options="typeGroup" options-label="label" options-value="val" close-on-select></v-select>				
 						</div>
 					</div>
 					<div class="column left aligned">
-						<v-select :value.sync="summerType" :options="typeGroup" options-label="label" options-value="val" close-on-select>
-						</v-select>
+						<tooltip effect="scale" placement="bottom" content="筛选条件为空,则不条件限制">
+						   <div class="ui small action input">
+								<select class="ui compact selection dropdown" v-model="T">
+							    	<option v-for="t of searchTypesFilter" :value="t.val" v-text="t.label"></option>
+								</select>
+								<input  class="optionval" v-for="s of this.searchTypes[T].sub_option" type="text" v-model="s.val" :placeholder="s.placeholder" @change="val_match(s)">
+								<div type="submit" @click="init()" class="ui button" style="cursor:pointer">
+									<i class="search icon"></i>搜索
+								</div>                         
+						   </div>
+						</tooltip>
 					</div>
-					<div class="column left aligned">
-						<div class="input-group" :style="{width:'250px'}">
-							<input type="text" v-model="search"  placeholder="关键字：手机号/姓名" class="form-control"/>
-							<span class="input-group-addon" ><a href="#" @click.prevent="init()"><i class="glyphicon glyphicon-search"><span > 搜索</span></i></a></span>
+					<div class="column center aligned">
+						<div class="ui small action input">
+							<a type="submit" href="https://bbk.800app.com/index.jsp?mfs=crm_sj&mid=-1&menu=3" target="_blank" class="btn btn-primary">新建家庭</a> 
 						</div>
-					</div>
-					<div class="column middle aligned">
-							<div class="ui mini action input">
-						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 
-							</div>
-							<div class="ui mini action input">
-							<button type="submit" class="btn btn-danger" @click="editContact"
-							v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
-							</div>
-							<div class="ui mini action input">
-							<button type="submit" class="btn btn-danger" @click="getSignlist"
-							v-show="select.acl.indexOf('系统管理员')!=-1">数据核对</button>                
-							</div>
+						<div class="ui small action input">
+							<a type="submit" @click="goSave" class="btn btn-primary">批量修改负责老师</a> 
+						</div>
 					</div>
 				</div>	
 			</div>
 			<div class="ui segment">
 				<div class="ui form">
-					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected&&select.campaign_selected.indexOf('集训营')!=-1">
-						<label>筛选条件1：</label>
+					<div class="inline fields" v-if="familyType=='potential'">
+						<label>筛选条件：</label>
 						<div class="field">
 							<div class="ui checkbox">
-								<input id="isrecd" type="checkbox" v-model="isrecd">
-								<label for="isrecd" >仅显示朋友推荐的</label>
-							</div>
-						</div>
-					</div>
-					<div class="inline fields" v-if="summerType!='coupon'">
-						<label>筛选条件2:</label>
-						<div class="field" v-for="s in arr_status">
-							<div class="ui checkbox">
-								<input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
-								<label :for="s">{{s}}</label>
+								<input id="onlyNoItro" type="checkbox" v-model="onlyNoItro">
+								<label for="onlyNoItro" >仅显示未体验的</label>
 							</div>
 						</div>
 					</div>
@@ -66,22 +54,39 @@
 				</div>   
 			</div>
 			
-			<tlg-table :select="select" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
+			<tlg-table :select="select" :checked="tchecked" :tb_style="tb_style" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
 		
-			<modal :show.sync="contactModal.show" effect="fade" :width="280" small>
+			<modal :show.sync="typeModal.show" effect="fade" :width="400">
 				<div slot="modal-header" class="modal-header">
 					<h4 class="modal-title">
-					<b>{{contactModal.title}}</b> 
+					<b>{{typeModal.title}}</b> 
 					</h4>
 				</div>
 				<div slot="modal-body" class="modal-body">
-					<bs-input maxlength=11 track-by="$index" v-for="phone of contactModal.phones" :value.sync="phone" :label="'手机号'+($index+1)"  placeholder="手机号" :pattern="contactModal.phone_reg" icon></bs-input>
+					<v-select :value.sync="updateType" :options="updateTypes" required></v-select>	
 				</div>
 				<div slot="modal-footer" class="modal-footer">
-					<button type="button" class="btn btn-success" @click="saveCon">保存</button>
-					<button type="button" class="btn btn-default" @click="contactModal.show = false">取消</button>
+					<button type="button" class="btn btn-success" @click="goSave">确定</button>
+					<button type="button" class="btn btn-default" @click="typeModal.show = false">取消</button>
 				</div>
 			</modal>
+			<modal :show.sync="saveLsModal.show" effect="fade" :width="400">
+				<div slot="modal-header" class="modal-header">
+					<h4 class="modal-title">
+					<b>{{typeModal.title}}</b> 
+					</h4>
+				</div>
+				<div slot="modal-body" class="modal-body">
+					<v-select :value.sync="updateType" :options="updateTypes" required></v-select>	
+					<v-select :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select>	
+					<v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" :options="saveLsModal.newers" options-label="name" options-value="id" required></v-select>	
+				</div>
+				<div slot="modal-footer" class="modal-footer">
+					<button type="button" class="btn btn-success" @click="Save()">确定</button>
+					<button type="button" class="btn btn-default" @click="saveLsModal.show = false">取消</button>
+				</div>
+			</modal>
+
 			<alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
 					<span class="glyphicon glyphicon-info-sign"></span>
 					<strong>{{alertError.title}}</strong>
@@ -107,6 +112,7 @@ import alert from '@/src/Alert.vue'
 import modal from '@/src/Modal.vue'
 import bsInput from '@/src/Input.vue'
 import tlgTable from '@/src/Table.vue'
+import tooltip from '@/src/Tooltip.vue'
 
 export default {
   props: {
@@ -119,17 +125,25 @@ export default {
 	alert,
 	modal,
 	bsInput,
-	tlgTable
+	tlgTable,
+	tooltip
   },
   data(){
     return{
-		  tbl_maxheight:"600px",	 
-		  arr_status:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
-		  arr_status_cur:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
-          summerType:'preEnrol',
-		  typeGroup:[{val:'preEnrol',label:'预报名信息'},{val:'coupon',label:'礼券名单'}],
-		  isrecd:false,
-          search:"",
+		  tbl_maxheight:"480px",	 
+		  familyType:'',
+		  updateType:null,
+		  updateTypes:['转移老师负责的所有例子','转移老师负责的全部潜在客户','转移老师负责的全部活跃会员','转移老师负责的全部历史会员','仅转移复选框选中的记录'],
+		  T:"",
+		  searchTypes:{
+			  age:{label:"孩子年龄",sub_option:[{val:"",opr:">=",placeholder:"年龄下限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"},{val:"",opr:"<=",placeholder:"年龄上限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"}],context:"active,history,potential"},
+			  kid:{label:"孩 子",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"all"},
+			  parent:{label:"家长姓名",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"recent"},
+			  phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"任意字符"}],context:"all"},
+			  quality:{label:"质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
+			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"all"},
+			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"}
+		  },
 		  pagenation:{
             pageSize :10,
 			pageNow:1,
@@ -137,15 +151,30 @@ export default {
 		  },
           alertError:{show:false,title:'错误提示',msg:''},
     	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
-		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
-          check: {},
-		  lack:[],
-		  sql_cur:sql_preEnrol,
+          onlyNoItro:false,
+		  sql_cur:sql_recent,
 		  getQuery:this.getEnrol,
-		  theader:[]
+		  theader:[],
+		  tchecked:false,
+		  tb_style:{
+			  th:{padding: ".22857143em .998571429em"},
+			  td:{padding: ".38571429em",fontSize:"6px"}
+		  },
+		  typeModal:{show:false,title:'批量修改方式选择'},
+		  saveLsModal:{show:false,title:'批量修改负责老师',formers:[],newers:[],former:"",newer:""},
 	}
   },
   computed:{
+		typeGroup:function(){
+			if(this.isadmin||(this.select.gym_selected&&this.select.gym_selected.split("|")[1]==1)){
+				return [
+					{val:'recent',label:'本中心今天查看过的家庭'},{val:'potential',label:'我负责的潜在客户'},
+					{val:'active',label:'我负责的活跃会员'},{val:'history',label:'我负责的历史会员'}	 
+				];
+			}else{
+				return  [{val:'recent',label:'本中心今天查看过的家庭'}];
+			}
+		},
 		isadmin:function(){
 			if(this.select.acl.indexOf('系统管理员')!=-1
 			||this.select.acl.indexOf('市场顾问')!=-1
@@ -155,131 +184,149 @@ export default {
 			}
 			return false;
 		},
+		searchTypesFilter:function(){
+			var res=[],item;
+			for(var i in this.searchTypes){
+				item=this.searchTypes[i];
+				if(item['context']=="all"||item['context'].indexOf(this.familyType)!=-1){
+                   res.push({label:item.label,val:i});
+				}
+			}
+			this.T=res[0].val;
+			return res;
+		},
+		condition:function(){
+			let c_join=function(label,opr,val){
+				label=label.replace(/\s+/ig,"")+" ";
+				var res="";
+				if(opr=="like"){
+					res=label+opr+" '%"+val+"%'";
+				}else{
+					res=label+opr+((typeof val=='nummber')?val:" '"+val+"'");
+				}
+				return res;
+			}
+			var c=[],item=this.searchTypes[this.T];
+			if(this.T!='age'&&item){
+				item.sub_option.map(function(p){
+					if(p.val.trim()!=""){
+						//console.log(item.label,p.opr,p.val)
+						c.push(c_join(item.label,p.opr,p.val))
+					}
+				})
+			}
+			//age特殊
+			if(this.T=="age"){
+			    var p=this.searchTypes[this.T].sub_option;
+			    if(p&&p[0].val.trim()!=""&&p[0].val.trim()!="") c.push("孩子<>''");
+			}
+			if(this.onlyNoItro){
+                c.push("孩子<>''");
+			}
+			c = Array.from(new Set(c));
+			c = c.join(" and ");
+			//console.error(c);
+			return c;
+		},
+		whereLs:function(){
+		   //return zx.crmzdy_81636452_id=iduser
+		   return '';
+		},
+     	whereAge:function(){
+		   var con='';
+		   if(this.T=="age"){
+			 var option=this.searchTypes[this.T].sub_option;
+		     if(option[0].val.trim()!=''){
+		        con += "and hz.crmzdy_80653845>=dateadd(d,-@up*30,getdate())";
+			 }
+			 if(option[1].val.trim()!=''){
+			    con +=" and hz.crmzdy_80653845<=dateadd(d,-@down*30,getdate())";
+			 }
+             con = con.replace('@down',option[0].val).replace('@up',option[1].val);	
+			 return con;
+           }
+           return '';		   
+		},
+		WhereNoIntro:function(){
+			if(this.onlyNoItro){
+               return " and not exists(select 1 from crm_zdytable_238592_23576_238592_view ty where zx.id=ty.crmzdy_81620307_id and ty.crmzdy_80653847_id=hz.id and datediff(d,getdate(),ty.crmzdy_80650731)>0 and ty.crmzdy_80650306<>'请假') and /*无出勤体验*/ not exists(select 1 from crm_zdytable_238592_23576_238592_view ty where zx.id=ty.crmzdy_81620307_id and ty.crmzdy_80653847_id=hz.id and datediff(d,getdate(),ty.crmzdy_80650731)<=0 and ty.crmzdy_80650306='出勤')"
+			}
+			return '';
+		},
 	    options:function(){
           return {pageSize:this.pagenation.pageSize,pageNow:this.pagenation.pageNow,order:this.pagenation.order,condition:this.condition} 
 		}, 
-		theader_pre: function(){
+		theader_comm: function(){
 		    return [
-		       //{lable:['name','fn_show','fn_lable_handle'],value:['default','fn_value_handle','key_override']}
-		       {label:['操作'],value:['',this.urlEdit,'row']},
-			   {label:['家长手机'],value:['',this.urlView,'row']},
-			   {label:['孩子姓名|l','',this.decorate],value:['','','babyname'],order:-1},
-			   {label:['孩子年龄',this.field_show],value:['','age','babyage']},
-			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
-			   {label:['报名日期'],value:['','dt','dtenrol'],order:-1},
-			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
-			   {label:['来自朋友推荐',this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','isrecd']},
-			   {label:['处理状态'],value:['','','status'],order:-1},
-			   {label:['活动名称'],value:['','','campaign']},
-			   {label:['备注',this.field_show],value:['','','remark']},
-			   {label:['创建时间'],value:['','dt','create_time'],order:-1}
-		     ]
-		},
-		theader_coupon: function(){
-		    return [
-			   {label:['姓名'],value:['','','user_name']},
-			   {label:['手机'],value:['',this.urlView,'row']},
-			   {label:['礼券名称'],value:['','','coupon_name'],order:-1},
-			   {label:['使用截止日期'],value:['','','end_date'],order:1},
-			   {label:['使用状态'],value:['','','status'],order:-1},
-			   {label:['是否会员'],value:['','','type'],order:-1}
-		     ]
-		},
-        url_export:function(){
-              var url="https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_excel.aspx"
-              var sql="select camp.crmzdy_82053602 记录ID,isnull(gym.crm_name,'总部') 来源中心,camp.crmzdy_82053439 物料编号,case when isnull(crmzdy_82053430,'')='' then null else dateadd(S,cast(crmzdy_82053430 as int),'1970-01-01 08:00:00') end  预报名日期,camp.crmzdy_82053647 报名中心,camp.crm_name 报名手机,crmzdy_82051553  孩子姓名 ,crmzdy_82051554 孩子年龄,crmzdy_82053557 报名状态,crmzdy_82053258 活动动名称,camp.create_time 创建时间 from crm_zdytable_238592_27045_238592_view camp left join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116 =camp.crmzdy_82053429 where crmzdy_82053258='@campaign' order by 报名中心,camp.create_time desc;"
-              sql = this.convertor.ToUnicode(sql.replace('@campaign',this.select.campaign_selected));
-              var filename = this.convertor.ToUnicode(this.select.campaign_selected+"_"+new Date().getTime());
-              return url+'?sql='+sql+'&filename='+filename;
-		},
-		condition:function(){
-			var c=[];
-			if(this.summerType=="preEnrol"){
-			  this.search.trim()&&c.push("phone+babyname like '%"+this.search+"%'")	
-              this.isrecd&&c.push("isrecd ='是'");
-			  c.push("status in ('"+this.arr_status_cur.join("','")+"')")
-			}else{
-              this.search.trim()&&c.push("phone+user_name like '%"+this.search+"%'")	
-			}
-			c=c.join(" and ");
-			//console.error(c);
-		    return c;  
+				//{lable:['name','fn_show','fn_label_handle'],value:['default','fn_value_handle','key_override']}
+			   {label:['操作'],value:['',this.urlView_zx(),'row']},
+			   {label:['家长手机'],value:['',this.urlView_zx("家长手机"),'row']},
+			   {label:['家长姓名|l'],value:[''],order:-1},
+			   {label:['孩子|l'],value:[''],order:-1},
+			   {label:['咨询日期',this.field_show("potential")],value:[''],order:-1},
+			   {label:['获得家长信息的渠道',this.field_show("potential")],value:[''],order:-1},
+			   {label:['客户质量评估|l',this.field_show("potential")],value:[''],order:-1},
+			   {label:['最近体验|l',this.field_show("potential")],value:[''],order:-1},
+			   {label:['负责老师'],value:[''],order:-1},
+			   {label:['报名课程情况|l',this.field_show("active,history")],value:[''],order:-1},
+               {label:['合同到期日期',this.field_show("history")],value:['','dt'],order:-1},
+			   {label:['最近浏览时间'],value:['',this.fmtDt("yyyy-MM-dd hh:mm:ss")],order:2}
+			]   
 		},
 		sqlBuilder:function () {
-			var id =this.select.gym_selected;
 			var sql=this.sql_cur;
-			if(id=="all"){
-				sql= sql.replace(/@gymWhere/gi,"")
-			}else{
-				sql= sql.replace(/@gymWhere/gi,'and crmzdy_82051555='+id)
-			}
-			if(this.select.campaign_selected=="所有"){
-				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''")
-			}else{
-				sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.select.campaign_selected+"'");
-			}
+			console.log("2:"+this.sql_cur);
+			sql=sql.replace("@whereAge",this.whereAge)
+			sql=sql.replace("@idGym",this.select.gym_selected&&this.select.gym_selected.split("|")[0])
+			sql=sql.replace("@whereNoIntro",this.WhereNoIntro)
+			sql=sql.replace("@whereLs",this.whereLs)
+			console.log(this.sql(sql))
 			sql=this.fn_pager(sql,this.options) 
-			//console.error(this.sql(sql))
+			console.log(this.sql(sql))
 			sql = this.convertor.ToUnicode(sql);
 			return sql; 
 		}
   },
   methods:{	  
+		goSave(){
+			if(!this.updateType){
+				this.typeModal.show=true;
+			}else{
+				if(this.tchecked){
+					if(this.select.ids.length>0){
+						this.getLs();
+					}else{
+                        this.alertInfo={show:false,title:'操作提示',msg:'请先搜索并选中需要更换负责老师的例子记录'};
+					}
+				}else{
+					this.getLs();
+				}
+			}
+		},
 	    decorate:function(field){
-			  var arr=['婴芭莎展会'];
-			  if(arr.indexOf(this.select.campaign_selected)!=-1)return '家长姓名';
-			  return field;
+			var arr=['婴芭莎展会'];
+			if(arr.indexOf(this.select.campaign_selected)!=-1)return '家长姓名';
+			return field;
 		},
         urlEdit:function(row){
             var u= "<a class='btn btn-default btn-sm' href='https://bbk.800app.com/index.jsp?mfs=crm_zdytable_238592_27045&mid=@id&menu=1109&gym=@gym' target='_blank'>修改</a>";
             return u.replace('@id',row.id).replace('@gym',this.convertor.ToUnicode(this.select.gymNames[row.sign_centerid]));
         },
-	    field_show:function(item){
-		  //年龄隐藏
-		  var arr=['婴芭莎展会'];
-		  if (item=='babyage' && arr.indexOf(this.select.campaign_selected)!=-1)return false;
-		  //备注显示
-		  var arr=['婴芭莎展会线下'];
-		  if (item=='remark' && arr.indexOf(this.select.campaign_selected)==-1)return false;
-		  return true;
+	    field_show:function(types){
+            return types.indexOf(this.familyType)!=-1;
 		},
-        getSignlist:function(){
-            var self=this;
-            self.$http.jsonp(url_signlist,{
-            },{
-                jsonp:'callback'
-            }).then(function(res){
-                var res_data = res.data;
-                if(!res_data.code){ 
-                    arr_uniqueid=res_data.uniqueid.split(",");
-                    arr_uniqueid.map(function(u){
-                        if(!self.check[u]){
-                            self.check[u]=0;
-                        }
-                        self.check[u]+=1;
-                    })
-                    self.lack=[];
-                    for(var key in self.check){
-                        if(self.check[key]==1){
-                            self.lack.push(key)
-                        }
-                    }
-					this.checkResult(res_data.count)
-                }
-                self.select.start=false;
-                
-            },function(res){
-                self.select.start=false;
-                console.error(res.status);
-            });
+		val_match:function(op){
+			if(op.match){
+				var reg=new RegExp(op.match);
+				var val=op.val.trim();
+				if (val!=""&&!reg.test(val)){
+					this.alertError={title:"错误提示",msg:op.errmsg,show:true};
+					op.val="";
+				}
+			}
+			console.log(JSON.stringify(this.condition))
 		},
 		validate:function(showErr=true){
-		    if(!this.select.campaign_selected) {
-              if(showErr){
-			     this.alertError={title:"错误提示",msg:"活动名称不能为空",show:true}
-			  }
-			  return false;
-			}
 		    if(!this.select.gym_selected) {
               if(showErr){
 			     this.alertError={title:"错误提示",msg:"中心名称能不为空",show:true}
@@ -287,204 +334,126 @@ export default {
 			  return false;
 			}
 		    return true;
-		},
-        checkResult:function(count_actual){
-            if(this.lack.length>0){
-                this.alertError.title="接口数据核对结果";
-                this.alertError.msg="接口总记录数:"+count_actual+",oasis总记录数:"+this.select.data.total+";缺少数据ID:"+this.lack.join(",");
-                this.alertError.show=true;
-            }else{
-                this.alertInfo.title="接口数据核对结果";
-                this.alertInfo.msg="接口总记录数:"+count_actual+",oasis总记录数:"+this.select.data.total+"！核对成功，没有差异！";
-                this.alertInfo.show=true;
-            }
-        },  
-        editContact:function(){
-			var self=this;
-			if(!self.select.gym_selected){
-				this.alertError.title="错误提示";
-				this.alertError.msg="请先选择中心！";
-				this.alertError.show=true;
-				return;
-			}
-			var sql_phones="select crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='"+self.select.gym_selected+"'";
-			self.$http.jsonp(url_jsonp,{
-				sql1: sql_phones
-			},{
-				jsonp:'callback'
-			}).then(function(res){
-				var res= res.data.info[0].rec;
-				if(typeof res=='object'){
-					res = res[0].phones.split("|");
-					self.contactModal.phones= new Array(res[0]||'',res[1]||'');
-				}
-				//console.log(JSON.stringify(self.contactModal.phones))
-			},function(res){
-				console.log(res.status);
-			});
-			this.contactModal.show = true;
 	   },
-	   saveCon:function(){
-			var self=this;
-			self.contactModal.valid=true
-			var res=self.contactModal.phones.filter(function(p){
-				if(p!="" && !self.contactModal.phone_reg.test(p)){
-				self.contactModal.valid=false;
-				}
-				return p!='';
-			});
-			if(!this.contactModal.valid){
-					this.alertError.title="错误提示";
-					this.alertError.msg="手机号录入不正确！";
-					this.alertError.show=true;
-					return;
-			} 
-			if(res.join('').trim()==''){
-					this.alertInfo.title="警告";
-					this.alertInfo.msg="请至少录入一个手机号信息！";
-					this.alertInfo.show=true;
-					return;
-			} 
-			var sql_update_phones = "merge into crm_zdytable_238592_27059_238592_view t using (select '@phones' phones,'@gymcode' gymcode ) s on t.crmzdy_82053884=s.gymcode when matched then update set t.crm_name= s.phones";
-			sql_update_phones += " when not matched by target then insert (org_id,cust_id,crm_syrID,create_time,crm_name,crmzdy_82053884/*gymcode*/) values (238592,279833,279833,getdate(),s.phones,s.gymcode);select 'ok' status;"; 
-			sql_update_phones = sql_update_phones.replace('@phones',res.join('|')).replace('@gymcode',self.select.gym_selected);
-			self.$http.jsonp(url_jsonp,{
-				sql1: sql_update_phones
-			},{
-				jsonp:'callback'
-			}).then(function(res){
-				var res= res.data.info[0].rec;
-				if(typeof res=='object'){
-					this.alertInfo.title="提示";
-					this.alertInfo.msg="操作成功";
-					this.alertInfo.show=true;
-				}else{
-					this.alertError.title="提示";
-					this.alertError.msg="保存失败";
-					this.alertError.show=true;
-				}
-			},function(res){
-				console.log(res.status);
-			});
-			this.contactModal.show = false;
+	   save(){
+
 	   },
-       getCouponlist:function(){
+	   getLs:function(){
+			var self=this;
+			self.select.start=true;
+			var sql=sql_ls;
+			sql = sql.replace(/@idGym/ig,this.select.gym_selected&&this.select.gym_selected.split("|")[0]);
+			self.$axios({
+				method: 'post',
+				url:url_local,
+                params:{sql1:sql,onlysql:(self.select.onlysql?1:0)}
+			}).then(function(res){
+			    if(res.status=200){
+					console.log(JSON.stringify(res.data))
+				   self.saveLsModal.former=res.data.former;
+				   self.saveLsModal.newer=res.data.newer;
+				}
+				self.select.start=false;
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            });
+	   },
+       getFam:function(){
 		    if(!this.validate()) return;
 			var self=this;
-			self.theader=self.theader_coupon;
 			self.select.start=true;
-			self.$http.jsonp(url_coupon,{
-                page: self.pageNow,
-                centerid: self.select.gym_selected,
-				campain: self.select.campaign_selected,
-				pageSize:11
-            },{
-                jsonp:'callback'
-            }).then(function(res){
-				var tbl_coupon=sql_coupon;
-				res = res.data;
-			    if(res && res.total>0){
-					var sql_data="";
-					res.data.map(function(d){
-					   sql_data +="select '";
-	                   sql_data +=d.phone+"'phone,'"+d.centerid+"'centerid,'"+(d.user_name||"")+"'user_name,'";
-					   sql_data +=d.coupon_name+"'coupon_name,'"+d.end_date+"'end_date,'"+d.status+"'status union all ";
-					})
-					sql_data = sql_data.slice(0,-11);
-					tbl_coupon = tbl_coupon.replace('@sql_data',sql_data);
-					tbl_coupon = this.fn_pager(tbl_coupon,this.options)
-					//console.error(tbl_coupon)
-                    self.$http.post(
-                         url_local,
-                         {
-                           sql1:this.convertor.ToUnicode(tbl_coupon),
-						   onlysql:(self.select.onlysql?1:0)
-                         },
-                         {emulateJSON: true}
-                       )
-                       .then(function(res){
-							if(res.status==200){
-								self.select.data=res.data;
-							}
-							self.select.start=false;
-                       })
-                       .catch(function(res) {
-						 console.error(res);
-						 self.select.start=false;
-					   });
-                }else{
-					this.select.start=false;
-					this.select.data={total:0,arr:[]}
+			self.$axios({
+				method: 'post',
+				url:url_local,
+                params:{sql1:this.sqlBuilder,onlysql:(self.select.onlysql?1:0)}
+			}).then(function(res){
+			    if(res.status=200){
+				   self.select.data=res.data;
 				}
+				//console.log(JSON.stringify(self.select.data))
+				self.select.start=false;
             },function(res){
                 self.select.start=false;
                 console.log(res.status);
             });
         },
-	    getEnrol:function(){
-			if(!this.validate()) return;
-			this.theader=this.theader_pre;
-			var self=this;
-            self.select.start=true;
-            self.$http.jsonp(url_local,{
-                sql1: self.sqlBuilder,
-                onlysql:(self.select.onlysql?1:0)
-            },{
-                jsonp:'callback'
-            }).then(function(res){ 
-				if(res.status==200){
-					self.select.data=res.data;
-				}
-				self.select.start=false;
-				//console.log(JSON.stringify(self.select.data))
-                //fn_pager
-            },function(res){
-                self.select.start=false;
-			});
-		},
 		init(){
-            this.select.data=null;
+			this.select.data=null;
+			var order="";
+			var h=this.theader.find(function(h){
+                return (h.label[1]==undefined||h.label[1])&&h.order&&h.order>-1;
+			})
+			if(h){
+				var order=(h.value[2]||this.labelify(h.label))+" "+(h.order==1?"asc":"desc")+",";
+			}
 			var v = {
 				pageSize :10,
 				pageNow:1,
-				order:""
+				order:order
 			}
-			if(this.isEqual(this.pagenation,v)){
-				this.pagenation=v;
-				this.getQuery();
-			}else{
-				this.pagenation=v;
-			}
-			
+			//if(this.isEqual(this.pagenation,v)){
+			this.pagenation=v;
+			//}
+		},
+		debug(){
+			console.error(this.select.gym_selected)
 		}
   },
   watch: {
-    summerType (newval) {
+    familyType (newval) {
+		this.theader=this.theader_comm;
 		switch(newval){
-			case 'coupon':
-				this.sql_cur=sql_coupon;
-				this.getQuery= this.getCouponlist;
+			case 'recent':
+				this.sql_cur=sql_recent;
+				break;
+			case "potential":
+				this.sql_cur=sql_potential;
+				break;
+			case "active":
+				this.sql_cur=sql_active;
+				break;
+			case "history":
+				this.sql_cur=sql_history;
+				console.log(this.sql_cur)
 				break;
 			default:
-				this.sql_cur=sql_preEnrol;
-				this.getQuery= this.getEnrol;
-				break;
+			   this.sql_cur=sql_recent;
 		}
-		this.init();
+		if(this.validate(false)){
+		   this.init();
+		}
+	},
+    updateType(newval){
+		if(!newval){
+			this.alertError={show:true,title:'错误提示',msg:'请选择批量修改的方式'};
+		}else{
+			this.updateType=="仅转移复选框选中的记录"? this.tchecked=true:this.getLs();
+			this.typeModal.show=false;
+		}
 	},
     pagenation:{
 		handler(newValue, oldValue) {
-			if(this.validate(false)){
-			   this.getQuery();
-			}
+			this.getFam();
 　　　   },
 　　　   deep: true
+	},
+    'select.gym_selected':function(){
+		if(this.validate(false)){
+			this.init();
+		}
 	}
   },
   created(){
-      if(this.$route.params.id=='4'){
-		  this.select.menuGroup[1].enabled=true;
-	  }
+	  this.select.cur_menu="family";
+	  this.familyType="recent";
   }
 }
 </script>
+ <style  scoped>
+ .optionval{
+   width:100px!important;
+ }
+
+</style>
+ 

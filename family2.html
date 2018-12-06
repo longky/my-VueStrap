@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>家庭</title>
+    <link rel="stylesheet" href="https://static.thelittlegym.com.cn/assert/ui/semantic/semantic.min.css">
+    <link rel="stylesheet" href="https://static.thelittlegym.com.cn/assert/ui/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/tlgc.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!--[if lt IE 9]>
+      <link rel="stylesheet" href="incompatible.css">
+    <![endif]-->
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/jquery-1.11.3.min.js"></script>
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/semantic.min.js"></script>
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/vue.js"></script>
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/vue-resource.js"></script>
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/axios.min.js"></script>
+    <script src="https://bbk.800app.com/uploadfile/staticresource/238592/279833/gym.js"></script>
+	
+
+	
+
+    <script>
+        var url_jsonp = "https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_jsonp_uni.aspx";
+        var url_local = "/uploadfile/staticresource/238592/279833/dataInterface_json.aspx";
+        var sql_getGym = "select crm_name name,gym.id id from crm_zdytable_238592_23594_238592_view gym join (select top 1 crm_jiandang,crmzdy_81611236 gymlist from crm_yh_238592_view where id=iduser)yh on gym.crmzdy_80620116 >'500004' and gym.crmzdy_82037329=1 and (yh.crm_jiandang in ('@consultant','@administrator') or (yh.crm_jiandang in ('@gd') and charindex(gym.crm_name,yh.gymlist)>0)) order by name";
+        var sql_quanxian ="selectnbsp;crmzdy_81611236nbsp;gyms,crm_jiandangnbsp;fromnbsp;crm_yh_238592_viewnbsp;wherenbsp;id=iduser";
+		var sql_comm = "declare @num int;select @num=count(1) from #temp @whereLast;select *,@num num from #temp @whereLast @order offset (@pageNow-1)*@pageSize rows fetch next @pageSize rows only";
+		var sql_recent = "select zx.id,jt.crm_surname 家长姓名,jt.crmzdy_80620120 家长手机,crmzdy_81843299 孩子,convert(varchar(20),zx.look_time,120) 最近浏览时间 into #temp from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on @gymWhere and zx.look_time>convert(varchar(10),getdate(),120) and zx.look_time<convert(varchar(10),getdate()add;1,120) and zx.crmzdy_81611091_id=jt.id;"
+        var sql_potential ="with zx as(select zx.id,jt.id idjt,zx.crmzdy_81636452 负责老师,jt.crm_surname 家长姓名,jt.crmzdy_80620120 家长手机,convert(varchar(10),zx.crmzdy_81620163,120) 咨询日期,jt.crmzdy_81535090 获得家长信息的渠道,zx.crmzdy_81636187 质量评估,zx.crmzdy_81620171 咨询中心,zx.crmzdy_82025400 最近体验,convert(varchar(20),zx.look_time,120) 最近浏览时间 from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on @gymWhere /*中心*/ and @userWhere and zx.crmzdy_81611091_id=jt.id where not exists(select 1 from crm_zdytable_238592_23796_238592 ht where ht.crmzdy_81620220_id=zx.id and ht.isdelete=0)) select id,负责老师,家长姓名,家长手机,咨询日期,咨询中心,(select crmzdy_81755581add;',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=zx.idjt @whereAge @whereNoIntro order by id desc for xml path(''))孩子,最近体验,质量评估,获得家长信息的渠道,最近浏览时间 into #temp from zx;"
+        var sql_active ="select zx.id,jt.id idJt,zx.crmzdy_81636452 负责老师,jt.crm_surname 家长姓名,jt.crmzdy_80620120 家长手机,zx.crmzdy_81620171 咨询中心,zx.crmzdy_81802303 报名课程情况 into # from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on @gymWhere /*中心*/ and @userWhere and zx.crmzdy_81611091_id=jt.id where exists(select 1 from crm_zdytable_238592_23796_238592_view ht,crm_zdytable_238592_25115_238592_view bmksb where bmksb.crmzdy_81486464_id=ht.id and bmksb.crmzdy_81733119='销售' and ht.crmzdy_81620220_id=zx.id and ht.crmzdy_81762904='课程' and datediff(day,getdate(),ht.crmzdy_81733324)>0 and bmksb.crmzdy_81939586>0);select idJt,id,负责老师,家长姓名,家长手机,咨询中心,max(case when xh=1 then hz_info else '' end)add;max(case when xh=2 then ','add;hz_info else '' end)add;max(case when xh=3 then ','add;hz_info else '' end)add;max(case when xh=4 then ','add;hz_info else '' end)add;max(case when xh=4 then ','add;hz_info else '' end) 孩子,报名课程情况 into #temp from(select row_number()over(partition by #.idjt order by hz.id) xh,crmzdy_81755581 hz_info,#.* from crm_zdytable_238592_23893_238592_view hz join # on hz.crmzdy_80653840_id=#.idJt @whereAge)a group by idJt,id,负责老师,家长姓名,家长手机,咨询中心,报名课程情况;"
+        var sql_history ="with zx as(select zx.id,jt.id idJt,zx.crmzdy_81636452 负责老师,jt.crm_surname 家长姓名,jt.crmzdy_80620120 家长手机,zx.crmzdy_81620171 咨询中心,convert(varchar(10),合同到期日,120) 合同到期日,报名课时数 from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on @gymWhere /*中心*/and @userWhere and zx.crmzdy_81611091_id=jt.id cross apply (select top 1 crmzdy_81733324 合同到期日,crmzdy_80646031 报名课时数 from crm_zdytable_238592_23796_238592_view ht,crm_zdytable_238592_25115_238592_view bmksb where ht.crmzdy_81620220_id=zx.id and ht.id=bmksb.crmzdy_81486464_id and ht.crmzdy_81762904='课程' and bmksb.crmzdy_81733119='销售' and not(bmksb.crmzdy_81939586>0 and datediff(day,getdate(),ht.crmzdy_81733324)>0) and not exists(select 1 from crm_zdytable_238592_23796_238592_view zhht where zhht.crmzdy_81620220_id=ht.crmzdy_81620220_id and zhht.crmzdy_81762904='课程' and datediff(day,ht.crmzdy_81733324,zhht.crmzdy_81733324)>0))res) select idJt,id,负责老师,家长姓名,家长手机,咨询中心,max(case when xh=1 then hz_info else '' end)add;max(case when xh=2 then ','add;hz_info else '' end)add;max(case when xh=3 then ','add;hz_info else '' end)add;max(case when xh=4 then ','add;hz_info else '' end)add;max(case when xh=4 then ','add;hz_info else '' end) 孩子,合同到期日,报名课时数 into #temp from(select row_number()over(partition by zx.idjt order by hz.id) xh,crmzdy_81755581 hz_info,zx.* from crm_zdytable_238592_23893_238592_view hz join zx on hz.crmzdy_80653840_id=zx.idJt @whereAge)a group by idJt,id,负责老师,家长姓名,家长手机,咨询中心,合同到期日,报名课时数;"
+		
+       
+    </script>
+
+    <style>
+	    #result{
+		  width:98%!important;
+		}
+        .ui .checkbox {
+            cursor:pointer!important;
+            margin-right: 20px!important;
+        }
+        .dt-input {
+            cursor: pointer;
+        }
+ 
+    </style>
+
+</head>
+
+
+<body>
+ <!--[if lt IE 11]>
+  <div class="browser-happy">
+      <div class="content">
+          <li>浏览器太旧了，为了兼容与美观请更新您的浏览器</p>
+          <a href="http://browsehappy.com/">立即更新</a>
+      </div>
+  </div>
+<![endif]-->
+<div class='incompatible'>
+<div id="box" >
+    <div class="ui container" id="result">
+        <div class="ui segments" >
+            <div class="ui segment" >
+                <div class="ui one column stackable grid">
+                    <div class="column">
+                       <tabs>
+                         <tab header="家庭列表">
+                         </tab>
+                         <tab header="批量导入家庭" >
+                         </tab>
+                         <tab header="查看/批量修改负责老师" >
+                         </tab>
+                         <tab header="官网预约查询" >
+                         </tab>
+						 
+                        <!-- <tab-group header="其它">
+                           <tab header="官网预约查询">
+                           </tab>
+                           <tab header="小小奥林匹克">
+                           </tab>
+                         </tab-group>-->
+                       </tabs>
+                    </div>
+                </div>
+            </div>
+            <div class="ui segments">
+                <div class="ui segment">
+                    <div class="ui four column stackable grid">
+                        <div class="column left aligned">
+                            <v-select :value.sync="select.gym_selected" :options="select.gyms" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select>
+                            </v-select>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment" v-show="onlysql.checked">
+                   <pre v-text="onlysql.value"></pre>
+                </div>
+                <component :is="menu" :select="select" :onlysql="onlysql" :debug=debug :getgym=getgym>
+                </component>
+            </div>
+        </div>
+    </div>
+</div>
+<template id="home">
+    <div class="ui segment">
+        <div class="ui three column stackable grid">
+              <div class="column left aligned">
+                  <v-select @change="init()" :value.sync="familyType" :options="typeGroup" options-label="label" options-value="val" close-on-select>
+                  </v-select>
+              </div>
+              <div class="column left aligned">
+                  <div class="ui mini action input">
+                    <select @change="" class="ui compact selection dropdown" v-model="searchType" @change="filterChange">
+                      <option v-for="t of searchTypesFilter" :value="t.label" v-text="t.label"></option>
+                    </select>
+                    <input v-for="s of search" type="text" v-model="s.val" :placeholder="s.placeholder" v-show="s.show">
+                    <div type="submit" @click="getFam()" class="ui button">搜索</div>                         
+                  </div>
+              </div>
+		</div>	
+    </div>
+	<div class="ui segment">
+        <div class="field">
+            <div class="ui checkbox" @change="clearfilter()" v-show="familyType=='potential'">
+                <input type="checkbox" id="onlyNoIntro" v-model="onlyNoIntro">
+                <label for="onlyNoIntro" >未体验</label>
+            </div>
+            <div class="ui checkbox"  v-if="select.acl.indexOf('系统管理员')!=-1">
+                <input type="checkbox" id="sql" v-model="onlysql.checked">
+                <label for="sql" >仅打印SQL</label>
+            </div>
+        </div>
+	</div>
+    <div class="ui segment">
+        <div style="text-align:center" v-show="select.start" ><img src="loading.gif" width="40px" height="40px"></div>
+    </div>
+  
+    <div class="ui segment" v-if="dataFilter[0]">
+        <table class="ui selectable celled table">
+            <thead>
+                <tr class="positive">
+			    	<th class="center aligned is-leaf is-sortable" :class="{'ascending':h.order==1,'descending':h.order==2,}" v-for="h in headers">
+                       <div class="cell">{{h.name}}<span class="caret-wrapper">
+                         <i class="sort-caret ascending" @click="paiXu(h,1)" v-show="h.name!='查看'"></i>
+                         <i class="sort-caret descending" @click="paiXu(h,2)" v-show="h.name!='查看'"></i></span>
+                       </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item of dataFilter">
+                   <td class="center aligned" v-for="(key,value) in item" v-html="value">
+                   </td>
+                </tr>
+                <tr v-if="dataFilter.length==0 && !select.start">
+                    <td colspan="11" style="text-align: center">
+                        <div class="ui pointing red  label">
+                            OOPS! No Record!
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+            <tr><th colspan="11">
+                <div class="ui compact menu">
+                    <a class="item">
+                        <i class="icon users"></i> 记录总数
+                        <div class="floating ui red label" v-text="myData[0].num"></div>
+                    </a>
+                    <a class="item">
+                        <i class="icon user"></i> 当前记录数
+                        <div class="floating ui teal label" v-text="myData.length"></div>
+                    </a>
+                </div>
+                <div v-show="myData[0].num>pageSize" class="ui right floated menu">
+                    <a href="javascript:void(0)" class="icon pager" v-on:click.prevent="turnTo(pageNow-1)"><i class="left chevron icon"></i></a>
+					<a href="javascript:void(0)" v-for="i in navSize" :class="{'active':i==0}" class="item pager" v-text="i+pageNow" v-on:click.prevent="turnTo(i+pageNow)"></a>
+                    <a href="javascript:void(0)" class="icon pager" v-on:click.prevent="turnTo(pageNow+1)"><i class="right chevron icon"></i></a>
+                </div>
+            </th></tr>
+            </tfoot>
+        </table>
+    </div>
+    <alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
+      <span class="ion-information-circled alert-icon-float-left"></span>
+      <strong>{{alertError.title}}</strong>
+      <p v-html="alertError.msg"></p>
+    </alert>
+    <alert :show.sync="alertInfo.show" placement="top" duration="0" type="info" width="400px" dismissable>
+      <span class="ion-information-circled alert-icon-float-left"></span>
+      <strong>{{alertInfo.title}}</strong>
+      <p v-html="alertInfo.msg"></p>
+    </alert>
+</template>
+
+<template id="camp">
+ <div>
+ </div>
+</template>
+</div>
+<script src="vue-strap.min.js"></script> 
+<script>
+var Home=Vue.extend({
+    template:'#home',
+    props:['select','onlysql','debug','getgym'],
+    components: {
+        	vSelect: VueStrap.select,
+        	vOption: VueStrap.option,
+        	alert: VueStrap.alert,
+			checkbox: VueStrap.checkbox
+    },
+    data: function () {
+       return {
+	     familyType:'recent',
+		 typeGroup:[{val:'recent',label:'本中心今天查看过的家庭'},{val:'potential',label:'我负责的潜在客户'},
+		            {val:'active',label:'我负责的活跃会员'},{val:'history',label:'我负责的历史会员'}
+		           ],
+         searchType:"孩子",
+		 searchTypes:[{label:"孩子年龄",show:"active,history,potential"},{label:"孩子",show:""},{label:"家长手机",show:""},
+		              {label:"质量评估",show:"potential"},{label:"负责老师",show:""},{label:"获得家长信息的渠道",show:"potential"},{label:"最近浏览时间",show:"recent,potential"}
+		        ],
+		 search:[{val:"",placeholder:"",show:true},{val:"",placeholder:"年龄上限(个月)",show:false}],
+         pageSize :10,
+         pageNow:1,	 
+		 pageSpan:0,
+		 order: "order by 最近浏览时间  desc",
+		 onlyNoIntro:false,
+		 myData:[],
+		 headers:[],
+    	 alertError:{show:false,title:'错误提示',msg:''},
+    	 alertInfo:{show:false,title:'操作提示',msg:'导入成功'}
+       }
+	},
+    filters: {
+    },
+    computed: {
+	     dataFilter:function(){
+		   var self=this;
+		   return self.myData.map(function(d,i){
+		         var dn={};		         
+		         self.headers.forEach(function(h,i){
+				   //console.log(h)
+			       if(h.name=="查看"){
+	                  dn[h.name]='<a href="/index.jsp?mlist=1&amp;mfs1=crm_zdytable_238592_25111&amp;mid='+d.id+'&amp;menu=3" target="_blank">查看</a>';			 
+				   }else{
+			          dn[h.name]=d[h.name];
+				   }
+			     })
+			     return dn;
+			})
+		 },
+	     sql_cur:function(){
+            switch(this.familyType){
+              case 'active':
+                return sql_active+sql_comm;
+                break;
+              case 'history':
+                return sql_history+sql_comm;
+                break;
+              case 'potential':
+                return sql_potential+sql_comm;
+                break;
+              default:
+                return sql_recent+sql_comm;
+            }
+		 },
+		 whereAge:function(){
+		   var con='';
+		   if(this.searchType=="孩子年龄"){
+		     if(this.search[1].val!=''){
+		        con += "and hz.crmzdy_80653845>=dateadd(d,-@up*30,getdate())";
+			 }
+			 if(this.search[0].val!=''){
+			    con +=" and hz.crmzdy_80653845<=dateadd(d,-@down*30,getdate())";
+			 }
+             con = con.replace('@down',this.search[0].val).replace('@up',this.search[1].val);	
+			 return con;
+           }
+           return '';		   
+		 },
+		 whereLast:function(){
+		    var con="where 1=1";
+			var a =$.trim(this.search[0].val);
+			var b =$.trim(this.search[1].val);
+		    if(this.searchType!="孩子年龄" && a!=''){
+			   con +=" and charindex('"+a+"',"+this.searchType+")>0";
+			}
+			if(this.searchType=="孩子年龄"&&!(a==''&&a=='')){
+			   con +=" and 孩子<>'' ";
+			}
+			if(con=="where 1=1") return '';
+			return con;
+		 },
+		 userWhere:function(){
+		    if(this.select.acl.indexOf("系统管理员")==-1
+			   &&this.select.acl.indexOf("运营顾问")==-1
+			   &&this.select.acl.indexOf("中心运营总监")==-1){
+			   return 'zx.crmzdy_81636452_id=iduser';
+			}else{
+			   return '1=1';
+			}
+		 },
+		 whereNoIntro:function(){
+		   if(this.onlyNoIntro){
+             return "and not exists(select 1 from crm_zdytable_238592_23576_238592_view ty where zx.id=ty.crmzdy_81620307_id and ty.crmzdy_80653847_id=hz.id and datediff(d,getdate(),ty.crmzdy_80650731)>0 and ty.crmzdy_80650306<>'请假') and /*无出勤体验*/ not exists(select 1 from crm_zdytable_238592_23576_238592_view ty where zx.id=ty.crmzdy_81620307_id and ty.crmzdy_80653847_id=hz.id and datediff(d,getdate(),ty.crmzdy_80650731)<=0 and ty.crmzdy_80650306='出勤')";
+			}
+			return "";
+		 },
+         sqlBuilder:function () {
+		     var id =this.select.gym_selected;
+			 var sql=this.sql_cur;
+             if(id=="all"){
+               sql= sql.replace(/@gymWwhere/gi,"1=1")
+			   .replace(/@userWhere/gi,this.userWhere)
+			   .replace(/@whereAge/gi,this.whereAge)
+			   .replace(/@whereNoIntro/gi,this.whereNoIntro)
+			   .replace(/@order/gi,this.order)
+			   .replace(/@whereLast/gi,this.whereLast)
+			   .replace(/@pageNow/gi,this.pageNow)
+			   .replace(/@pageSize/gi,this.pageSize);
+             }else{
+               sql= sql.replace("@gymWhere","zx.crmzdy_81620171_id ="+id)
+			   .replace(/@userWhere/gi,this.userWhere)
+			   .replace(/@whereAge/gi,this.whereAge)
+			   .replace(/@whereNoIntro/gi,this.whereNoIntro)
+			   .replace(/@order/gi,this.order)
+			   .replace(/@whereLast/gi,this.whereLast)
+			   .replace(/@pageNow/gi,this.pageNow)
+			   .replace(/@pageSize/gi,this.pageSize);
+             }
+			 //console.log(sql);
+			 sql = GB2312UnicodeConverter.ToUnicode(sql);
+			 return sql; 
+         },
+		 searchTypesFilter:function(){
+		   var self = this;
+		   return self.searchTypes.filter(function(st){
+		         return st.show.indexOf(self.familyType)!=-1||st.show=="";
+		   })
+		 },
+		 navSize:function () {
+		     if(this.myData.length>0){
+		        this.pageSpan=Math.ceil(this.myData[0].num/this.pageSize);
+                return this.pageSpan>8 ? 8: this.pageSpan;
+			 }
+			 return 0;
+         } 
+    },
+    methods:{
+	    clearfilter:function(){
+           this.search=[{val:"",placeholder:"",show:true},{val:"",placeholder:"年龄上限(个月)",show:false}];
+		},
+	    updateHeader:function(data){
+		   var self=this;
+		   if(self.headers.length==0){
+		   self.headers.push({name:'查看',order:0})
+		     for (var key in data[0]){
+		       if(key!='id'&&key!='idjt'&&key!='num'){
+		         self.headers.push({name:key,order:0})
+			   }
+		     }
+		   }
+	   },
+	   validate:function(){
+           var reg = /^[0-9]*$/;
+           if (!reg.test(this.search[0].val)
+	  	      ||!reg.test(this.search[1].val)){
+                this.alertError.msg="请输入正确数字";
+		        this.alertError.show=true;
+                return false;
+           }
+	  	   return true;
+	   },
+	   filterChange:function(){
+	      if($.trim(this.searchType)=='孩子年龄'){
+	  	    this.search[0].placeholder="年龄下限(个月)";
+	  	    this.search[1].show=true;
+	  	  }else{
+	  	    this.search[0].placeholder="";
+	  	    this.search[1].show=false;
+	  	  }
+	   },
+	   init:function(){
+	     if(this.familyType=="recent") {
+		    this.order="order by 最近浏览时间 desc";
+		 }else if(this.familyType=="potential") {
+		    this.order="order by 最近浏览时间 desc";
+		 }else{ this.order="order by id desc";}
+		 this.headers=[];
+	     this.searchType=this.searchTypesFilter[0].label;
+		 if(this.select.data[this.familyType]&&this.select.data[this.familyType].length>0){
+	       this.myData=this.select.data[this.familyType];
+		 }
+	     this.filterChange();
+	   },
+	   turnTo:function(num){
+	     if(num<1) {num=1}
+	     if(num>this.pageSpan) {num=this.pageSpan}
+	     this.pageNow = num;
+		 alert(this.pageNow)
+		 this.getFam();
+	   },
+	   paiXu:function(header,order){
+         this.headers.map(function(h){
+		   h.order=0;
+		 })
+		 header.order=order;
+		 this.order="order by "+header.name+" "+(order==1?"asc":"desc");
+		 this.getFam()
+	   },
+	   getFam:function(){
+			var self=this;
+			self.myData=[];
+		    if(self.validate()){
+				self.select.data[self.familyType]=[];
+				self.select.start=true;
+                self.$http.jsonp(url_jsonp,{
+                    sql1: self.sqlBuilder,
+					onlysql:(self.onlysql.checked?1:0)
+                },{
+                    jsonp:'callback'
+                }).then(function(res){
+				  var sql =res.data.info[1].sql;
+				  sql =sql.replace(/quot;/gi,"'")
+				  self.onlysql.value=sql;
+				  var res_data = res.data.info[0].rec;
+				  if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                      self.select.data[self.familyType]=res_data;
+					  self.myData=self.select.data[self.familyType];
+					  self.updateHeader(self.myData);
+				  }
+				  self.select.start=false;
+                },function(res){
+				  self.select.start=false;
+                  alert(res.status);
+                });
+			}
+	   },
+	   test:function(){
+	    //this.validate()
+	    alert(this.navSize)
+	   }
+    },
+    ready: function () {
+	   this.getgym(this.getFam);
+    }
+  });
+  var Camp=Vue.extend({
+        components: {
+           vSelect: VueStrap.select,
+           alert: VueStrap.alert,
+           datepicker: VueStrap.datepicker,
+           modal: VueStrap.modal,
+           alert: VueStrap.alert,
+           tooltip: VueStrap.tooltip
+        },
+        template:'#work',
+        props:['select','onlysql','debug'],
+        data: function () {
+            return {
+			  alert2:false,
+			  value:"",
+	          disabled:[],
+	          format:"yyyy-MM-dd",
+	          clear:true,
+	          placeholder:"开始日期",
+              title: "我是标题",
+              alertIsOpen: false,
+              showRight: false,
+              showTop: false,
+			  showCustomModal:false
+            }
+        },
+        methods:{
+            showAlert : function(){
+              this.$set('alertIsOpen',true);
+            },
+			showDialog: function(){
+              this.$set('showCustomModal',true);
+            }
+        },
+        ready: function () {
+
+        }
+    });
+
+  
+ 
+    new Vue({
+      el: '#box',
+      data: function() {
+        return { 
+		  menu:'home',
+		  onlysql:{checked:false,value:""},
+		  visible:false,
+          select: {
+            start: false,
+            isShow: true,
+            acl: "",
+            ids:[],
+            gyms: [],
+            gym_selected:null,
+            data: {},
+          },
+		}
+      },
+      components:{
+            'home':Home,
+            'camp':Camp,
+            tabs: VueStrap.tabset,
+            tabGroup: VueStrap.tabGroup,
+            dropdown: VueStrap.dropdown, 
+            tab: VueStrap.tab,
+        	vSelect: VueStrap.select,
+        	vOption: VueStrap.option
+      },
+	  computed:{
+            gymSQl:function () {
+			    var code =this.gymSelected;
+                if(code=="all"){
+                    return sql_GymFilter.replace("@where"," where crmzdy_80620116 between '500004' and '600004'")
+					       .replace("@dts",this.dt[0])
+						   .replace("@dte",this.dt[1])
+						   .replace("@@pageNow",this.pageNow)
+						   .replace("@@size",this.pageSize);
+                }else{
+                    return sql_GymFilter.replace("@where"," where crmzdy_80620116='"+code+"'")
+					       .replace("@dts",this.dt[0])
+						   .replace("@dte",this.dt[1])
+						   .replace("@@pageNow",this.pageNow)
+						   .replace("@@size",this.pageSize);
+                }
+            }
+	  },
+      methods: {
+	    HuiZFilter:function(i){
+		  if(this.HuiZ.length==0) return null;
+	      return this.HuiZ.filter(function(currentValue,index,ar){
+	         return index%3==i
+	      })
+	    },
+        toggleSelection:function(rows,checked) {
+		    var self = this;
+            if (rows) {
+                rows.forEach(function(row){
+                    self.$refs.multipleTable.toggleRowSelection(row,checked);
+                });
+            } else {
+                self.$refs.multipleTable.clearSelection();
+            }
+        },
+        handleSizeChange:function(val) {
+            this.pageSize=val;
+            this.getAttds();
+        },
+        handleCurrentChange:function(val) {
+            this.pageNow=val;
+            this.getAttds();
+        },
+        handleRowSelect:function(row,column){
+		    //alert(JSON.stringify(column))
+			//if(column.label!='考勤状态'&&column.label!='操作'){
+            //   this.$refs.multipleTable.toggleRowSelection(row);
+			//}
+        },
+
+        getAcl_jsonp:function(){
+            this.$http.jsonp(url_jsonp,{
+                sql1:sql_quanxian
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+			    var self=this;
+                if(res.data.info[0].rec.constructor !=String){
+                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
+                     if(self.select.acl.indexOf("系统管理员")==-1&&self.select.acl.indexOf("运营顾问")==-1){
+                     }else{
+					    self.select.gyms.unshift({code:"all",name:"所有中心"})
+                     }
+                }
+            },function(res){
+                alert(res.status);
+            });
+        },
+        getgym:function(func){
+		     var self=this;
+             self.$http.jsonp(url_jsonp,{
+                 sql1: sql_getGym
+             },{
+                 jsonp:'callback'
+             }).then(function(res){
+                 self.select.gyms = res.data.info[0].rec;
+		         self.select.gym_selected=self.select.gyms[0].id;
+				 if(func){
+				   func();
+				 }
+             },function(res){
+                 alert(res.status);
+             });
+        },
+        debug: function () {
+	       alert(JSON.stringify(this.select.gym_selected))
+        }
+      },
+      created: function () {
+	        var param =GetRequest()
+	        if(param.id){
+	           this.memu=param.id
+			   if(this.memu=='intro'){
+			     this.index=3
+			   }
+	        }
+          this.getAcl_jsonp();
+      },
+    }) 
+</script>
+</body>
+</html>

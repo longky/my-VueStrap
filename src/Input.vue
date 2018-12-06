@@ -1,6 +1,6 @@
 <template>
   <div class="form-group" :class="{validate:canValidate,'has-feedback':icon,'has-error':canValidate&&valid===false,'has-success':canValidate&&valid}">
-    <slot name="label"><label v-if="label" class="control-label" @click="focus">{{label}}</label></slot>
+    <slot name="label"><label v-if="label" class="control-label" @click="focus">{{labl}}</label></slot>
     <div v-if="slots.before||slots.after" class="input-group">
       <slot name="before"></slot>
       <textarea v-if="type=='textarea'" class="form-control" v-el:input v-model="value"
@@ -121,7 +121,7 @@ export default {
       coerce: coerce.boolean,
       default: false
     },
-    label: {
+    labl: {
       type: String,
       default: null
     },
