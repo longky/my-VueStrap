@@ -68,10 +68,10 @@ export default {
       type: String,
       default: null
     },
-    backdrop: {
+    isbackdrop: {
       type: Boolean,
       coerce: coerce.boolean,
-      default: true
+      default: false
     },
     large: {
       type: Boolean,
@@ -107,7 +107,7 @@ export default {
         if (scrollBarWidth !== 0) {
           body.style.paddingRight = scrollBarWidth + 'px'
         }
-        if (this.backdrop) {
+        if (this.isbackdrop) {
           $(el).on('click', e => {
             if (e.target === el) this.show = false
           })

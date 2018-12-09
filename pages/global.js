@@ -81,8 +81,6 @@ export default{
             }else{
                 throw new Error("sql没有main标识！")
             }
-            str=str.replace(/'/ig,"quot;")
-            str=str.replace(/\+/ig,"add;")
             return str;
           }
     }    

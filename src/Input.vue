@@ -81,7 +81,6 @@ import $ from './utils/NodeList.js'
 export default {
   props: {
     value: {
-      twoWay: true,
       default: null
     },
     match: {

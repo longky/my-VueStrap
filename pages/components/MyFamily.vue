@@ -23,10 +23,10 @@
 					</div>
 					<div class="column center aligned">
 						<div class="ui small action input">
-							<a type="submit" href="https://bbk.800app.com/index.jsp?mfs=crm_sj&mid=-1&menu=3" target="_blank" class="btn btn-primary">新建家庭</a> 
+							<a type="submit" href="https://bbk.800app.com/index.jsp?mfs=crm_sj&mid=-1&menu=3" target="_blank" class="btn btn-default">新建家庭</a> 
 						</div>
-						<div class="ui small action input">
-							<a type="submit" @click="goSave" class="btn btn-primary">批量修改负责老师</a> 
+						<div v-show="isadmin" class="ui small action input">
+							<a type="submit" @click="goSave()" class="btn btn-primary">批量修改负责老师</a> 
 						</div>
 					</div>
 				</div>	
@@ -54,7 +54,7 @@
 				</div>   
 			</div>
 			
-			<tlg-table :select="select" :checked="tchecked" :tb_style="tb_style" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
+			<tlg-table :select="select" :checkbox="tchecked" :tb_style="tb_style" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start" ></tlg-table>
 		
 			<modal :show.sync="typeModal.show" effect="fade" :width="400">
 				<div slot="modal-header" class="modal-header">
@@ -63,27 +63,37 @@
 					</h4>
 				</div>
 				<div slot="modal-body" class="modal-body">
-					<v-select :value.sync="updateType" :options="updateTypes" required></v-select>	
+					<v-select :value.sync="updateType" required>
+						<v-option v-for="t of updateTypes" :value="$index+1">{{t}}</v-option>
+					</v-select>	
 				</div>
 				<div slot="modal-footer" class="modal-footer">
-					<button type="button" class="btn btn-success" @click="goSave">确定</button>
-					<button type="button" class="btn btn-default" @click="typeModal.show = false">取消</button>
+					<button type="button" class="btn btn-success" @click="goSave(1)">确定</button>
+					<button type="button" class="btn btn-default" @click="goCancel()">退出</button>
 				</div>
 			</modal>
-			<modal :show.sync="saveLsModal.show" effect="fade" :width="400">
+			<modal :show.sync="saveLsModal.show" effect="fade" small>
 				<div slot="modal-header" class="modal-header">
 					<h4 class="modal-title">
-					<b>{{typeModal.title}}</b> 
+					<b>{{saveLsModal.title}}</b> 
 					</h4>
 				</div>
 				<div slot="modal-body" class="modal-body">
-					<v-select :value.sync="updateType" :options="updateTypes" required></v-select>	
-					<v-select :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select>	
-					<v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" :options="saveLsModal.newers" options-label="name" options-value="id" required></v-select>	
+					<div class="ui form">
+						<div class="field">
+							<bs-input class="header" maxlength=10 disabled :value="updateType&&updateTypes[updateType-1]" icon></bs-input>
+						</div>
+					</div>
+					<div class="ui form">
+						<div class="two fields">
+							<div class="field" v-show="updateType!=5"><v-select :value.sync="saveLsModal.former" placeholder="原负责老师"  clearable multiple :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select></div>	
+							<div class="field"><v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" clearable :options="saveLsModal.newers" options-label="name" options-value="id" required></v-select></div>
+						</div>
+					</div>
 				</div>
 				<div slot="modal-footer" class="modal-footer">
-					<button type="button" class="btn btn-success" @click="Save()">确定</button>
-					<button type="button" class="btn btn-default" @click="saveLsModal.show = false">取消</button>
+					<button type="button" class="btn btn-success" @click="save()">转换</button>
+					<button type="button" class="btn btn-danger" @click="reset()">重置</button>
 				</div>
 			</modal>
 
@@ -99,15 +109,12 @@
 			</alert>
 	</div>
 </template>
-<style scope>
-	.box{
-		border:1px dashed #000;
-	}
-</style>
+ 
 
 
 <script>
 import vSelect from '@/src/Select.vue'
+import vOption from '@/src/Option.vue'
 import alert from '@/src/Alert.vue'
 import modal from '@/src/Modal.vue'
 import bsInput from '@/src/Input.vue'
@@ -122,6 +129,7 @@ export default {
   },
   components:{
 	vSelect,
+	vOption,
 	alert,
 	modal,
 	bsInput,
@@ -155,13 +163,17 @@ export default {
 		  sql_cur:sql_recent,
 		  getQuery:this.getEnrol,
 		  theader:[],
-		  tchecked:false,
+		  tchecked:{
+			  show:false,
+			  ids:[],
+			  checkall:false
+		  },
 		  tb_style:{
 			  th:{padding: ".22857143em .998571429em"},
 			  td:{padding: ".38571429em",fontSize:"6px"}
 		  },
-		  typeModal:{show:false,title:'批量修改方式选择'},
-		  saveLsModal:{show:false,title:'批量修改负责老师',formers:[],newers:[],former:"",newer:""},
+		  typeModal:{show:false,title:'批量修改方式选择',dropback:false},
+		  saveLsModal:{show:false,title:'批量转换负责老师',dropback:false,formers:[],newers:[],former:null,newer:null},
 	}
   },
   computed:{
@@ -177,9 +189,8 @@ export default {
 		},
 		isadmin:function(){
 			if(this.select.acl.indexOf('系统管理员')!=-1
-			||this.select.acl.indexOf('市场顾问')!=-1
 			||this.select.acl.indexOf('运营顾问')!=-1
-			||this.select.acl.indexOf('市场专员')!=-1){
+			||this.select.acl.indexOf('中心运营总监')!=-1){
 				return true;
 			}
 			return false;
@@ -275,30 +286,42 @@ export default {
 		},
 		sqlBuilder:function () {
 			var sql=this.sql_cur;
-			console.log("2:"+this.sql_cur);
+			//console.log("2:"+this.sql_cur);
 			sql=sql.replace("@whereAge",this.whereAge)
 			sql=sql.replace("@idGym",this.select.gym_selected&&this.select.gym_selected.split("|")[0])
 			sql=sql.replace("@whereNoIntro",this.WhereNoIntro)
 			sql=sql.replace("@whereLs",this.whereLs)
-			console.log(this.sql(sql))
+			//console.log(this.sql(sql))
 			sql=this.fn_pager(sql,this.options) 
-			console.log(this.sql(sql))
+			//console.log(this.sql(sql))
 			sql = this.convertor.ToUnicode(sql);
 			return sql; 
 		}
   },
-  methods:{	  
-		goSave(){
+  methods:{	 
+	    goCancel(){
+		   this.updateType=null;
+           this.typeModal.show=false;
+		},
+		goSave(type){
 			if(!this.updateType){
 				this.typeModal.show=true;
+				if(!this.alertError.show&&type==1){
+				    this.alertError={show:true,title:'错误提示',msg:'请选择批量修改的方式'};
+				}
 			}else{
-				if(this.tchecked){
-					if(this.select.ids.length>0){
+				this.typeModal.show=false;
+				if(this.updateType==5){
+					this.tchecked.show=true;
+					if(this.tchecked.ids.length>0){
+						this.alertInfo.show=false;
 						this.getLs();
 					}else{
-                        this.alertInfo={show:false,title:'操作提示',msg:'请先搜索并选中需要更换负责老师的例子记录'};
+                        this.alertInfo={show:true,title:'操作提示',msg:'请先搜索并选中需要修改的记录, 再点击"批量修改按钮"'};
 					}
 				}else{
+					this.tchecked.show=false;
+					this.alertInfo.show=false;
 					this.getLs();
 				}
 			}
@@ -335,23 +358,110 @@ export default {
 			}
 		    return true;
 	   },
+		valid_update:function(type){
+		    if(type==5) {
+				if(this.tchecked.ids.length==0){
+					this.alertError={title:"错误提示",msg:"请先搜索并选中需要修改的记录",show:true};
+					return false;
+				}
+			}else{
+				if(this.saveLsModal.former.length==0){
+					this.alertError={title:"错误提示",msg:"请选择原负责老师",show:true};
+					return false;
+				}
+			}
+			if(!this.saveLsModal.newer){
+				this.alertError={title:"错误提示",msg:"请选择新负责老师",show:true};
+				return false;
+			}
+		    return true;
+	   },
+       fn_update:function(str){
+            var header="with ";
+            if(/with.+as/.test(str)){
+              header=","
+            } 
+            if(/^(.*)(select\s*?)\/\*main\*\/(.*?)[;]?$/.test(str)){
+				str = RegExp.$1+header+"p as("+RegExp.$2+RegExp.$3+")";
+				str += "update p set idls=@newer where idls in(@former);";
+            }else{
+                throw new Error("sql没有main标识！")
+            }
+            return str;
+       },
 	   save(){
-
+		   if(!this.valid_update(this.updateType))return;
+		   let sql_update=null;
+		   if(this.updateType==5){
+			  sql_update="update zx set zx.crmzdy_81636452_id=@newer from crm_zdytable_238592_25111_238592_view zx where zx.id in (@ids);";
+			  sql_update=sql_update.replace("@ids",this.tchecked.ids.join(","));
+		   }else if(this.updateType==1){
+			  sql_update="update zx set zx.crmzdy_81636452_id=@newer from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_81620171_id =@idGym and zx.crmzdy_81636452_id in (@former);";
+		   }else if(this.updateType==2){
+			  sql_update=sql_potential;
+			  sql_update=this.fn_update(sql_update);
+		   }else if(this.updateType==3){
+			  sql_update=sql_active;
+			  sql_update=this.fn_update(sql_update);
+		   }else if(this.updateType==4){
+			  sql_update=sql_history;
+			  sql_update=this.fn_update(sql_update);
+		   }
+		   sql_update=sql_update.replace("@idGym",this.select.gym_selected&&this.select.gym_selected.split("|")[0]);
+		   sql_update=sql_update.replace("@whereLs","").replace("@whereAge","").replace("@whereNoIntro","");
+		   sql_update=sql_update.replace("@former",this.saveLsModal.former.join(",")).replace("@newer",this.saveLsModal.newer);
+		   console.log(sql_update)
+		   if(sql_update){
+				sql_update+="select top 1 0 errcode,'ok' errmsg from crm_yh_238592_view for json path,without_array_wrapper;"
+				sql_update=this.convertor.ToUnicode(sql_update);
+				let self=this;
+				self.select.start=true;
+				self.saveLsModal.show=false;
+				self.$axios({
+						method: 'post',
+						url:url_local,
+						params:{sql1:sql_update,onlysql:(self.select.onlysql?1:0)}
+					}).then(function(res){
+						if(res.status=200&&res.data.errcode==0){
+							self.alertInfo={show:true,title:'操作提示',msg:'操作成功'};
+							self.reset("q");
+						}else{
+                            self.alertError={title:"错误提示",msg:"操作失败",show:true}
+						}
+						self.select.start=false;
+						self.getFam();
+					},function(res){
+						self.select.start=false;
+						console.log(res.status);
+					});
+		    }
+	   },
+	   reset(type){
+		   this.saveLsModal.former=null;
+		   this.saveLsModal.newer=null;
+		   this.saveLsModal.show = false;
+		   this.updateType=null;
+		   this.tchecked={show:false,checkall:false,ids:[]};
+		   if(type!="q"){
+		      this.typeModal.show=true;
+		   }
 	   },
 	   getLs:function(){
 			var self=this;
 			self.select.start=true;
 			var sql=sql_ls;
 			sql = sql.replace(/@idGym/ig,this.select.gym_selected&&this.select.gym_selected.split("|")[0]);
+			sql = this.convertor.ToUnicode(sql);
 			self.$axios({
 				method: 'post',
 				url:url_local,
                 params:{sql1:sql,onlysql:(self.select.onlysql?1:0)}
 			}).then(function(res){
 			    if(res.status=200){
-					console.log(JSON.stringify(res.data))
-				   self.saveLsModal.former=res.data.former;
-				   self.saveLsModal.newer=res.data.newer;
+				   //console.log(JSON.stringify(res.data))
+				   self.saveLsModal.formers=res.data.formers;
+				   self.saveLsModal.newers=res.data.newers;
+				   self.saveLsModal.show=true;
 				}
 				self.select.start=false;
             },function(res){
@@ -415,21 +525,12 @@ export default {
 				break;
 			case "history":
 				this.sql_cur=sql_history;
-				console.log(this.sql_cur)
 				break;
 			default:
-			   this.sql_cur=sql_recent;
+			    this.sql_cur=sql_recent;
 		}
 		if(this.validate(false)){
 		   this.init();
-		}
-	},
-    updateType(newval){
-		if(!newval){
-			this.alertError={show:true,title:'错误提示',msg:'请选择批量修改的方式'};
-		}else{
-			this.updateType=="仅转移复选框选中的记录"? this.tchecked=true:this.getLs();
-			this.typeModal.show=false;
 		}
 	},
     pagenation:{
@@ -443,6 +544,7 @@ export default {
 			this.init();
 		}
 	}
+	
   },
   created(){
 	  this.select.cur_menu="family";
@@ -451,9 +553,16 @@ export default {
 }
 </script>
  <style  scoped>
- .optionval{
-   width:100px!important;
- }
-
+	.optionval{
+		width:100px!important;
+	}
+	.box{
+		border:1px dashed #000;
+	}
+	.header{
+		font-weight:bold;
+		color:black!important;
+		font-size:1.4em;
+	}
 </style>
  

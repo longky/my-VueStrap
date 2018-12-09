@@ -7,7 +7,7 @@
       @keyup.esc="show = false"
     >
       <span class="btn-content" v-html="loading ? text.loading : showPlaceholder || selected"></span>
-      <span v-if="clearButton&&values.length" class="close" @click="clear()">&times;</span>
+      <span v-if="clearable&&values.length" class="close" @click="clear()">&times;</span>
     </div>
     <select v-el:sel v-model="value" v-show="show" name="{{name}}" class="secret" :multiple="multiple" :required="required" :readonly="readonly" :disabled="disabled">
       <option v-if="required" value=""></option>
@@ -23,7 +23,7 @@
           />
           <span v-show="searchValue" class="close" @click="clearSearch">&times;</span>
         </li>
-        <li v-if="required&&!clearButton"><a @mousedown.prevent="clear() && blur()">{{ placeholder || text.notSelected }}</a></li>
+        <li v-if="required&&!clearable"><a @mousedown.prevent="clear() && blur()">{{ placeholder || text.notSelected }}</a></li>
         <li v-for="option in options | filterBy searchValue" :id="option[optionsValue]||option">
           <a @mousedown.prevent="select(option[optionsValue],option)">
             <span v-html="option[optionsLabel]||option"></span>
@@ -57,7 +57,7 @@ export default {
       coerce: coerce.boolean,
       default: false
     },
-    clearButton: {
+    clearable: {
       type: Boolean,
       coerce: coerce.boolean,
       default: false

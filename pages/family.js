@@ -1,10 +1,9 @@
-﻿import Vue from 'vue'
-import VueRouter from '../docs/js/vue-router.min.js'
+﻿import VueRouter from '../docs/js/vue-router.min.js'
 import Family from './Family.vue'
 import routerConfig from './router.family.js'
 import functions from './functions'
 import global from './global'
-import axios from  '@/docs/js/axios.min.js'
+
  
 
 Vue.prototype.$axios = axios;

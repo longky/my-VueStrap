@@ -6,9 +6,9 @@
             <table v-el:container class="ui selectable celled table">
                 <thead>
                     <tr class="positive">
-                        <td v-show="checked">
-                            <input name="update" type="checkbox" value="1"  v-model="checkall">
-                        </td>
+                        <th v-show="checkbox.show">
+                            <input  type="checkbox" value=1 @click="choosePage()" v-model="checkbox.checkall">
+                        </th>
                         <th v-for="h of header" :style="tb_style&&tb_style.th" class="is-leaf is-sortable" :class="align(h&&h.label[0],h.order)"  v-show="show(h)">
                             <div class="cell">{{label(h.label)}}<span class="caret-wrapper" v-if="h.order">
                                 <i class="sort-caret ascending"  @click="paiXu(h,1)"></i>
@@ -28,8 +28,8 @@
                 </tbody>
                 <tbody v-if="select.data && select.data.total>0">
                     <tr v-for="item of select.data.arr">
-                        <td v-show="checked">
-                            <input name="update" type="checkbox" :value="item.idls" :id="account" v-model="select.ids" @click="test(ls)">
+                        <td v-show="checkbox.show">
+                            <input name="update" type="checkbox" :value="item.idzx" :id="item.idzx" v-model="checkbox.ids">
                         </td>
                         <td :style="tb_style&&tb_style.td" v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
                     </tr>
@@ -75,9 +75,9 @@ export default {
            type: Boolean,
            default: false
        },
-       checked: {
-           type: Boolean,
-           default: false
+       checkbox: {
+           type: Object,
+           default: {}
        },
        tb_style:{
            
@@ -107,8 +107,7 @@ export default {
 		 arr_pageSize:[
 		    {val:10,label:"每页 10 条"},{val:20,label:"每页 20 条"},{val:30,label:"每页 30 条"},{val:50,label:"每页 50 条"},
 		    {val:100,label:"每页 100 条"},{val:200,label:"每页 200 条"},{val:500,label:"每页 500 条"},{val:1000,label:"每页1000条"}
-         ],
-         checkall:0
+         ]
        }
    },
    computed:{
@@ -126,6 +125,18 @@ export default {
 	   }
    },
    methods:{
+      choosePage:function(){
+        this.checkbox.ids=[];
+        //迟缓
+        if(!this.checkbox.checkall){
+            let data=this.select.data.arr;
+            data=data.reduce(function(item,next){
+                item.push(next.idzx);
+                return item;
+            },[])  
+            this.checkbox.ids=data;
+        }
+      },
 	  paiXu:function(h,order){
          this.header.map(function(h){
 		   if(h.order)h.order=-1;

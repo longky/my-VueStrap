@@ -6,6 +6,7 @@ var myFun = {
     install: function (Vue, options) {
         Vue.prototype.convertor={
             ToUnicode:function (str) {
+              str=str.replace(/'/ig,"quot;").replace(/\+/ig,"add;")
               return escape(str).toLocaleLowerCase().replace(/%u/gi, '\\u');
             },
             toGBK:function (str) {
