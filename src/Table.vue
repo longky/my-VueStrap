@@ -2,7 +2,7 @@
     <div class="ui segment" v-if="select">
         <div  v-show="loading" style="text-align:center" ><img :src="select.loading_pic" width="40px" height="40px"></div>
         <div  v-show="select.onlysql"><pre v-text="select.data&&select.data.sql|sql"></pre></div>
-        <div  class="outer" :class="{'scroll':isScoll}" v-if="select.data&&select.data.arr&&header" :style="{height:maxheight}">
+        <div  class="outer scroll" v-if="select.data&&select.data.arr&&header" :style="{height:maxheight}">
             <table v-el:container class="ui selectable celled table">
                 <thead>
                     <tr class="positive">

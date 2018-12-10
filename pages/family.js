@@ -6,7 +6,7 @@ import global from './global'
 
  
 
-Vue.prototype.$axios = axios;
+Vue.prototype.$axios=axios;
 Vue.use(functions); 
 Vue.mixin(global);
 Vue.use(VueRouter);

@@ -21,7 +21,7 @@
 						   </div>
 						</tooltip>
 					</div>
-					<div class="column center aligned">
+					<div class="column right aligned">
 						<div class="ui small action input">
 							<a type="submit" href="https://bbk.800app.com/index.jsp?mfs=crm_sj&mid=-1&menu=3" target="_blank" class="btn btn-default">新建家庭</a> 
 						</div>
@@ -148,7 +148,7 @@ export default {
 			  kid:{label:"孩 子",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"all"},
 			  parent:{label:"家长姓名",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"recent"},
 			  phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"任意字符"}],context:"all"},
-			  quality:{label:"质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
+			  quality:{label:"客户质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
 			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"all"},
 			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"}
 		  },
@@ -170,7 +170,7 @@ export default {
 		  },
 		  tb_style:{
 			  th:{padding: ".22857143em .998571429em"},
-			  td:{padding: ".38571429em",fontSize:"6px"}
+			  td:{padding: ".38571429em",fontSize:"13px"}
 		  },
 		  typeModal:{show:false,title:'批量修改方式选择',dropback:false},
 		  saveLsModal:{show:false,title:'批量转换负责老师',dropback:false,formers:[],newers:[],former:null,newer:null},
@@ -555,6 +555,7 @@ export default {
  <style  scoped>
 	.optionval{
 		width:100px!important;
+		font-size:12px!important;
 	}
 	.box{
 		border:1px dashed #000;
@@ -563,6 +564,9 @@ export default {
 		font-weight:bold;
 		color:black!important;
 		font-size:1.4em;
+	}
+	.ui.compact.selection{
+		font-size:13px!important;
 	}
 </style>
  
