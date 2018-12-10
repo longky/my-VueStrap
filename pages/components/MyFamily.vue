@@ -21,7 +21,7 @@
 						   </div>
 						</tooltip>
 					</div>
-					<div class="column right aligned">
+					<div class="column center aligned">
 						<div class="ui small action input">
 							<a type="submit" href="https://bbk.800app.com/index.jsp?mfs=crm_sj&mid=-1&menu=3" target="_blank" class="btn btn-default">新建家庭</a> 
 						</div>
