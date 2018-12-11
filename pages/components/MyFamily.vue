@@ -211,7 +211,7 @@ export default {
 				label=label.replace(/\s+/ig,"")+" ";
 				var res="";
 				if(opr=="like"){
-					res=label+opr+" '%"+val+"%'";
+					res=label+opr+" '%"+val.trim()+"%'";
 				}else{
 					res=label+opr+((typeof val=='nummber')?val:" '"+val+"'");
 				}
@@ -240,8 +240,11 @@ export default {
 			return c;
 		},
 		whereLs:function(){
-		   //return zx.crmzdy_81636452_id=iduser
-		   return '';
+			if(this.isadmin){
+                return '';
+			}else{
+				return 'and zx.crmzdy_81636452_id=iduser';
+			}
 		},
      	whereAge:function(){
 		   var con='';
