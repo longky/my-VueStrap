@@ -147,7 +147,8 @@ export default {
 			  age:{label:"孩子年龄",sub_option:[{val:"",opr:">=",placeholder:"年龄下限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"},{val:"",opr:"<=",placeholder:"年龄上限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"}],context:"active,history,potential"},
 			  kid:{label:"孩 子",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"all"},
 			  parent:{label:"家长姓名",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"recent"},
-			  phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"任意字符"}],context:"all"},
+			  phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"手机号"}],context:"all"},
+			  phone:{label:"咨询日期",sub_option:[{val:"",opr:"=",placeholder:"日期"}],context:"potential"},
 			  quality:{label:"客户质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
 			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"all"},
 			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"}
