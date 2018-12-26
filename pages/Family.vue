@@ -82,6 +82,7 @@ export default {
         },
         getAcl:function(){
             var self=this;
+            sql_quanxian=sql_quanxian.replace('iduser',279833);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql_quanxian}
             })
@@ -94,7 +95,8 @@ export default {
             });
         },
         getGym:function(func){
-		     var self=this;
+             var self=this;
+             sql_getGym=sql_getGym.replace('iduser',279833);
 			 sql_getGym = this.convertor.ToUnicode(sql_getGym);
              self.$axios.get(url_jsonp,{
                  params:{sql1: sql_getGym}

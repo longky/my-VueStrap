@@ -14,10 +14,14 @@
 								<select class="ui compact selection dropdown" v-model="T">
 							    	<option v-for="t of searchTypesFilter" :value="t.val" v-text="t.label"></option>
 								</select>
-								<input  class="optionval" v-for="s of this.searchTypes[T].sub_option" type="text" v-model="s.val" :placeholder="s.placeholder" @change="val_match(s)">
+								<select class="ui compact selection dropdown" v-model="Tm" v-show="gt_show">
+							    	<option v-for="t of followTime" :value="t.val" v-text="t.label"></option>
+								</select>
+								<input  class="optionval" v-for="s of searchTypes[T].sub_option" type="text" v-model="s.val" :placeholder="s.placeholder" @change="val_match(s)">
 								<div type="submit" @click="init()" class="ui button" style="cursor:pointer">
 									<i class="search icon"></i>搜索
-								</div>                         
+								</div>          
+         
 						   </div>
 						</tooltip>
 					</div>
@@ -151,8 +155,11 @@ export default {
 			  phone:{label:"咨询日期",sub_option:[{val:"",opr:"=",placeholder:"日期"}],context:"potential"},
 			  quality:{label:"客户质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
 			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"all"},
-			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"}
+			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
+			  follower:{label:"老师跟进",sub_option:[{val:"",opr:"like",placeholder:"老师姓名"}],context:"all"}
 		  },
+		  Tm:1,
+		  followTime:[{val:1,label:"今天"},{val:7,label:"本周"}],
 		  pagenation:{
             pageSize :10,
 			pageNow:1,
@@ -178,6 +185,9 @@ export default {
 	}
   },
   computed:{
+	    gt_show(){
+          return this.T=='follower';
+		},
 		typeGroup:function(){
 			if(this.isadmin||(this.select.gym_selected&&this.select.gym_selected.split("|")[1]==1)){
 				return [
@@ -208,6 +218,7 @@ export default {
 			return res;
 		},
 		condition:function(){
+			if(this.T=='follower') return'';
 			let c_join=function(label,opr,val){
 				label=label.replace(/\s+/ig,"")+" ";
 				var res="";
@@ -284,17 +295,23 @@ export default {
 			   {label:['最近体验|l',this.field_show("potential")],value:[''],order:-1},
 			   {label:['负责老师'],value:[''],order:-1},
 			   {label:['报名课程情况|l',this.field_show("active,history")],value:[''],order:-1},
-               {label:['合同到期日期',this.field_show("history")],value:['','dt'],order:-1},
+			   {label:['合同到期日期',this.field_show("history")],value:['','dt'],order:-1},
+			   {label:['最近沟通记录|l'],value:['','','recent'],order:-1},
 			   {label:['最近浏览时间'],value:['',this.fmtDt("yyyy-MM-dd hh:mm:ss")],order:2}
 			]   
 		},
 		sqlBuilder:function () {
 			var sql=this.sql_cur;
+			if(this.gt_show){
+			   sql +=" cross apply(select top 1 convert(varchar(20),create_time,120)+ ', '+cust_name+'：'+crmzdy_81748934 recent from crm_zdytable_238592_25121_238592_view gt where gt.crmzdy_81748926_id=zx.id and crmzdy_81762823<>'短信' and datediff(d,gt.create_time,getdate())<=@limit and cust_name like '%@ls%' order by id desc)gt";
+			   sql =sql.replace('/*main*/','/*main*/ gt.recent,').replace("@limit",this.Tm).replace("@ls",this.searchTypes[this.T].sub_option[0].val||'');
+			}
 			//console.log("2:"+this.sql_cur);
 			sql=sql.replace("@whereAge",this.whereAge)
 			sql=sql.replace("@idGym",this.select.gym_selected&&this.select.gym_selected.split("|")[0])
 			sql=sql.replace("@whereNoIntro",this.WhereNoIntro)
 			sql=sql.replace("@whereLs",this.whereLs)
+			
 			//console.log(this.sql(sql))
 			sql=this.fn_pager(sql,this.options) 
 			//console.log(this.sql(sql))
@@ -557,6 +574,11 @@ export default {
 }
 </script>
  <style  scoped>
+ 
+	.ui.selection.dropdown{
+		padding-right: .2em!important;
+		padding-bottom: .6em!important;
+	}
 	.optionval{
 		width:100px!important;
 		font-size:12px!important;
