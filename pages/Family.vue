@@ -65,8 +65,9 @@ export default {
             },
             isadmin:function(){
                 if(this.select.acl.indexOf('系统管理员')!=-1
-                ||this.select.acl.indexOf('中心运营总监')!=-1
-                ||this.select.acl.indexOf('运营顾问')!=-1){
+                  ||this.select.acl.indexOf('运营顾问')!=-1
+                  ||(this.select.acl.indexOf('中心运营总监')!=-1&&this.select.gym_selected&&this.select.gym_selected.split("|")[2]==1)
+                ){
                     return true;
                 }
                 return false;
@@ -82,7 +83,7 @@ export default {
         },
         getAcl:function(){
             var self=this;
-            sql_quanxian=sql_quanxian.replace('iduser',279833);
+            sql_quanxian=sql_quanxian.replace('iduser',281584);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql_quanxian}
             })
