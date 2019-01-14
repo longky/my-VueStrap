@@ -6,7 +6,7 @@
 					<div class="column left aligned">
 						<div class="input-group">
 							<span class="input-group-addon">市场活动</span>          
-							<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  search close-on-select>
+							<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
 							</v-select>					
 						</div>
 					</div>
@@ -26,11 +26,11 @@
 								v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
 							</div>
 							<div class="ui mini action input">
-						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-sm btn-danger" v-show="isadmin">导出Excel</a> 
+						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 
 							</div>
 							<div class="ui mini action input">
-								<button type="submit" class="btn btn-sm btn-danger" @click="getSignlist"
-								v-show="select.acl.indexOf('系统管理员')!=-1">数据核对</button>                
+								<button type="submit" class="btn btn-danger" @click="getSignlist"
+								v-show="select.acl.indexOf('系统管理员')!=-1">Check</button>                
 							</div>
 					</div>
 				</div>	
@@ -46,7 +46,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="inline fields" v-if="summerType!='coupon'">
+					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected&&select.campaign_selected.indexOf('官网预约体验')==-1">
 						<label>筛选条件2:</label>
 						<div class="field" v-for="s in arr_status">
 							<div class="ui checkbox">
@@ -67,7 +67,7 @@
 				</div>   
 			</div>
 			
-			<tlg-table :select="select" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
+			<tlg-table :select="select" :checkbox="tchecked" :maxheight="tbl_maxheight" :tb_style="tb_style"   :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
 		
 			<modal :show.sync="contactModal.show" effect="fade" :width="280" small>
 				<div slot="modal-header" class="modal-header">
@@ -142,7 +142,16 @@ export default {
 		  lack:[],
 		  sql_cur:sql_preEnrol,
 		  getQuery:this.getEnrol,
-		  theader:[]
+		  theader:[],
+		  tb_style:{
+			  th:{padding: ".22857143em .998571429em"},
+			  td:{padding: ".38571429em",fontSize:"13px"}
+		  },
+		  tchecked:{
+			  show:false,
+			  ids:[],
+			  checkall:false
+		  },
 	}
   },
   computed:{
@@ -160,11 +169,11 @@ export default {
 		}, 
 		theader_pre: function(){
 		    return [
-		       //{lable:['name','fn_show','fn_lable_handle'],value:['default','fn_value_handle','key_override']}
+		       //{lable:['name','fn_show','fn_label_handle'],value:['default','fn_value_handle','key_override']}
 		       {label:['操作'],value:['',this.urlEdit,'row']},
 			   {label:['家长手机'],value:['',this.urlView,'row']},
 			   {label:['孩子姓名|l','',this.decorate],value:['','','babyname'],order:-1},
-			   {label:['孩子年龄',this.field_show],value:['','age','babyage']},
+			   {label:['孩子年龄',this.field_show,this.ageLabel],value:['','age','babyage']},
 			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
 			   {label:['报名日期'],value:['','dt','dtenrol'],order:-1},
 			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
@@ -224,7 +233,11 @@ export default {
 			return sql; 
 		}
   },
-  methods:{	  
+  methods:{
+	    ageLabel:function(field){
+			if( this.select.campaign_selected.indexOf("官网预约体验")!=-1) return '孩子生日';
+			 return field;
+		},	  
 	    decorate:function(field){
 			  var arr=['婴芭莎展会'];
 			  if(arr.indexOf(this.select.campaign_selected)!=-1)return '家长姓名';
@@ -236,11 +249,16 @@ export default {
         },
 	    field_show:function(item){
 		  //年龄隐藏
-		  var arr=['婴芭莎展会'];
-		  if (item=='babyage' && arr.indexOf(this.select.campaign_selected)!=-1)return false;
+		  var arr=['婴芭莎展会','开学季','圣诞节'];
+		  var val = this.select.campaign_selected;
+		  if (item=='babyage' && arr.find(function(item){
+				if(val.indexOf(item)!=-1) return true;
+			})) return false;
 		  //备注显示
 		  var arr=['婴芭莎展会线下'];
-		  if (item=='remark' && arr.indexOf(this.select.campaign_selected)==-1)return false;
+		  if (item=='remark' &&  !arr.find(function(item){
+				if(val.indexOf(item)!=-1) return true;
+			})) return false;
 		  return true;
 		},
         getSignlist:function(){
