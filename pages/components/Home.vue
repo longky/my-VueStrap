@@ -46,7 +46,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected&&select.campaign_selected.indexOf('官网预约体验')==-1">
+					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
 						<label>筛选条件2:</label>
 						<div class="field" v-for="s in arr_status">
 							<div class="ui checkbox">
@@ -181,7 +181,8 @@ export default {
 			   {label:['处理状态'],value:['','','status'],order:-1},
 			   {label:['活动名称'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
-			   {label:['创建时间'],value:['','dt','create_time'],order:-1}
+			   {label:['来源渠道',this.select.campaign_selected=="官网预约体验"],value:['','','channel'],order:-1},
+			   {label:['创建时间'],value:['','dt','create_time'],order:2}
 		     ]
 		},
 		theader_coupon: function(){

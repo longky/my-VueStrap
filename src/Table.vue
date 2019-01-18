@@ -36,7 +36,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="ui segment">
+        <div class="ui segment" v-if="pagenation">
                 <tfoot>
                     <tr><th :colspan="header.length" v-show="select.data && !select.data.errcode && select.data.total>0">
                         <div class="ui compact menu">
@@ -213,7 +213,7 @@ export default {
         return cls;
 	  },
       age:function(a){
-          if(a.indexOf('-')!=-1||a.indexOf('/')!=-1){
+          if(a&&(a.length>4||a.indexOf('-')!=-1||a.indexOf('/')!=-1)){
             return a;
           }else if(a){ 
             return a+'岁';
