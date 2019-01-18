@@ -213,7 +213,7 @@ export default {
         return cls;
 	  },
       age:function(a){
-          if(a&&(a.length>4||a.indexOf('-')!=-1||a.indexOf('/')!=-1)){
+          if(a&&(a.length>2||a.indexOf('-')!=-1||a.indexOf('/')!=-1)){
             return a;
           }else if(a){ 
             return a+'岁';
