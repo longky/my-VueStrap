@@ -21,15 +21,18 @@
 						</div>
 					</div>
 					<div class="column left aligned">
-							<div class="ui mini action input">
-								<button type="submit" class="btn btn-danger" @click="editContact"
-								v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>                
+						    <div class="ui mini action input">
+						        <button class="btn btn-primary" @click="goSave()">导入家庭</button> 
+						    </div>
+							<div class="ui mini action input">    
+								<button class="btn btn-danger" @click="editContact"
+								v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>           
 							</div>
 							<div class="ui mini action input">
-						    	<a type="submit" :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 
+						    	<a :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 
 							</div>
 							<div class="ui mini action input">
-								<button type="submit" class="btn btn-danger" @click="getSignlist"
+								<button class="btn btn-danger" @click="getSignlist"
 								v-show="select.acl.indexOf('系统管理员')!=-1">Check</button>                
 							</div>
 					</div>
@@ -81,6 +84,20 @@
 				<div slot="modal-footer" class="modal-footer">
 					<button type="button" class="btn btn-success" @click="saveCon">保存</button>
 					<button type="button" class="btn btn-default" @click="contactModal.show = false">取消</button>
+				</div>
+			</modal>
+			<modal :show.sync="checkModal.show" effect="fade" :width="400">
+				<div slot="modal-header" class="modal-header">
+					<h4 class="modal-title">
+					<b>{{checkModal.title}}</b> 
+					</h4>
+				</div>
+				<div slot="modal-body" class="modal-body">
+				    <p v-text="checkModal.content"></p>
+				</div>
+				<div slot="modal-footer" class="modal-footer">
+					<button type="button" class="btn btn-success" @click="goSave(1)">确定</button>
+					<button type="button" class="btn btn-default" @click="goCancel()">放弃</button>
 				</div>
 			</modal>
 			<alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
@@ -138,6 +155,7 @@ export default {
           alertError:{show:false,title:'错误提示',msg:''},
     	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
 		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
+		  checkModal:{show:false,title:'操作提示',content:'请先查询并选择下面要导入的名单（打勾）,再点击导入按钮'},
           check: {},
 		  lack:[],
 		  sql_cur:sql_preEnrol,
@@ -235,6 +253,25 @@ export default {
 		}
   },
   methods:{
+	    goSave:function(type){
+           if(type==1){
+			  this.checkModal.show=false; 
+              this.tchecked.show=true;
+		   }else{
+			  if(this.tchecked.ids&&this.tchecked.ids.length>0){
+			     this.save();
+			  }else{
+				 this.checkModal.show=true; 
+			  }
+		   }
+		},
+		goCancel:function(){
+		   this.tchecked.show=false;
+		   this.checkModal.show=false; 
+		},
+		save:function(){
+          console.log(this.tchecked.ids)
+		},
 	    ageLabel:function(field){
 			if( this.select.campaign_selected.indexOf("官网预约体验")!=-1) return '孩子生日';
 			 return field;

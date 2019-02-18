@@ -5161,7 +5161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	//   <div class="form-group" :class="{validate:canValidate,'has-feedback':icon,'has-error':canValidate&&valid===false,'has-success':canValidate&&valid}">
 	
-	//     <slot name="label"><label v-if="label" class="control-label" @click="focus">{{label}}</label></slot>
+	//     <slot name="label"><label v-if="label" class="control-label" @click="focus">{{labl}}</label></slot>
 	
 	//     <div v-if="slots.before||slots.after" class="input-group">
 	
@@ -5312,7 +5312,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = {
 	  props: {
 	    value: {
-	      twoWay: true,
 	      default: null
 	    },
 	    match: {
@@ -5352,7 +5351,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      coerce: _utils.coerce.boolean,
 	      default: false
 	    },
-	    label: {
+	    labl: {
 	      type: String,
 	      default: null
 	    },
@@ -5657,7 +5656,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 140 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div class=\"form-group\" :class=\"{validate:canValidate,'has-feedback':icon,'has-error':canValidate&amp;&amp;valid===false,'has-success':canValidate&amp;&amp;valid}\" _v-c58d3cd0=\"\">\n    <slot name=\"label\" _v-c58d3cd0=\"\"><label v-if=\"label\" class=\"control-label\" @click=\"focus\" _v-c58d3cd0=\"\">{{label}}</label></slot>\n    <div v-if=\"slots.before||slots.after\" class=\"input-group\" _v-c58d3cd0=\"\">\n      <slot name=\"before\" _v-c58d3cd0=\"\"></slot>\n      <textarea v-if=\"type=='textarea'\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :cols=\"cols\" :rows=\"rows\" :name=\"name\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\"></textarea>\n      <input v-else=\"\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :name=\"name\" :max=\"attr(max)\" :min=\"attr(min)\" :step=\"step\" :type=\"type\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @keyup.enter=\"enterSubmit&amp;&amp;submit()\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\">\n      <div v-if=\"showClear &amp;&amp; value\" :class=\"{icon:icon}\" _v-c58d3cd0=\"\">\n        <span class=\"close\" @click=\"value = ''\" _v-c58d3cd0=\"\">×</span>\n      </div>\n      <div v-if=\"icon\" class=\"icon\" _v-c58d3cd0=\"\">\n        <span v-if=\"icon&amp;&amp;valid!==null\" :class=\"['form-control-feedback glyphicon','glyphicon-'+(valid?'ok':'remove')]\" aria-hidden=\"true\" _v-c58d3cd0=\"\"></span>\n      </div>\n      <slot name=\"after\" _v-c58d3cd0=\"\"></slot>\n    </div>\n    <template v-else=\"\" _v-c58d3cd0=\"\">\n      <textarea v-if=\"type=='textarea'\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :cols=\"cols\" :rows=\"rows\" :name=\"name\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\"></textarea>\n      <input v-else=\"\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :name=\"name\" :max=\"attr(max)\" :min=\"attr(min)\" :step=\"step\" :type=\"type\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @keyup.enter=\"enterSubmit&amp;&amp;submit()\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\">\n      <span v-if=\"showClear &amp;&amp; value\" class=\"close\" @click=\"value = ''\" _v-c58d3cd0=\"\">×</span>\n      <span v-if=\"icon&amp;&amp;valid!==null\" :class=\"['form-control-feedback glyphicon','glyphicon-'+(valid?'ok':'remove')]\" aria-hidden=\"true\" _v-c58d3cd0=\"\"></span>\n    </template>\n    <div v-if=\"showHelp\" class=\"help-block\" @click=\"focus\" _v-c58d3cd0=\"\">{{help}}</div>\n    <div v-if=\"showError\" class=\"help-block with-errors\" @click=\"focus\" _v-c58d3cd0=\"\">{{errorText}}</div>\n  </div>";
+	module.exports = "<div class=\"form-group\" :class=\"{validate:canValidate,'has-feedback':icon,'has-error':canValidate&amp;&amp;valid===false,'has-success':canValidate&amp;&amp;valid}\" _v-c58d3cd0=\"\">\n    <slot name=\"label\" _v-c58d3cd0=\"\"><label v-if=\"label\" class=\"control-label\" @click=\"focus\" _v-c58d3cd0=\"\">{{labl}}</label></slot>\n    <div v-if=\"slots.before||slots.after\" class=\"input-group\" _v-c58d3cd0=\"\">\n      <slot name=\"before\" _v-c58d3cd0=\"\"></slot>\n      <textarea v-if=\"type=='textarea'\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :cols=\"cols\" :rows=\"rows\" :name=\"name\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\"></textarea>\n      <input v-else=\"\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :name=\"name\" :max=\"attr(max)\" :min=\"attr(min)\" :step=\"step\" :type=\"type\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @keyup.enter=\"enterSubmit&amp;&amp;submit()\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\">\n      <div v-if=\"showClear &amp;&amp; value\" :class=\"{icon:icon}\" _v-c58d3cd0=\"\">\n        <span class=\"close\" @click=\"value = ''\" _v-c58d3cd0=\"\">×</span>\n      </div>\n      <div v-if=\"icon\" class=\"icon\" _v-c58d3cd0=\"\">\n        <span v-if=\"icon&amp;&amp;valid!==null\" :class=\"['form-control-feedback glyphicon','glyphicon-'+(valid?'ok':'remove')]\" aria-hidden=\"true\" _v-c58d3cd0=\"\"></span>\n      </div>\n      <slot name=\"after\" _v-c58d3cd0=\"\"></slot>\n    </div>\n    <template v-else=\"\" _v-c58d3cd0=\"\">\n      <textarea v-if=\"type=='textarea'\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :cols=\"cols\" :rows=\"rows\" :name=\"name\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\"></textarea>\n      <input v-else=\"\" class=\"form-control\" v-el:input=\"\" v-model=\"value\" :name=\"name\" :max=\"attr(max)\" :min=\"attr(min)\" :step=\"step\" :type=\"type\" :title=\"attr(title)\" :readonly=\"readonly\" :required=\"required\" :disabled=\"disabled\" :maxlength=\"maxlength\" :placeholder=\"placeholder\" @keyup.enter=\"enterSubmit&amp;&amp;submit()\" @blur=\"onblur\" @focus=\"onfocus\" _v-c58d3cd0=\"\">\n      <span v-if=\"showClear &amp;&amp; value\" class=\"close\" @click=\"value = ''\" _v-c58d3cd0=\"\">×</span>\n      <span v-if=\"icon&amp;&amp;valid!==null\" :class=\"['form-control-feedback glyphicon','glyphicon-'+(valid?'ok':'remove')]\" aria-hidden=\"true\" _v-c58d3cd0=\"\"></span>\n    </template>\n    <div v-if=\"showHelp\" class=\"help-block\" @click=\"focus\" _v-c58d3cd0=\"\">{{help}}</div>\n    <div v-if=\"showError\" class=\"help-block with-errors\" @click=\"focus\" _v-c58d3cd0=\"\">{{errorText}}</div>\n  </div>";
 
 /***/ }),
 /* 141 */
@@ -5847,10 +5846,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      type: String,
 	      default: null
 	    },
-	    backdrop: {
+	    isbackdrop: {
 	      type: Boolean,
 	      coerce: _utils.coerce.boolean,
-	      default: true
+	      default: false
 	    },
 	    large: {
 	      type: Boolean,
@@ -5890,7 +5889,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (scrollBarWidth !== 0) {
 	          body.style.paddingRight = scrollBarWidth + 'px';
 	        }
-	        if (this.backdrop) {
+	        if (this.isbackdrop) {
 	          (0, _NodeList2.default)(el).on('click', function (e) {
 	            if (e.target === el) _this.show = false;
 	          });
@@ -7312,7 +7311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	//       <span class="btn-content" v-html="loading ? text.loading : showPlaceholder || selected"></span>
 	
-	//       <span v-if="clearButton&&values.length" class="close" @click="clear()">&times;</span>
+	//       <span v-if="clearable&&values.length" class="close" @click="clear()">&times;</span>
 	
 	//     </div>
 	
@@ -7320,7 +7319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	//       <option v-if="required" value=""></option>
 	
-	//       <option v-for="option in options" :value="option[optionsValue]||option">{{ option[optionsLabel]||option }}</option>
+	//       <option v-for="option in options" :value="option[optionsValue]||option|json">{{ option[optionsLabel]||option }}</option>
 	
 	//     </select>
 	
@@ -7344,7 +7343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	//         </li>
 	
-	//         <li v-if="required&&!clearButton"><a @mousedown.prevent="clear() && blur()">{{ placeholder || text.notSelected }}</a></li>
+	//         <li v-if="required&&!clearable"><a @mousedown.prevent="clear() && blur()">{{ placeholder || text.notSelected }}</a></li>
 	
 	//         <li v-for="option in options | filterBy searchValue" :id="option[optionsValue]||option">
 	
@@ -7391,7 +7390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      coerce: _utils.coerce.boolean,
 	      default: false
 	    },
-	    clearButton: {
+	    clearable: {
 	      type: Boolean,
 	      coerce: _utils.coerce.boolean,
 	      default: false
@@ -8326,7 +8325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 193 */
 /***/ (function(module, exports) {
 
-	module.exports = "<div v-el:select=\"\" :class=\"classes\" _v-5738441e=\"\">\n    <div class=\"form-control dropdown-toggle\" :disabled=\"disabled || !hasParent\" :readonly=\"readonly\" @click=\"toggle()\" @keyup.esc=\"show = false\" _v-5738441e=\"\">\n      <span class=\"btn-content\" v-html=\"loading ? text.loading : showPlaceholder || selected\" _v-5738441e=\"\"></span>\n      <span v-if=\"clearButton&amp;&amp;values.length\" class=\"close\" @click=\"clear()\" _v-5738441e=\"\">×</span>\n    </div>\n    <select v-el:sel=\"\" v-model=\"value\" v-show=\"show\" name=\"{{name}}\" class=\"secret\" :multiple=\"multiple\" :required=\"required\" :readonly=\"readonly\" :disabled=\"disabled\" _v-5738441e=\"\">\n      <option v-if=\"required\" value=\"\" _v-5738441e=\"\"></option>\n      <option v-for=\"option in options\" :value=\"option[optionsValue]||option\" _v-5738441e=\"\">{{ option[optionsLabel]||option }}</option>\n    </select>\n    <ul class=\"dropdown-menu\" _v-5738441e=\"\">\n      <template v-if=\"options.length\" _v-5738441e=\"\">\n        <li v-if=\"canSearch\" class=\"bs-searchbox\" _v-5738441e=\"\">\n          <input type=\"text\" placeholder=\"{{searchText||text.search}}\" class=\"form-control\" autocomplete=\"off\" v-el:search=\"\" v-model=\"searchValue\" @keyup.esc=\"show = false\" _v-5738441e=\"\">\n          <span v-show=\"searchValue\" class=\"close\" @click=\"clearSearch\" _v-5738441e=\"\">×</span>\n        </li>\n        <li v-if=\"required&amp;&amp;!clearButton\" _v-5738441e=\"\"><a @mousedown.prevent=\"clear() &amp;&amp; blur()\" _v-5738441e=\"\">{{ placeholder || text.notSelected }}</a></li>\n        <li v-for=\"option in options | filterBy searchValue\" :id=\"option[optionsValue]||option\" _v-5738441e=\"\">\n          <a @mousedown.prevent=\"select(option[optionsValue],option)\" _v-5738441e=\"\">\n            <span v-html=\"option[optionsLabel]||option\" _v-5738441e=\"\"></span>\n            <span class=\"glyphicon glyphicon-ok check-mark\" v-show=\"isSelected(option[optionsValue])\" _v-5738441e=\"\"></span>\n          </a>\n        </li>\n      </template>\n      <slot _v-5738441e=\"\"></slot>\n      <div v-if=\"showNotify &amp;&amp; !closeOnSelect\" class=\"notify in\" transition=\"fadein\" _v-5738441e=\"\">{{limitText}}</div>\n    </ul>\n    <div v-if=\"showNotify &amp;&amp; closeOnSelect\" class=\"notify out\" transition=\"fadein\" _v-5738441e=\"\"><div _v-5738441e=\"\">{{limitText}}</div></div>\n  </div>";
+	module.exports = "<div v-el:select=\"\" :class=\"classes\" _v-5738441e=\"\">\n    <div class=\"form-control dropdown-toggle\" :disabled=\"disabled || !hasParent\" :readonly=\"readonly\" @click=\"toggle()\" @keyup.esc=\"show = false\" _v-5738441e=\"\">\n      <span class=\"btn-content\" v-html=\"loading ? text.loading : showPlaceholder || selected\" _v-5738441e=\"\"></span>\n      <span v-if=\"clearable&amp;&amp;values.length\" class=\"close\" @click=\"clear()\" _v-5738441e=\"\">×</span>\n    </div>\n    <select v-el:sel=\"\" v-model=\"value\" v-show=\"show\" name=\"{{name}}\" class=\"secret\" :multiple=\"multiple\" :required=\"required\" :readonly=\"readonly\" :disabled=\"disabled\" _v-5738441e=\"\">\n      <option v-if=\"required\" value=\"\" _v-5738441e=\"\"></option>\n      <option v-for=\"option in options\" :value=\"option[optionsValue]||option|json\" _v-5738441e=\"\">{{ option[optionsLabel]||option }}</option>\n    </select>\n    <ul class=\"dropdown-menu\" _v-5738441e=\"\">\n      <template v-if=\"options.length\" _v-5738441e=\"\">\n        <li v-if=\"canSearch\" class=\"bs-searchbox\" _v-5738441e=\"\">\n          <input type=\"text\" placeholder=\"{{searchText||text.search}}\" class=\"form-control\" autocomplete=\"off\" v-el:search=\"\" v-model=\"searchValue\" @keyup.esc=\"show = false\" _v-5738441e=\"\">\n          <span v-show=\"searchValue\" class=\"close\" @click=\"clearSearch\" _v-5738441e=\"\">×</span>\n        </li>\n        <li v-if=\"required&amp;&amp;!clearable\" _v-5738441e=\"\"><a @mousedown.prevent=\"clear() &amp;&amp; blur()\" _v-5738441e=\"\">{{ placeholder || text.notSelected }}</a></li>\n        <li v-for=\"option in options | filterBy searchValue\" :id=\"option[optionsValue]||option\" _v-5738441e=\"\">\n          <a @mousedown.prevent=\"select(option[optionsValue],option)\" _v-5738441e=\"\">\n            <span v-html=\"option[optionsLabel]||option\" _v-5738441e=\"\"></span>\n            <span class=\"glyphicon glyphicon-ok check-mark\" v-show=\"isSelected(option[optionsValue])\" _v-5738441e=\"\"></span>\n          </a>\n        </li>\n      </template>\n      <slot _v-5738441e=\"\"></slot>\n      <div v-if=\"showNotify &amp;&amp; !closeOnSelect\" class=\"notify in\" transition=\"fadein\" _v-5738441e=\"\">{{limitText}}</div>\n    </ul>\n    <div v-if=\"showNotify &amp;&amp; closeOnSelect\" class=\"notify out\" transition=\"fadein\" _v-5738441e=\"\"><div _v-5738441e=\"\">{{limitText}}</div></div>\n  </div>";
 
 /***/ }),
 /* 194 */

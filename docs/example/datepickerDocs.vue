@@ -96,6 +96,7 @@ export default {
       value: '2015-06-10',
       formats: [
         {value: 'dd/MM/yyyy', label: 'dd/MM/yyyy'},
+        {value: 'yyyy', label: 'yyyy'},
         {value: 'dd-MM-yyyy', label: 'dd-MM-yyyy'},
         {value: 'yyyy,MM,dd', label: 'yyyy,MM,dd'},
         {value: 'yyyy-MM-dd', label: 'yyyy-MM-dd'},

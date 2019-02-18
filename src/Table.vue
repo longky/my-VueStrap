@@ -29,7 +29,7 @@
                 <tbody v-if="select.data && select.data.total>0">
                     <tr v-for="item of select.data.arr">
                         <td v-show="checkbox.show">
-                            <input name="update" type="checkbox" :value="item.idzx" :id="item.idzx" v-model="checkbox.ids">
+                            <input name="update" type="checkbox" :value="item.id" v-model="checkbox.ids">
                         </td>
                         <td :style="tb_style&&tb_style.td" v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
                     </tr>
@@ -131,7 +131,7 @@ export default {
         if(!this.checkbox.checkall){
             let data=this.select.data.arr;
             data=data.reduce(function(item,next){
-                item.push(next.idzx);
+                item.push(next.id);
                 return item;
             },[])  
             this.checkbox.ids=data;
