@@ -384,5 +384,7 @@ export default {
         width: 100%;
         box-sizing: border-box;
     }
-
+    .ui.table tr td{
+        vertical-align: middle;
+    }
 </style>

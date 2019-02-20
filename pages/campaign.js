@@ -5,7 +5,7 @@ import routerConfig from './router.campaign.js'
 import global from './global.js'
 import functions from './functions'
  
-
+Vue.prototype.$axios=axios;
 Vue.use(functions); 
 Vue.mixin(global);
 Vue.use(VueRouter);
