@@ -215,7 +215,7 @@ export default {
       age:function(a){
           if(a&&(a.length>2||a.indexOf('-')!=-1||a.indexOf('/')!=-1)){
             return a;
-          }else if(a){ 
+          }else if(a&&a>'0'){ 
             return a+'岁';
           }else{
             return '';

@@ -169,8 +169,8 @@ export default {
   data(){
     return{
 		  tbl_maxheight:"600px",	 
-		  arr_status:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
-		  arr_status_cur:["未处理","处理中","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status_cur:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
           summerType:'preEnrol',
 		  typeGroup:[{val:'preEnrol',label:'预报名信息'},{val:'coupon',label:'礼券名单'}],
 		  isrecd:false,
