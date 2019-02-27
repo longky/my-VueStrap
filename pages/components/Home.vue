@@ -70,7 +70,7 @@
 				</div>   
 			</div>
 			
-			<tlg-table :select="select" :checkbox="tchecked" :maxheight="tbl_maxheight" :tb_style="tb_style"   :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
+			<tlg-table :select="select" :checkbox="tchecked" :maxheight="tbl_maxheight" :tb_style="tb_style"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
 		
 			<modal :show.sync="contactModal.show" effect="fade" :width="280" small>
 				<div slot="modal-header" class="modal-header">
@@ -128,7 +128,7 @@ import tlgTable from '@/src/Table.vue'
 import qs from 'qs';
 
 //channel
-var qstr = "select * into #c from(select crmzdy_82058177 idjt,camp.id,camp.crmzdy_82053647 gym,camp.crm_name phone,isnull(nullif(crmzdy_82053557,''),'未处理') status,isnull(dateadd(s,crmzdy_82053430+8*3600,'1970-01-01 00:00:00'),convert(varchar(20),create_time,120))dtenrol,crmzdy_82053429 centerid,crmzdy_82053258 campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,isnull(crmzdy_82051553,'') babyname,case when charindex('-',crmzdy_82051554)=5 then crmzdy_82051554 when ISNUMERIC(crmzdy_82051554)=1 then dateadd(year,0-crmzdy_82051554,getdate()) else '' end birth,crmzdy_82053558 remark,convert(varchar(20),camp.create_time,120)create_time from crm_zdytable_238592_27045_238592_view camp where id in(@ids))c;"
+var qstr = "select * into #c from(select crmzdy_82058177 idjt,camp.id,camp.crmzdy_82053647 gym,camp.crm_name phone,isnull(nullif(crmzdy_82053557,''),'未处理') status,isnull(dateadd(s,crmzdy_82053430+8*3600,'1970-01-01 00:00:00'),convert(varchar(20),create_time,120))dtenrol,crmzdy_82051555 centerid,crmzdy_82053258 campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,isnull(crmzdy_82051553,'') babyname,case when (charindex('-',crmzdy_82051554)>0 or charindex('/',crmzdy_82051554)>0) then crmzdy_82051554 when ISNUMERIC(crmzdy_82051554)=1 and crmzdy_82051554>'0' and crmzdy_82051554<'40' then dateadd(year,0-crmzdy_82051554,getdate()) else '' end birth,crmzdy_82053558 remark,convert(varchar(20),camp.create_time,120)create_time from crm_zdytable_238592_27045_238592_view camp where id in(@ids))c;"
 qstr +="insert into crm_zdytable_238592_25112_238592(org_id,cust_id,crm_syrID,create_time,crmzdy_81756602_id,crm_name,crmzdy_81755633,crmzdy_81755550,crmzdy_81755551)select distinct 238592,279833,279833,getdate(),59 type,'总部活动-'+#c.campaign,#c.campaign,1,1  from #c left join crm_zdytable_238592_25112_238592_view channel on #c.campaign=channel.crmzdy_81755633 where channel.crm_name is null;"
 //jt
 qstr += "select #c.*,isnull((select top 1 id from crm_zdytable_238592_25112_238592_view channel where #c.campaign=channel.crmzdy_81755633 and crmzdy_81756602_id=59),0)idchannel into #cc from #c;"
@@ -314,6 +314,8 @@ export default {
 				}else{
 					self.alertError={title:"错误提示",msg:"导入失败："+res.data.errmsg,show:true}
 				}
+				self.select.data=res.data;
+				console.log(self.select.data)
 				self.select.start=false;
 				self.tchecked.ids=[];
 				self.tchecked.checkall=false;
