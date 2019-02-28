@@ -41,7 +41,7 @@
 			<div class="ui segment">
 				<div class="ui form">
 					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected&&select.campaign_selected.indexOf('集训营')!=-1">
-						<label>筛选条件1：</label>
+						<label>筛选条件：</label>
 						<div class="field">
 							<div class="ui checkbox">
 								<input id="isrecd" type="checkbox" v-model="isrecd">
@@ -50,7 +50,7 @@
 						</div>
 					</div>
 					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
-						<label>筛选条件2:</label>
+						<label>筛选条件:</label>
 						<div class="field" v-for="s in arr_status">
 							<div class="ui checkbox">
 								<input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
@@ -224,6 +224,11 @@ export default {
 			   {label:['报名日期'],value:['','dt','dtenrol'],order:-1},
 			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
 			   {label:['来自朋友推荐',this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','isrecd']},
+			   {label:['是否上过早教',this.field_show],value:['','','zaojiao'],order:-1},
+			   {label:['距离',this.field_show],value:['','','juli'],order:-1},
+			   {label:['性格',this.field_show],value:['','','xingge'],order:-1},
+			   {label:['能力',this.field_show],value:['','','nengli'],order:-1},
+			   {label:['质量评估',this.field_show],value:['','','quality'],order:-1},
 			   {label:['处理状态'],value:['','','status'],order:-1},
 			   {label:['活动名称'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
@@ -351,6 +356,13 @@ export default {
 		  if (item=='remark' &&  !arr.find(function(item){
 				if(val.indexOf(item)!=-1) return true;
 			})) return false;
+		  //地推字段显示
+		  var arr=['预约试听'];
+		  var fields=['juli','nengli','xingge','zaojiao'];
+		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
+			})) return false;
+			
 		  return true;
 		},
         getSignlist:function(){
