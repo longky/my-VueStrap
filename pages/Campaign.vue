@@ -115,6 +115,7 @@ export default {
                  self.select.gyms.map(function(g){
                     self.select.gymNames[g.id]=g.name;
                  }) 
+                 self.select.gymNames['980000']="月球中心";
              },function(res){
                  console.log(res.status);
              });

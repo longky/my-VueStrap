@@ -148,7 +148,7 @@ export default {
       show:function(h){
 	    if(!h) return true;
 	    var isShow=h.label[1];
-        var key=h.value[2]||h.label[0].split("|")[0];
+        var key=h.value[2]||h.label[0]&&h.label[0].split("|")[0];
         // if(key=="m_code"){
         //     console.error(isShow)
         // }
@@ -181,17 +181,15 @@ export default {
 		if(key){
 		    var res =(key=='row'?item:item[key])||h.value[0]; 
 		    if(typeof method==="function"){
-			   return method(res);
+			    res=method(res);
 			}else if(['age','num','amt','dt'].indexOf(method)!=-1){
                 //console.error(this[method])
-               return this[method](res);
-               return '';
-			}else{
-			   return res;
+                res=this[method](res);
 			}
 		}else{
-		   return '';
-		}
+		    res='';
+        }
+        return res||'';
 	  },
       align:function(lname,order){
 	    var p= "";

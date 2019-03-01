@@ -342,7 +342,7 @@ export default {
 		},
         urlEdit:function(row){
             var u= "<a class='btn btn-default btn-sm' href='https://bbk.800app.com/index.jsp?mfs=crm_zdytable_238592_27045&mid=@id&menu=1109&gym=@gym' target='_blank'>修改</a>";
-            return u.replace('@id',row.id).replace('@gym',this.convertor.ToUnicode(this.select.gymNames[row.sign_centerid]));
+            return u.replace('@id',row.id)&&u.replace('@id',row.id).replace('@gym',this.convertor.ToUnicode(this.select.gymNames[row.sign_centerid]||row.gym))||'';
         },
 	    field_show:function(item){
 		  //年龄隐藏
@@ -357,8 +357,9 @@ export default {
 				if(val.indexOf(item)!=-1) return true;
 			})) return false;
 		  //地推字段显示
-		  var arr=['预约试听'];
-		  var fields=['juli','nengli','xingge','zaojiao'];
+		  var arr=['预约试听','开业地推'];
+		  var fields=['juli','nengli','xingge','zaojiao','quality'];
+ 
 		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
