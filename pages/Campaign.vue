@@ -105,17 +105,18 @@ export default {
         },
         getgym:function(func){
 		     var self=this;
-			 sql_getGym = this.convertor.ToUnicode(sql_getGym);
+             sql_getGym = this.convertor.ToUnicode(sql_getGym);
+             self.select.gyms=[];
              self.$http.jsonp(url_jsonp,{
                  sql1: sql_getGym
              },{
                  jsonp:'callback'
              }).then(function(res){
                  self.select.gyms = res.data.info[0].rec;
+                 self.select.gyms.unshift({id:"980000",name:"月球中心"});
                  self.select.gyms.map(function(g){
                     self.select.gymNames[g.id]=g.name;
                  }) 
-                 self.select.gymNames['980000']="月球中心";
              },function(res){
                  console.log(res.status);
              });

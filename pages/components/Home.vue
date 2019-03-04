@@ -232,7 +232,7 @@ export default {
 			   {label:['处理状态'],value:['','','status'],order:-1},
 			   {label:['活动名称'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
-			   {label:['来源渠道',this.select.campaign_selected=="官网预约体验"],value:['','','channel'],order:-1},
+			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
 			   {label:['创建时间'],value:['','dt','create_time'],order:2}
 		     ]
 		},
@@ -301,6 +301,14 @@ export default {
 		goCancel:function(){
 		   this.tchecked.show=false;
 		   this.checkModal.show=false; 
+		},
+		show_on_campaign(field){
+		   var res=false;
+		   if(field=='channel'){
+				if(this.select.campaign_selected=="官网预约体验")res=true;
+				if(this.select.campaign_selected.indexOf("倒立")!=-1)res=true;
+		   }
+		   return res;
 		},
 		save:function(){
 		    var sql=qstr;
