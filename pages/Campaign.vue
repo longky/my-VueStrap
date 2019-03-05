@@ -44,7 +44,7 @@ export default {
                 isShow: true,
 				campaigns:[{id:'所有',name:'所有活动'}],
 				campaign_selected:null,
-				acl: "",
+                acl: "",
 				ids:[],
 				gyms: [],
 				gymNames:{},
@@ -61,10 +61,19 @@ export default {
             gyms:function(){
                 var self=this;
                 var gyms=self.select.gyms;
-                if(!(self.select.acl.indexOf("系统管理员")==-1
+                if(self.select.acl.indexOf("月球中心")!=-1){
+                    gyms.unshift({id:"980000",name:"月球中心"});
+                } 
+                if(self.select.acl
+                  &&self.select.acl!="no record!"&&
+                  !(self.select.acl.indexOf("系统管理员")==-1
                   &&self.select.acl.indexOf("运营顾问")==-1
                   &&self.select.acl.indexOf("市场专员")==-1
+                  &&self.select.acl.indexOf("月球运营总监开发")==-1
                   &&self.select.acl.indexOf("市场顾问")==-1)){
+                    if(self.select.acl.indexOf("月球中心")==-1){
+                        gyms.unshift({id:"980000",name:"月球中心"});
+                    }
                     gyms.unshift({id:"all",name:"所有中心"})
                 }
                 if(gyms[0]){
@@ -97,7 +106,7 @@ export default {
             }).then(function(res){
 			    var self=this;
                 if(res.data.info[0].rec.constructor !=String){
-                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
+                     self.select.acl = res.data.info[0].rec[0].acl;
 				}
             },function(res){
                 console.log(res.status);
@@ -112,8 +121,9 @@ export default {
              },{
                  jsonp:'callback'
              }).then(function(res){
-                 self.select.gyms = res.data.info[0].rec;
-                 self.select.gyms.unshift({id:"980000",name:"月球中心"});
+                 if(typeof res.data.info[0].rec!="string"){
+                    self.select.gyms = res.data.info[0].rec;
+                 }
                  self.select.gyms.map(function(g){
                     self.select.gymNames[g.id]=g.name;
                  }) 
