@@ -2,25 +2,29 @@
 <template>
 	<div class="ui segments">
 			<div class="ui segment">
-				<div class="ui four column stackable grid">
-					<div class="column left aligned">
-						<div class="input-group">
-							<span class="input-group-addon">市场活动</span>          
-							<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
-							</v-select>					
+				<div class="ui relaxed grid">
+					<div class="seven wide column">
+						<div class="ui grid">
+							<div class="ten wide column">
+								<div class="input-group">
+									<span class="input-group-addon">活动</span>          
+									<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
+									</v-select>					
+								</div>
+							</div>
+							<div class="six wide column">
+								<v-select :value.sync="summerType" :options="typeGroup" options-label="label" options-value="val" close-on-select>
+								</v-select>
+							</div>
 						</div>
 					</div>
-					<div class="column left aligned">
-						<v-select :value.sync="summerType" :options="typeGroup" options-label="label" options-value="val" close-on-select>
-						</v-select>
-					</div>
-					<div class="column left aligned">
+					<div class="five wide column">
 						<div class="input-group" :style="{width:'240px'}">
 							<input type="text" v-model="search"  placeholder="关键字：手机号/姓名" class="form-control"/>
 							<span class="input-group-addon" ><a href="#" @click.prevent="init()"><i class="glyphicon glyphicon-search"><span > 搜索</span></i></a></span>
 						</div>
 					</div>
-					<div class="column left aligned">
+					<div class="four wide column">
 						    <div class="ui mini action input">
 						        <button class="btn btn-primary" @click="goSave()">导入家庭</button> 
 						    </div>
@@ -146,10 +150,11 @@ qstr +="select upper('JTGTJL-')+cast(idzx as varchar)+'-'+convert(varchar(8),get
 qstr +="insert into crm_zdytable_238592_23893_238592(crm_name,org_id,cust_id,crm_syrid,create_time,crmzdy_81783222/*idjt*/,crmzdy_80653840_id/*idjt*/,crmzdy_80653845/*babybrithday*/)select babyname,238592,@iduser,@iduser,getdate(),jt.id,jt.id,birth from #cc  join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone left join crm_zdytable_238592_23893_238592_view hz on hz.crmzdy_80653840_id=jt.id and hz.crm_name=babyname where hz.crm_name is null;"
 
 //初始化中心搜索和综合搜索
-qstr +="update jt set crmzdy_81802271/*hz*/=(select crm_name+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id FOR XML PATH('')),crmzdy_80610668/*hz+age*/=(select crm_name+' '+crmzdy_81497217+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id FOR XML PATH('')),crmzdy_82021205/*hz+birth*/=(select crm_name+' '+ convert(varchar(10),crmzdy_80653845,120)+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id FOR XML PATH('')) from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_87673451 in (@ids) and jt.id=zx.crmzdy_81611091_id;"
-qstr +="update jt set crmzdy_81767199/*search*/=/*家长姓名*/isnull(crm_surname,'')+','+/*手机*/isnull(crmzdy_80620120,'')+/*hz*/isnull(crmzdy_80610668,''),crmzdy_81778300/*中心*/=(select crmzdy_81620171+',' from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_81611091_id=jt.id FOR XML PATH('')) from crm_sj_238592_view jt join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_87673451 in (@ids) and jt.id=zx.crmzdy_81611091_id;"
+qstr +="select zx.crmzdy_81611091_id id,zx.crmzdy_87673451 id_campaign into #idjts from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_87673451 in (@ids);"; 
+qstr +="update jt set crmzdy_81802271/*hz*/=(select crm_name+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_80610668/*hz+age*/=(select crm_name+' '+crmzdy_81497217+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_82021205/*hz+birth*/=(select crm_name+' '+ convert(varchar(10),crmzdy_80653845,120)+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')) from crm_sj_238592_view jt join #idjts on jt.id=#idjts.id;";
+qstr +="update jt set crmzdy_81767199/*search*/=/*家长姓名*/isnull(crm_surname,'')+','+/*手机*/isnull(crmzdy_80620120,'')+/*hz*/isnull(crmzdy_80610668,''),crmzdy_81778300/*中心*/=(select crmzdy_81620171+',' from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_81611091_id=jt.id for xml path('')) from crm_sj_238592_view jt join #idjts on jt.id=#idjts.id;";
 //update idjt for campaign
-qstr +="update camp set crmzdy_82058177 =zx.crmzdy_81611091_id,crmzdy_82053557=case when isnull(crmzdy_82053557,'未处理')='未处理' then '处理中' else crmzdy_82053557 end  from crm_zdytable_238592_25111_238592_view zx join crm_zdytable_238592_27045_238592_view camp on zx.crmzdy_87673451 in (@ids) and zx.crmzdy_87673451=camp.id;"
+qstr +="update camp set crmzdy_82058177 =#idjts.id,crmzdy_82053557=case when isnull(crmzdy_82053557,'未处理')='未处理' then '处理中' else crmzdy_82053557 end from crm_zdytable_238592_27045_238592_view camp join #idjts on #idjts.id_campaign=camp.id;"
 //result info
 qstr +="select top 1 0 errcode,'ok' errmsg,'@sql' sql from crm_yh_238592_view for json auto,without_array_wrapper;"
 
@@ -328,7 +333,7 @@ export default {
 					self.alertError={title:"错误提示",msg:"导入失败："+res.data.errmsg,show:true}
 				}
 				self.select.data=res.data;
-				console.log(self.select.data)
+				self.select.sql=res.sql;
 				self.select.start=false;
 				self.tchecked.ids=[];
 				self.tchecked.checkall=false;
