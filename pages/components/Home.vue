@@ -195,8 +195,8 @@ export default {
 		  getQuery:this.getEnrol,
 		  theader:[],
 		  tb_style:{
-			  th:{padding: ".22857143em .998571429em"},
-			  td:{padding: ".38571429em",fontSize:"13px"}
+			  th:{padding: ".22857143em .498571429em",fontSize:"14px"},
+			  td:{padding: ".28571429em",fontSize:"12px"}
 		  },
 		  tchecked:{
 			  show:false,
