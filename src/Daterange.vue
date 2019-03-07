@@ -1,6 +1,6 @@
 <template>
            <div class="mz-datepicker" v-bind:style="{width:width+'px'}"> 
-            <input :value="value" readonly :disabled="disabled" :class="{focus:show}" @click="click" @mousedown="$event.preventDefault()"/><a v-if="clearable&&value" @click.stop="clear"></a><i @click="click"></i> 
+            <input :value="value" readonly :disabled="disabled" :placeholder="placeholder" :class="{focus:show}" @click="click" @mousedown="$event.preventDefault()"/><a v-if="clearable&&value" @click.stop="clear"></a><i @click="click"></i> 
             <div class="mz-datepicker-popup" :class="{'mz-datepicker-popup-left':left}" v-if="show" transition="mz-datepicker-popup" tabindex="-1" @blur="show = false" @dblclick="show = false" @mousedown="$event.preventDefault()" @keyup.up="changeMonth(-1,1)" @keyup.down="changeMonth(1,1)" @keyup.left="changeYear(-1,1)" @keyup.right="changeYear(1,1)" v-el:popup> 
             <div class="mz-calendar-top" v-if="range&&!en"> 
                 <template v-for="item in ranges"> 
@@ -71,6 +71,10 @@ export default {
                 type: Boolean,
                 default: false
             },
+            placeholder:{
+                type: String,
+                default:"日期"
+            },
             //显示格式
             format: {
                 type: String,
@@ -132,7 +136,7 @@ export default {
                     if (this.startTime && this.endTime) {
                         return this.stringify(this.parse(this.startTime, false)) + ' ~ ' + this.stringify(this.parse(this.endTime, false));
                     } else {
-                        return '';
+                        return null;
                     }
                 } else {
                     return this.stringify(this.parse(this.time, false));

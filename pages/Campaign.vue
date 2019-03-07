@@ -16,7 +16,7 @@
                         <div class="column left aligned">
 						   <div class="input-group">
 							  <span class="input-group-addon">中心</span>           
-			                  <v-select :value.sync="select.gym_selected" :options="gyms" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
+			                  <v-select :value.sync="select.gym_selected" :options="gyms_valid" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
                            </div>
                         </div>
                     </div>
@@ -46,7 +46,7 @@ export default {
 				campaign_selected:null,
                 acl: "",
 				ids:[],
-				gyms: [],
+                gyms: [],
 				gymNames:{},
 				gym_selected:"",
 				data: null
@@ -58,9 +58,12 @@ export default {
            vSelect
       },
 	  computed:{
-            gyms:function(){
+            gyms_valid:function(){
                 var self=this;
-                var gyms=self.select.gyms;
+                var gyms=self.select.gyms&&self.select.gyms.filter(function(g){
+                    return g.status==1||self.isadmin;
+                    //中心看不到停用，管理员可以看到所有
+                });
                 if(self.select.acl.indexOf("月球中心")!=-1){
                     gyms.unshift({id:"980000",name:"月球中心"});
                 } 

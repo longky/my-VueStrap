@@ -189,7 +189,9 @@ export default {
 		}else{
 		    res='';
         }
-        return res||'';
+        res=res||'';
+        res=res.replace(/(^[,;\s]+|[,;\s]+$)/,""); //去首尾多余字符
+        return res;
 	  },
       align:function(lname,order){
 	    var p= "";
