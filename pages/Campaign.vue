@@ -64,9 +64,6 @@ export default {
                     return g.status==1||self.isadmin;
                     //中心看不到停用，管理员可以看到所有
                 });
-                if(self.select.acl.indexOf("月球中心")!=-1){
-                    gyms.unshift({id:"980000",name:"月球中心"});
-                } 
                 if(self.select.acl
                   &&self.select.acl!="no record!"&&
                   !(self.select.acl.indexOf("系统管理员")==-1
@@ -74,9 +71,6 @@ export default {
                   &&self.select.acl.indexOf("市场专员")==-1
                   &&self.select.acl.indexOf("月球运营总监开发")==-1
                   &&self.select.acl.indexOf("市场顾问")==-1)){
-                    if(self.select.acl.indexOf("月球中心")==-1){
-                        gyms.unshift({id:"980000",name:"月球中心"});
-                    }
                     gyms.unshift({id:"all",name:"所有中心"})
                 }
                 if(gyms[0]){

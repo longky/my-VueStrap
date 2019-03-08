@@ -90,7 +90,7 @@
 				<div slot="modal-body" class="modal-body">
 					<template v-for="(index,c) of dialogAdv.conditions" >
 						<form-group>
-						<mz-datepicker format="yyyy-MM-dd" :start-time.sync="c.value[0]" :end-time.sync="c.value[1]" range confirm ch :placeholder="c.label" clearable v-if="c.type=='daterange'"></mz-datepicker>
+						<mz-datepicker  :start-time.sync="c.value[0]" :end-time.sync="c.value[1]" range confirm ch :placeholder="c.label" clearable v-if="c.type=='daterange'"></mz-datepicker>
 						<bs-input maxlength=11 track-by="$index" style="width:87%" :placeholder="c.label" :value.sync="c.value" v-else></bs-input>
 						</form-group>
 					</template>	
@@ -148,7 +148,7 @@
 	}
 	.mz-datepicker input {
 		border-radius: 6%;
-		margin-bottom: 5%;
+		margin-bottom: 6%;
 		
 	}
 </style>
@@ -172,25 +172,22 @@ qstr += "select #c.*,isnull((select top 1 id from crm_zdytable_238592_25112_2385
 //jt
 qstr += "DECLARE @gt table(cust_id bigint,crm_syrID bigint,idzx bigint,idjt bigint,memo nvarchar(4000),memo2 nvarchar(4000),gymcode varchar(20),idcampaign varchar(100));"
 qstr += "insert into crm_sj_238592(org_id,cust_id,crm_syrID,crmzdy_81535047_id,crmzdy_81535045_id/*ls*/,create_time,crm_surname,crmzdy_81988104/*hz*/,crmzdy_81988100/*birth*/,crmzdy_80620120/*phone*/,crmzdy_80620075/*gymName*/,crmzdy_80620075_id/*idgym*/,crmzdy_82021212/*code*/,crmzdy_81486365/*prov*/,crmzdy_81486367/*city*/,crmzdy_80652377/*relation*/,crmzdy_81497202/*quality*/,crmzdy_80620126/*memo*/,crmzdy_81620165/*zxdt*/,crmzdy_81755583_id,crmzdy_81535090_id)"
-qstr += "select 238592,@iduser,gym.crm_syrID,@iduser,@iduser,getdate(),babyname+'家长',babyname,birth,phone,gym.crm_name,gym.id,gym.crmzdy_80620116,crmzdy_81744958,crmzdy_81744959,'无',quality,remark,getdate(),idchannel,idchannel from #cc join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone where jt.crm_surname is null"
-qstr += "union all select 238592,@iduser,gym.crm_syrID,@iduser,@iduser,getdate(),babyname+'家长',babyname,birth,phone,gym.crm_name,gym.id,gym.crmzdy_80620116,crmzdy_81744958,crmzdy_81744959,'无',quality,remark,getdate(),idchannel,idchannel from #cc join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_sj_238592_view jt on jt.crm_tel=#cc.phone and jt.crmzdy_80620120<>#cc.phone where jt.crm_surname is null;"
+qstr += "select 238592,@iduser,gym.crm_syrID,@iduser,@iduser,getdate(),babyname+'家长',babyname,birth,phone,gym.crm_name,gym.id,gym.crmzdy_80620116,crmzdy_81744958,crmzdy_81744959,'无',quality,remark,getdate(),idchannel,idchannel from #cc join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone"
+qstr += " left join crm_sj_238592_view jt2 on jt2.crm_tel=#cc.phone where jt.crm_surname is null and jt2.crm_surname is null ;";
 //zx
-qstr += "insert into crm_zdytable_238592_25111_238592(org_id,cust_id,crm_syrID,create_time,crm_name,crmzdy_81741656 /*备注*/,crmzdy_81802275 /*gthz*/,crmzdy_81620171_id /*中心*/,crmzdy_81636452_id /*负责老师*/,crmzdy_81620164_id /*接待老师*/,crmzdy_81620163 /*咨询日期*/,crmzdy_81636187 /*质量评估*/,crmzdy_81769392 /*中心编号*/,crmzdy_81620162_id/*中心获得家长信息的渠道*/,crmzdy_81755584_id  /*家长是从哪里了解到小小运动馆的*/,crmzdy_81611091_id /*家庭*/,crmzdy_81757915 /*家庭ID*/,crmzdy_87673451)"
-qstr += "output INSERTED.cust_id ,INSERTED.crm_syrID,INSERTED.id,INSERTED.crmzdy_81611091_id,INSERTED.crmzdy_81741656,INSERTED.crmzdy_81802275,INSERTED.crmzdy_81769392,inserted.crmzdy_87673451  into @gt "
-qstr += "select 238592,@iduser,gym.crm_syrID,getdate(),gym.crm_name+'-'+cast(jt.id as varchar),remark 备注,'|'+convert(varchar(10),getdate(),120)+',@user:'+remark,gym.id 中心,@iduser 负责老师,@iduser 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,#cc.idchannel,jt.id,jt.id,#cc.id from #cc join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id where zx.crm_name is null"
-qstr += "union all select 238592,@iduser,gym.crm_syrID,getdate(),gym.crm_name+'-'+cast(jt.id as varchar),remark 备注,'|'+convert(varchar(10),getdate(),120)+',@user:'+remark,gym.id 中心,@iduser 负责老师,@iduser 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,#cc.idchannel,jt.id,jt.id,#cc.id from #cc join crm_sj_238592_view jt on jt.crm_tel=#cc.phone and jt.crmzdy_80620120<>#cc.phone join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id where zx.crm_name is null;"
-//gt
+qstr += "select * into #tmp from(select *,row_number() over(partition by idjt order by idzx desc)xh from(select 238592 org_id,279833 cust_id,gym.crm_syrid,getdate() create_time,gym.crm_name+'-'+cast(jt.id as varchar) name,remark 备注,'|'+convert(varchar(10),getdate(),120)+',系统管理员:'+remark remark2,gym.id 中心,279833 负责老师,279833 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,jt.id idjt,#cc.id idcamp,isnull(zx.id,0) idzx from #cc join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id union all select 238592,279833,gym.crm_syrid,getdate(),gym.crm_name+'-'+cast(jt.id as varchar),remark 备注,'|'+convert(varchar(10),getdate(),120)+',系统管理员:'+remark,gym.id 中心,279833 负责老师,279833 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,jt.id,#cc.id,isnull(zx.id,0) idzx from #cc join crm_sj_238592_view jt on jt.crm_tel=#cc.phone  join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id)a)a where xh=1;"; 
+qstr += "insert into crm_zdytable_238592_25111_238592(org_id,cust_id,crm_syrid,create_time,crm_name,crmzdy_81741656 /*备注*/,crmzdy_81802275 /*gthz*/,crmzdy_81620171_id /*中心*/,crmzdy_81636452_id /*负责老师*/,crmzdy_81620164_id /*接待老师*/,crmzdy_81620163 /*咨询日期*/,crmzdy_81636187 /*质量评估*/,crmzdy_81769392 /*中心编号*/,crmzdy_81620162_id/*中心获得家长信息的渠道*/,crmzdy_81755584_id  /*家长是从哪里了解到小小运动馆的*/,crmzdy_81611091_id /*家庭*/,crmzdy_81757915 /*家庭id*/,crmzdy_87673451)output inserted.cust_id ,inserted.crm_syrid,inserted.id,inserted.crmzdy_81611091_id,inserted.crmzdy_81741656,inserted.crmzdy_81802275,inserted.crmzdy_81769392,inserted.crmzdy_87673451  into @gt select  org_id,cust_id,crm_syrid,create_time,name,备注,remark2,中心,负责老师,接待老师,咨询日期,质量评估,centerid,idchannel,idchannel,idjt,idjt,idcamp from #tmp where idzx=0;";
+ //gt
 qstr +="insert into crm_zdytable_238592_25121_238592(crm_name,crmzdy_81762823/*type*/,org_id,cust_id,crm_syrID,create_time,crmzdy_81748926_id/*idZx*/,crmzdy_81748934/*内容*/,crmzdy_81803726/*content2*/,crmzdy_81762900/*gymcode*/)"
 qstr +="select upper('JTGTJL-')+cast(idzx as varchar)+'-'+convert(varchar(8),getdate(),112)+'B','潜在会员沟通',238592,cust_id,crm_syrid,getdate(),idzx,memo,memo2,gymcode from @gt where len(memo)>0;"
 //hz
 qstr +="insert into crm_zdytable_238592_23893_238592(crm_name,org_id,cust_id,crm_syrid,create_time,crmzdy_81783222/*idjt*/,crmzdy_80653840_id/*idjt*/,crmzdy_80653845/*babybrithday*/)select babyname,238592,@iduser,@iduser,getdate(),jt.id,jt.id,birth from #cc  join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone left join crm_zdytable_238592_23893_238592_view hz on hz.crmzdy_80653840_id=jt.id and hz.crm_name=babyname where hz.crm_name is null;"
 
 //初始化中心搜索和综合搜索
-qstr +="select zx.crmzdy_81611091_id id,zx.crmzdy_87673451 id_campaign into #idjts from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_87673451 in (@ids);";  
-qstr +="update jt set crmzdy_81802271/*hz*/=(select crm_name+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_81843299/*hz+age*/=(select crm_name+' '+crmzdy_81497217+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_82021205/*hz+birth*/=(select crm_name+' '+ convert(varchar(10),crmzdy_80653845,120)+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')) from crm_sj_238592_view jt join #idjts on jt.id=#idjts.id;";
-qstr +="update jt set crmzdy_81767199/*search*/=/*家长姓名*/isnull(crm_surname,'')+','+/*手机*/isnull(crmzdy_80620120,'')+/*hz*/isnull(crmzdy_80610668,''),crmzdy_81778300/*中心*/=(select crmzdy_81620171+',' from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_81611091_id=jt.id for xml path('')) from crm_sj_238592_view jt join #idjts on jt.id=#idjts.id;";
+qstr +="update jt set crmzdy_81802271/*hz*/=(select crm_name+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_81843299/*hz+age*/=(select crm_name+' '+crmzdy_81497217+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')),crmzdy_82021205/*hz+birth*/=(select crm_name+' '+ convert(varchar(10),crmzdy_80653845,120)+',' from crm_zdytable_238592_23893_238592_view hz where hz.crmzdy_80653840_id=jt.id for xml path('')) from crm_sj_238592_view jt join #tmp on jt.id=#tmp.idjt;";
+qstr +="update jt set crmzdy_81767199/*search*/=/*家长姓名*/isnull(crm_surname,'')+','+/*手机*/isnull(crmzdy_80620120,'')+/*hz*/isnull(crmzdy_80610668,''),crmzdy_81778300/*中心*/=(select crmzdy_81620171+',' from crm_zdytable_238592_25111_238592_view zx where zx.crmzdy_81611091_id=jt.id for xml path('')) from crm_sj_238592_view jt join #tmp on jt.id=#tmp.idjt;";
 //update idjt for campaign
-qstr +="update camp set crmzdy_82058177 =#idjts.id,crmzdy_82053557=case when isnull(crmzdy_82053557,'未处理')='未处理' then '处理中' else crmzdy_82053557 end from crm_zdytable_238592_27045_238592_view camp join #idjts on #idjts.id_campaign=camp.id;"
+qstr +="update camp set crmzdy_82058177 =#tmp.idjt,crmzdy_82053557=case when isnull(crmzdy_82053557,'未处理')='未处理' then '处理中' else crmzdy_82053557 end from crm_zdytable_238592_27045_238592_view camp join #tmp on #tmp.idcamp=camp.id;"
 //result info
 qstr +="select top 1 0 errcode,'ok' errmsg,'@sql' sql from crm_yh_238592_view for json auto,without_array_wrapper;"
 
@@ -237,10 +234,11 @@ export default {
 			  th:{padding: ".22857143em .498571429em",fontSize:"14px"},
 			  td:{padding: ".28571429em",fontSize:"12px"}
 		  },
+		  adv:false,
 		  dialogAdv:{
 			show:false,
 			title:"高级筛选",
-			conditions:[{label:"报名日期(选填)",type:'daterange',item:'dtenrol',value:[]},{label:"姓名(选填)",type:'string',item:"babyname",value:undefined},{label:"手机(选填)",item:"phone",value:undefined}]
+			conditions:[{label:"报名日期(选填)",type:'daterange',item:'dtenrol',value:[]},{label:"姓名(选填)",type:'string',item:"babyname",value:undefined},{label:"手机(选填)",type:'string',item:"phone",value:undefined}]
 		  },
 		  tchecked:{
 			  show:false,
@@ -311,17 +309,19 @@ export default {
 			}else{
               this.search.trim()&&c.push("phone+user_name like '%"+this.search+"%'")	
 			}
-			
-            this.dialogAdv.forEach(function(c){
-				if(!c.value)return;
-				if(typeof c.value=="array"&&c.value.length==0)return;
-                if(c.type=="daterange"){
-					c.push(c.item+" between '"+c.value[0]+"' and '"+c.value[1]+"'")
-				}
-                if(c.type=="string"){
-					c.push(c.item="'"+c.value+"'")
-				}
-			})
+			if(this.adv){
+				this.dialogAdv.conditions.forEach(function(cn){
+					if(!cn.value)return;
+					if(typeof cn.value=="object"&&!(cn.value[0]&&cn.value[1]))return;
+					if(cn.type=="daterange"){
+						c.push(cn.item+" between '"+cn.value[0]+"' and '"+cn.value[1]+"'")
+					}
+					if(cn.type=="string"){
+						c.push(cn.item+" like '"+cn.value+"%'")
+					}
+				})
+			    this.adv=false;
+			}
 			c=c.join(" and ");
 			//console.error(c);
 		    return c;  
@@ -346,9 +346,10 @@ export default {
 		}
   },
   methods:{
-	    goSearch:function(type){ 
-			console.log(JSON.stringify(this.dialogAdv))
-
+	    goSearch:function(){ 
+			this.adv=true;
+			this.dialogAdv.show=false;
+			this.init();
 	    },
 	    goSave:function(type){
            if(type==1){

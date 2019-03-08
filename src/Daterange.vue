@@ -134,7 +134,9 @@ export default {
             value: function() {
                 if (this.range) {
                     if (this.startTime && this.endTime) {
-                        return this.stringify(this.parse(this.startTime, false)) + ' ~ ' + this.stringify(this.parse(this.endTime, false));
+                        this.startTime=this.stringify(this.parse(this.startTime, false))
+                        this.endTime=this.stringify(this.parse(this.endTime, false))
+                        return this.startTime + ' ~ ' + this.endTime;
                     } else {
                         return null;
                     }
