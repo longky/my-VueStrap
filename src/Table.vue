@@ -31,7 +31,7 @@
                         <td v-show="checkbox.show">
                             <input name="update" type="checkbox" :value="item.id" v-model="checkbox.ids">
                         </td>
-                        <td :style="tb_style&&tb_style.td" v-for="h of header" :class="align(h.label[0])" v-show="show(h)" v-html="value(h,item)"></td>
+                        <td :style="tb_style&&tb_style.td" v-for="h of header" :class="align(h.label[0])+' '+add_class(h,value(h,item))"  v-show="show(h)" v-html="value(h,item)"></td>
                     </tr>
                 </tbody>
             </table>
@@ -125,6 +125,19 @@ export default {
 	   }
    },
    methods:{
+      add_class:function(h,val){
+        if(!h.class) return '';
+        cl=JSON.stringify(h.class);
+        var cl=cl.replace(/val/ig,val);
+        cl=JSON.parse(cl);
+        var res=[]
+        if(typeof cl=='object'){
+            for(var i in cl ){
+                if (eval(cl[i])) res.push(i);
+            }  
+         }        
+        return res.join(" ");
+      },
       choosePage:function(){
         this.checkbox.ids=[];
         //迟缓
@@ -252,7 +265,9 @@ export default {
     .scroll{
         overflow-y: scroll;
     }
-    
+    .text-danger{
+        font-weight:bold;
+    }
     a.disabled {
                 pointer-events: none;
                 filter: alpha(opacity=50); /*IE滤镜，透明度50%*/

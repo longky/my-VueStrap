@@ -102,7 +102,7 @@
 				</div>
 			</modal>
 
-			<modal :show.sync="contactModal.show" effect="fade" :width="280" small>
+			<modal :show.sync="contactModal.show" effect="fade" :width="380">
 				<div slot="modal-header" class="modal-header">
 					<h4 class="modal-title">
 					<b>{{contactModal.title}}</b> 
@@ -130,7 +130,22 @@
 					<button type="button" class="btn btn-default" @click="goCancel()">放弃</button>
 				</div>
 			</modal>
-			<alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
+
+			<modal :show.sync="warnModal.show" effect="fade" small>
+				<div slot="modal-header" class="modal-header">
+					<h4 class="modal-title">
+					<b>{{warnModal.title}}</b> 
+					</h4>
+				</div>
+				<div slot="modal-body" class="modal-body">
+				    <p v-text="warnModal.content"></p>
+				</div>
+				<div slot="modal-footer" class="modal-footer">
+					<button type="button" class="btn btn-success" @click="editContact">确定</button>
+					<button type="button" class="btn btn-danger" @click="warnModal.show=false;">放弃</button>
+				</div>
+			</modal>
+			<alert :show.sync="alertError.show" placement="top" duration="8000" type="danger" width="400px" dismissable>
 					<span class="glyphicon glyphicon-info-sign"></span>
 					<strong>{{alertError.title}}</strong>
 					<p style="padding-left:8%" v-html="alertError.msg"></p>
@@ -225,6 +240,7 @@ export default {
     	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
 		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
 		  checkModal:{show:false,title:'操作提示',content:'请先查询并选择下面要导入的名单（打勾）,再点击导入按钮'},
+		  warnModal:{show:false,title:'手机联系人设置提醒',content:'中心尚未《设置短信通知提醒》的手机联系人！请尽快进行设置！以免影响市场例子的及时跟进！'},
           check: {},
 		  lack:[],
 		  sql_cur:sql_preEnrol,
@@ -276,7 +292,7 @@ export default {
 			   {label:['性格',this.field_show],value:['','','xingge'],order:-1},
 			   {label:['能力',this.field_show],value:['','','nengli'],order:-1},
 			   {label:['质量评估',this.field_show],value:['','','quality'],order:-1},
-			   {label:['处理状态'],value:['','','status'],order:-1},
+			   {label:['处理状态'],value:['','','status'],order:-1,class:{"text-danger":"'val'=='未处理'"}},
 			   {label:['参加过的活动'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
@@ -497,14 +513,29 @@ export default {
             }
         },  
         editContact:function(){
-			var self=this;
-			if(!self.select.gym_selected){
+			this.warnModal.show=false;
+			if(!this.select.gym_selected){
 				this.alertError.title="错误提示";
 				this.alertError.msg="请先选择中心！";
 				this.alertError.show=true;
 				return;
 			}
-			var sql_phones="select crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='"+self.select.gym_selected+"'";
+			if(!this.isadmin&&this.select.acl.indexOf('中心运营总监')==-1){
+				this.alertError.title="错误提示";
+				this.alertError.msg="没有权限！请使用GD帐号权限进行设置";
+				this.alertError.show=true;
+				return;
+			}
+			if(!this.contactModal.phones||this.contactModal.phones.length==0){
+				this.readContact();
+			}
+			this.contactModal.title=(this.select.gym_selected&&this.select.gymNames[this.select.gym_selected]||'')+"手机联系人";
+			this.contactModal.show = true;
+	   },
+	  readContact(check){
+		    var self=this;
+			var sql_phones="select isnull((select top 1 crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='@gymcode'),'') phones"
+			sql_phones = sql_phones.replace("@gymcode",self.select.gym_selected);
 			self.$http.jsonp(url_jsonp,{
 				sql1: sql_phones
 			},{
@@ -513,13 +544,15 @@ export default {
 				var res= res.data.info[0].rec;
 				if(typeof res=='object'){
 					res = res[0].phones.split("|");
+					if(check&&(!res||res.length==0||res[0]=="")){
+						self.warnModal.show=true;
+					}
 					self.contactModal.phones= new Array(res[0]||'',res[1]||'');
 				}
-				//console.log(JSON.stringify(self.contactModal.phones))
 			},function(res){
 				console.log(res.status);
 			});
-			this.contactModal.show = true;
+			return result;
 	   },
 	   saveCon:function(){
 			var self=this;
@@ -677,6 +710,15 @@ export default {
 			//if(this.validate()){
 			   this.getQuery();
 			//}
+　　　   },
+　　　   deep: true
+	},
+	"select.gym_selected":{
+		handler(newValue, oldValue) {
+			if(this.select.gym_selected&&this.select.gym_selected!="all"){
+				this.init();
+				this.readContact(1);
+			}
 　　　   },
 　　　   deep: true
 	}

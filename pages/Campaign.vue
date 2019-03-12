@@ -61,8 +61,8 @@ export default {
             gyms_valid:function(){
                 var self=this;
                 var gyms=self.select.gyms&&self.select.gyms.filter(function(g){
-                    return g.status==1||self.isadmin;
-                    //中心看不到停用，管理员可以看到所有
+                    return g.status==1;
+                    //||self.isadmin;//中心看不到停用，管理员可以看到所有
                 });
                 if(self.select.acl
                   &&self.select.acl!="no record!"&&
