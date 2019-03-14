@@ -284,8 +284,12 @@ export default {
   },
   computed:{
       pageShow:function(){
+            var self=this;
             var arr=["市场顾问","市场总监","系统管理员","市场专员","运营顾问"]
-            return this.select&&arr.indexOf(this.select.acl)!=-1;
+            var res=arr.findIndex(function(a){
+                return a.indexOf(self.select.acl)!=-1
+            })
+            return arr!=-1;
       },
       rowGroup:function(){
             if(this.kxjData.length==0) return [];

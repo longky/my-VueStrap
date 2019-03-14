@@ -35,7 +35,7 @@
 						    </div>
 							<div class="ui mini action input">    
 								<button class="btn btn-danger" @click="editContact"
-								v-show="select.acl.indexOf('中心运营总监')!=-1||select.acl.indexOf('系统管理员')!=-1">短信通知设置</button>           
+								v-show="select.acl.indexOf('中心运营总监')!=-1||isadmin">短信通知设置</button>           
 							</div>
 							<div class="ui mini action input">
 						    	<a :href="url_export" target="_blank" class="btn btn-danger" v-show="isadmin">导出Excel</a> 

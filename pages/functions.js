@@ -75,7 +75,7 @@ var myFun = {
                 var fmt="@fmt"
                 if(typeof dt!=="object"){
                     //ie不兼容问题
-                    if(dt.indexOf("T")==-1) dt = dt.replace(/-/g,"/")
+                    if(typeof dt=='string'&&dt.indexOf("T")==-1) dt = dt.replace(/-/g,"/")
                     dt = new Date(dt||'');
                 }
                 if (/(y+)/.test(fmt)) {
@@ -112,7 +112,7 @@ var myFun = {
                 let fmt=arguments[0]|| "yyyy-MM-dd hh:mm:ss";
                 if(typeof dt!=="object"){
                     //ie不兼容问题
-                    if(dt.indexOf("T")==-1) dt = dt.replace(/-/g,"/")
+                    if(typeof dt=='string'&&dt.indexOf("T")==-1) dt = dt.replace(/-/g,"/")
                     dt = new Date(dt||'');
                 }
                 if (/(y+)/.test(fmt)) {
