@@ -67,6 +67,15 @@
 							</div>
 						</div>
 					</div>
+					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
+						<label>筛选条件:</label>
+						<div class="field">
+							<div class="ui checkbox">
+								<input id="recent" type="checkbox" value="30" v-model="recent">
+								<label for="recent">仅显示最近30天</label>
+							</div>
+						</div>
+					</div>
 					<div class="inline fields" v-if="select.acl.indexOf('系统管理员')!=-1">
 						<label>打印SQL</label>
 						<div class="field">
@@ -261,6 +270,7 @@ export default {
 			  ids:[],
 			  checkall:false
 		  },
+		  recent:['30']
 	}
   },
   computed:{
@@ -319,18 +329,18 @@ export default {
 		condition:function(){
 			var c=[];
 			if(this.summerType=="preEnrol"){
-			  this.search.trim()&&c.push("phone+babyname like '%"+this.search+"%'")	
+			  this.search.trim()&&c.push("phone+babyname like '%"+this.search.trim()+"%'")	
               this.isrecd&&c.push("isrecd ='是'");
 			  c.push("status in ('"+this.arr_status_cur.join("','")+"')")
 			}else{
-              this.search.trim()&&c.push("phone+user_name like '%"+this.search+"%'")	
+              this.search.trim()&&c.push("phone+user_name like '%"+this.search.trim()+"%'")	
 			}
 			if(this.adv){
 				this.dialogAdv.conditions.forEach(function(cn){
 					if(!cn.value)return;
 					if(typeof cn.value=="object"&&!(cn.value[0]&&cn.value[1]))return;
 					if(cn.type=="daterange"){
-						c.push(cn.item+" between '"+cn.value[0]+"' and '"+cn.value[1]+"'")
+						c.push(cn.item+" between '"+cn.value[0]+"' and '"+cn.value[1]+" 23:59:59'")
 					}
 					if(cn.type=="string"){
 						c.push(cn.item+" like '"+cn.value+"%'")
@@ -354,6 +364,11 @@ export default {
 				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''")
 			}else{
 				sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.select.campaign_selected+"'");
+			}
+			if(this.recent&&this.recent[0]>0){
+				sql= sql.replace('@recentWhere',"and create_time>=dateadd(d,-@recent,getdate())".replace("@recent",this.recent[0]));
+			}else{
+				sql= sql.replace('@recentWhere',"")
 			}
 			sql=this.fn_pager(sql,this.options) 
 			//console.error(this.sql(sql))
@@ -533,7 +548,9 @@ export default {
 			this.contactModal.show = true;
 	   },
 	  readContact(check){
-		    var self=this;
+			var self=this;
+			self.warnModal.show=false;
+			if (self.select.gym_selected=="all"||!self.select.gym_selected) return;
 			var sql_phones="select isnull((select top 1 crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='@gymcode'),'') phones"
 			sql_phones = sql_phones.replace("@gymcode",self.select.gym_selected);
 			self.$http.jsonp(url_jsonp,{
@@ -552,7 +569,6 @@ export default {
 			},function(res){
 				console.log(res.status);
 			});
-			return result;
 	   },
 	   saveCon:function(){
 			var self=this;
@@ -715,7 +731,7 @@ export default {
 	},
 	"select.gym_selected":{
 		handler(newValue, oldValue) {
-			if(this.select.gym_selected&&this.select.gym_selected!="all"){
+			if(this.select.gym_selected){
 				this.init();
 				this.readContact(1);
 			}
@@ -727,7 +743,7 @@ export default {
       if(this.$route.params.id=='4'){
 		  this.select.menuGroup[1].enabled=true;
 	  }
-	  this.select.campaign_selected="官网预约体验";
+	  this.select.campaign_selected="所有";
   }
 }
 </script>
