@@ -293,6 +293,9 @@ export default {
 			   {label:['家长手机'],value:['',this.urlView,'row']},
 			   {label:['孩子姓名|l','',this.decorate],value:['','','babyname'],order:-1},
 			   {label:['孩子年龄',this.field_show,this.ageLabel],value:['','age','babyage']},
+			   {label:['会员名称',this.field_show],value:['','','membername']},
+			   {label:['会员等级',this.field_show],value:['','','level'],order:-1},
+			   {label:['会员有效期',this.field_show],value:['','dt','dtlevelexpire']},
 			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
 			   {label:['报名日期'],value:['','dt','dtenrol'],order:-1},
 			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
@@ -464,7 +467,13 @@ export default {
 		  //地推字段显示
 		  var arr=['预约试听','开业地推'];
 		  var fields=['juli','nengli','xingge','zaojiao','quality'];
- 
+		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
+			})) return false;
+
+		  //会员相关信息
+		  var arr=['youle','有叻联盟'];
+		  var fields=['membername','dtlevelexpire','level'];
 		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;

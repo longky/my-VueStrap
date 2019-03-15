@@ -28,6 +28,9 @@
               </div>	
         </div>
         <div class="ui segment">
+           <div v-show="onlysql.value"><pre v-text="onlysql.value|sql"></pre></div>
+        </div>
+        <div class="ui segment">
             <div class="ui form">
               <div class="inline fields" v-show="report_cur=='fansData'">
                 <label>分组条件：</label>
