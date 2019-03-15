@@ -28,7 +28,7 @@
               </div>	
         </div>
         <div class="ui segment">
-           <div v-show="onlysql.value"><pre v-text="onlysql.value|sql"></pre></div>
+           <div v-show="onlysql.checked"><pre v-text="onlysql.value|sql"></pre></div>
         </div>
         <div class="ui segment">
             <div class="ui form">
