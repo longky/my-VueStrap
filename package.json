@@ -70,7 +70,7 @@
     "build": "webpack --progress --hide-modules --config  webpack.build.min.js && webpack --progress --hide-modules --config  webpack.build.js",
     "builddocs": "webpack --progress --hide-modules && set NODE_ENV=production webpack --progress --hide-modules",
     "buildCamp": "webpack --progress --hide-modules --config webpack.cfg.campaign.js --env=production",
-    "campaign": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.campaign.js",
+    "campaign": "webpack-dev-server --n --hot --quiet --port 80 --config webpack.cfg.campaign.js",
     "buildFam": "webpack --progress --hide-modules --config webpack.cfg.family.js --env=production",
     "family": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.family.js",
     "docs": "webpack-dev-server --inline --hot --quiet",

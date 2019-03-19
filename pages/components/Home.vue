@@ -746,6 +746,14 @@ export default {
 			}
 　　　   },
 　　　   deep: true
+	},
+	"select.campaign_selected":{
+		handler(newValue, oldValue) {
+			if(this.select.campaign_selected&&this.select.gym_selected){
+				this.init();
+			}
+　　　   },
+　　　   deep: true
 	}
   },
   created(){

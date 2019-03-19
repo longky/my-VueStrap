@@ -60,7 +60,9 @@ export default {
 	  computed:{
             gyms_valid:function(){
                 var self=this;
-                var gyms=self.select.gyms&&self.select.gyms.filter(function(g){
+                if(self.select.gyms.length==0) return [];
+                var gyms=self.select.gyms;
+                gyms&&gyms.filter(function(g){
                     self.select.gymNames[g.id]=g.name;
                     return g.status==1;
                     //||self.isadmin;//中心看不到停用，管理员可以看到所有
