@@ -1,0 +1,341 @@
+<template>
+    <div class='incompatible'>
+        <div id="box" :class="isCheck?'ui teal message':'ui orange message'">
+            <tooltip effect="scale" placement="bottom" content="完成后请打勾">
+                <checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
+            </tooltip>
+            <div class="content">
+                <div class="header">
+                    工作内容
+                </div>
+                <ul class="list">
+                    <li v-for="d of data[wk%7]">
+                        <div v-html="d.txt"></div>
+                        <ol class="list" v-if="d.subtxt">
+                            <li v-for="s of d.subtxt" v-html="s"></li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+
+            <alert :show.sync="showTop" placement="top" type="info" width="650px" dismissable>
+                <div class="ui" v-show="showzk">
+                    <span class="glyphicon glyphicon-info-sign"></span>
+                    <strong>转课待处理</strong>
+                    <div class="ui">
+                        <div v-for="s of data_zk">
+                            <p><label v-html="s.msg"></label><a class="text text-danger" href="https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_sj&menu=3&mid={{s.id}}"
+                                    target="_blank">转到家庭</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div v-show="showYuyue" class="ui">
+                    <span class="glyphicon glyphicon-info-sign"></span>
+                    <strong>官网预约体验"未处理"</strong>
+                    <div class="ui">
+                        <div v-for="s of data_yuyue">
+                            <p><label >你有官网预约未处理，家长手机:{{s.phone}},孩子姓名：{{s.babyname}},</label><a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/campaign.html"
+                                    target="_blank">前往处理</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <embed class='incompatible' id="music" src="" width="0" height="0">
+            </alert>
+        </div>
+    </div>
+</template>
+
+
+<script>
+	import alert from '@/src/Alert.vue'
+	import tooltip from '@/src/Tooltip.vue'
+	import checkbox from '@/src/Checkbox.vue'
+	import qs from 'qs';
+
+    export default {
+            components: {
+                tooltip,
+                checkbox,
+                alert
+            },
+            data:function() {
+				return	{
+					weeknum: null,
+					isCheck: false,
+					showTop: false,
+					showYuyue: false,
+					showzk:false,
+					idgym: "",
+					gym: "",
+					role: "",
+					data_gd: [
+						[
+							{ txt: "要求所有人必须在大厅" },
+							{ txt: "换设备；检查设备安全" },
+							{ txt: "打印并分配<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>（本周六、日， 下周一）；下周二的可放在周一打" },
+							{ txt: "未报名的做好Comments" },
+							{ txt: "检查本周合同输入系统；（利用<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportContractDetail.aspx' target='_blank'>中心课程合同详情报表</a>报表）" },
+							{ txt: "检查课程考勤表做入系统；（利用<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a> '遗漏考勤课时'和'班级上课日期'，课后及时沟通未出席家长）" },
+							{ txt: "检查当天所有例子输入系统" },
+							{ txt: "打印本周五、本周六、下周一<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>" },
+							{ txt: "打印下周一<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>" }
+						],
+						[
+							{ txt: "转移人数多的班级的孩子；升班或调时间；" },
+							{ txt: "查看<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportNeedFollowUp.aspx'>需要跟进续报家庭</a>和<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportColudBeDelayed.aspx'>可能来不及上完课的家庭</a>" },
+							{ txt: "导出<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportInquiryButNoIntro.aspx'>未体验且未在将来预约体验孩子清单</a>（之前某段时期），分配老师打邀约电话；" },
+							{ txt: "导出<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportIntroButNeverEnrolled.aspx'>体验后未报名孩子清单</a>（之前某段时期）" },
+							{ txt: "分配偏销售老师或销售主管打电话；" },
+							{ txt: "督促老师培训、打电话；" },
+							{ txt: "打印周二<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "确认所有的例子都得到及时的跟踪和消化（利用<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportIntroLog.aspx'>体验清单</a>报表，每周导出跟进）" }
+						],
+						[
+							{ txt: "查看体验邀约量；" },
+							{ txt: "搜索简历，打面试电话；" },
+							{ txt: "打印周三<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>并分配好；" },
+							{ txt: "打印周三<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "督促老师培训、打电话；" }
+						],
+						[
+							{ txt: "查看体验邀约量；" },
+							{ txt: "督促老师培训、打电话；" },
+							{ txt: "打印周四<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>并分配好；" },
+							{ txt: "打印周四<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "周五、六的<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>中的明天体验部分打出来，并分配好；" }
+						],
+						[
+							{ txt: "查看体验邀约量；" },
+							{ txt: "督促老师培训、打电话；" },
+							{ txt: "打印周五<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>并分配好；" },
+							{ txt: "打印周五<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "周四确认周末体验的电话，确认周末体验数量和情况，再加紧预约；" },
+							{ txt: "面试；" }
+						],
+						[
+							{ txt: "督促老师培训、打电话；" },
+							{ txt: "发送周六和周日体验确认短信；" },
+							{ txt: "若发现体验人数不够，则再导出名单（之前某段时期的，咨询未体验）继续邀约；" },
+							{ txt: "打印周六<a target='_blank' href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportDailyPhoneCall.aspx'>每日电话报表</a>并分配好；" },
+							{ txt: "打印周六<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "检查周六、日签单所需物品；" },
+							{ txt: "布置周六生日会（若有）；" }
+						],
+						[
+							{ txt: "分例子很重要，所有的例子分配必须在Midannouncement之后由GD统一分配" },
+							{ txt: "每个体验跟完后必须在oasis里面做好comments" },
+							{ txt: "要求所有老师必须在大厅里；" },
+							{ txt: "市场活动（若有）；" },
+							{ txt: "打周日未接的体验确认电话；（在周四，最晚周五打完）" },
+							{ txt: "再发送一次周日体验确认短信；（周五全部发完）" },
+							{ txt: "打印周日<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportClassRoster.aspx' target='_blank'>课程考勤表</a>；" },
+							{ txt: "和约好周日来报名家长确认；" },
+							{ txt: "布置周日生日会；" }
+						]
+					],
+					data_pd: [
+						[
+							{ txt: "完成自身授课任务" },
+							{ txt: "指导师课程的Q3考核" },
+							{ txt: "根据中心市场活动及排班需要检查下周课表安排" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" }
+						],
+						[
+							{ txt: "教学例会（如周日未进行）" },
+							{ txt: "安排课程音乐的下载和准备（如周日未进行）" },
+							{ txt: "根据教案需求组织老师调整设备和归置教具（如周日未进行）" },
+							{ txt: "协助中心GD进行OASIS系统每日电话报表的管控" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" },
+							{ txt: "检查、督促、推进团队成员<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportProgress.aspx' target='_blank'> OTS培训进度及完成情况</a>" },
+							{ txt: "新员工入职培训（如有新员工入职）" },
+							{ txt: "每日1：00-3：00（或者其他时间）组织中心老师集体演练或培训，每天保证有至少一个小时时间。" },
+							{ txt: "新员工Mentor进行沟通了解新员工当天工作、培训情况（如有新员工入职）" }
+						],
+						[
+							{ txt: "安排指导师使用备课表准备下周课程内容" },
+							{ txt: "组织进行面试" },
+							{ txt: "中心培训" },
+							{ txt: "协助中心GD进行OASIS系统每日电话报表的管控" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" },
+							{ txt: "检查、督促、推进团队成员OTS培训进度及完成情况" },
+							{ txt: "新员工入职培训（如有新员工入职）" },
+							{ txt: "每日1：00-3：00（或者其他时间）组织中心老师集体演练或培训，每天保证有至少一个小时时间" },
+							{
+								txt: "与新员工Mentor进行沟通了解新员工当天工作、培训情况（如有新员工入职）如之前未完成，则需补齐以下事项：", subtxt: ["教学例会（如未进行）",
+									"安排课程音乐的下载和准备（如未进行）",
+									"根据教案需求组织老师调整设备和归置教具（如未进行）"]
+							}
+						],
+						[
+							{ txt: "督促老师完成下周备课，并填写每周备课表，待周五群内提交" },
+							{ txt: "将每个班级选择一份备课表并发送至中心内部沟通群中，确保课程宣讲的正确、保质进行" },
+							{ txt: "协助中心GD进行OASIS系统每日电话报表的管控" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" },
+							{ txt: "检查、督促、推进团队成员<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportProgress.aspx' target='_blank'> OTS培训进度及完成情况</a>" },
+							{ txt: "新员工入职培训（如有新员工入职）" },
+							{ txt: "每日1：00-3：00（或者其他时间）组织中心老师集体演练或培训，每天保证有至少一个小时时间。" },
+							{
+								txt: "与新员工Mentor进行沟通了解新员工当天工作、培训情况（如有新员工入职）如之前未完成，则需补齐以下事项：", subtxt: ["教学例会（如未进行）",
+									"安排课程音乐的下载和准备（如未进行）",
+									"根据教案需求组织老师调整设备和归置教具（如未进行）"]
+							}
+						],
+						[
+							{ txt: "回收指导师下周教案备课表并进行审查（最晚要在周五前回收）" },
+							{ txt: "将每个班级选择一份备课表并发送至中心内部沟通群中，确保课程宣讲的正确、保质进行" },
+							{ txt: "协助中心GD进行OASIS系统每日电话报表的管控" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" },
+							{ txt: "检查、督促、推进团队成员<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportProgress.aspx' target='_blank'> OTS培训进度及完成情况</a>" },
+							{ txt: "新员工入职培训（如有新员工入职）" },
+							{ txt: "每日1：00-3：00（或者其他时间）组织中心老师集体演练或培训，每天保证有至少一个小时时间。" },
+							{ txt: "与新员工Mentor进行沟通了解新员工当天工作、培训情况（如有新员工入职）" }
+						],
+						[
+							{ txt: "回收指导师下周教案备课表并进行审查" },
+							{ txt: "将每个班级选择一份备课表并发送至中心内部沟通群中，确保课程宣讲的正确、保质进行" },
+							{ txt: "协助中心GD进行OASIS系统每日电话报表的管控" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" },
+							{ txt: "检查、督促、推进团队成员<a href='https://bbk.800app.com/uploadfile/staticresource/238592/279833/reportProgress.aspx' target='_blank'> OTS培训进度及完成情况</a>" },
+							{ txt: "新员工入职培训（如有新员工入职）" },
+							{ txt: "每日1：00-3：00（或者其他时间）组织中心老师集体演练或培训，每天保证有至少一个小时时间。" },
+							{ txt: "与新员工Mentor进行沟通了解新员工当天工作、培训情况（如有新员工入职）" }
+						],
+						[
+							{ txt: "完成自身授课任务" },
+							{ txt: "指导师课程的Q3考核" },
+							{ txt: "交谈、回访等方式与家长建立关系" },
+							{ txt: "查看邮件、企业微信群获取TLGI、TLGC课程相关信息，并及时告知团队成员" }
+						]
+					],
+					data: [],
+					data_zk: [],
+					data_yuyue: [],
+				}
+			},
+            computed: {
+                wk: function () {
+                    var mydate = new Date();
+                    //return 4;
+                    return this.weeknum || mydate.getDay() || 7
+                }
+            },
+            created: function () {
+                this.getchkRec_jsonp()
+                this.getYuyue();
+            },
+            methods: {
+                showAlert: function () {
+                    this.$set('alertIsOpen', true);
+                },
+                showDialog: function () {
+                    this.$set('showCustomModal', true);
+                },
+                showZKDialog: function () {
+                    this.$set('showTop', true);
+                },
+                getchkRec_jsonp: function () {
+                    var self = this;
+                    self.$http.jsonp(url_jsonp, {
+                        sql1: sql_getchkRec
+                    }, {
+                            jsonp: 'callback'
+                        }).then(function (res) {
+                            var res = res.data.info[0].rec;
+                            if (res[0]) {
+                                res = res[0]
+                            }
+                            if (res && typeof res != "string") {
+                                self.weeknum = res.weeknum;
+                                self.isCheck = res.id == 0 ? false : true;
+                                self.idgym = res.idgym;
+                                self.gym = res.gym;
+                                self.role = res.crm_jiandang;
+                                if (self.role == "课程主管") {
+                                    self.data = self.data_pd;
+                                    sql_check = sql_check.replace('@type', 'pd');
+                                } else {
+                                    self.data = self.data_gd;
+									sql_check = sql_check.replace('@type', 'gd');
+									self.getzk();
+								}
+                            }
+                        }, function (res) {
+                            //alert(res.status);
+                        });
+                },
+                getzk: function () {
+                    var self = this;
+                    var sql_zk = GB2312UnicodeConverter.ToUnicode(sql_getzk);
+                    self.$http.jsonp(url_jsonp, {
+                        sql1: sql_zk
+                    }, {
+                            jsonp: 'callback'
+                        }).then(function (res) {
+                            var res = res.data.info[0].rec;
+                            if (res[0]) {
+                                if (res[0].msg) {
+                                    self.data_zk = res;
+                                    self.showzk=true;
+                                    self.showTop = true;
+                                    document.getElementById("music").src = "https://static.thelittlegym.com.cn/assert/audio/zhuankeinfo.mp3";
+                                }
+                            }
+                            if (res && typeof res != "string") {
+                                //self.inp=res.msg;
+                            };
+                            //console.log(JSON.stringify(self.inp));
+                        });
+                },
+                //官网预约查询
+                getYuyue: function () {
+                    var self = this;
+                    var sql_zk = GB2312UnicodeConverter.ToUnicode(sql_getyuyue);
+                    self.$http.jsonp(url_jsonp, {
+                        sql1: sql_zk
+                    }, {
+                            jsonp: 'callback'
+                        }).then(function (res) {
+                            var res = res.data.info[0].rec;
+                            if (res[0]) {
+                                if (res[0].phone) {
+                                    self.data_yuyue = res;
+                                    self.showTop = true;
+                                    self.showYuyue = true;
+                                    //document.getElementById("music").src = "https://static.thelittlegym.com.cn/assert/audio/zhuankeinfo.mp3";
+                                }
+                            }
+                            if (res && typeof res != "string") {
+                                //self.inp=res.msg;
+                            };
+                        });
+                },
+                checked: function () {
+                    if (this.isCheck) return;
+                    this.$http.jsonp(url_jsonp, {
+                        sql1: sql_check
+                    }, {
+                            jsonp: 'callback'
+                        }).then(function (res) {
+                        }, function (res) {
+                            //alert(res.status);
+                        });
+
+                },
+                debug: function () {
+                    alert(JSON.stringify(this.data[this.wk % 7]))
+                }
+            }
+    };
+
+       
+	setTimeout(function () {
+		if(jQuery("#music")[0].pause)jQuery("#music")[0].pause();
+	}, 10000)
+    </script>

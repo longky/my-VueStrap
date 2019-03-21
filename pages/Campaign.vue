@@ -60,7 +60,7 @@ export default {
 	  computed:{
             gyms_valid:function(){
                 var self=this;
-                if(self.select.gyms.length==0) return [];
+                if(self.select.gyms.length==0) return []; //确保先有gymName,再gym_selected触发查询
                 var gyms=self.select.gyms;
                 gyms&&gyms.filter(function(g){
                     self.select.gymNames[g.id]=g.name;

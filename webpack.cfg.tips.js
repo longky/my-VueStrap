@@ -3,7 +3,7 @@ var path = require('path')
 
 module.exports = {
   entry: {
-    'family': './pages/family.js'
+    'tips': './pages/tipAll.js'
   },
   output: {
     path: './build',
@@ -25,7 +25,7 @@ module.exports = {
         exclude: /node_modules|vue\/src|vue-router\/|vue-loader\/|vue-hot-reload-api\//,
       	loader: 'babel'
       },
-      {test: /\.css$/, loader: "style-loader!css-loader?root=./docs/" },
+      { test: /\.css$/, loader: "style-loader!css-loader?root=./docs/" },
       {test: /\.scss$/, loader: "style!css!sass"},
       {test: /\.less$/, loader: "style-loader!css-loader!less-loader"},
     ]
