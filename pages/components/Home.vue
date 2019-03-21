@@ -75,6 +75,12 @@
 								<label for="recent">仅显示最近30天</label>
 							</div>
 						</div>
+						<div class="field">
+							<div class="ui checkbox">
+								<input id="history" type="checkbox"  v-model="history">
+								<label for="history">是否显示参加过的历史活动</label>
+							</div>
+						</div>
 					</div>
 					<div class="inline fields" v-if="select.acl.indexOf('系统管理员')!=-1">
 						<label>打印SQL</label>
@@ -98,10 +104,10 @@
 				</div>
 				<div slot="modal-body" class="modal-body">
 					<template v-for="(index,c) of dialogAdv.conditions" >
-						<form-group>
-						<mz-datepicker  :start-time.sync="c.value[0]" :end-time.sync="c.value[1]" range confirm ch :placeholder="c.label" clearable v-if="c.type=='daterange'"></mz-datepicker>
+					  <form-group>
+						<mz-datepicker  :start-time.sync="c.value[0]" :end-time.sync="c.value[1]" range confirm ch :placeholder="c.label" clearable v-if="c.type=='daterange'" :on-Confirm="clearTime"></mz-datepicker>
 						<bs-input maxlength=11 track-by="$index" style="width:87%" :placeholder="c.label" :value.sync="c.value" v-else></bs-input>
-						</form-group>
+					  </form-group>
 					</template>	
 					
 				</div>
@@ -190,7 +196,7 @@ import formGroup from 'src/formGroup.vue'
 import qs from 'qs';
 
 //channel
-var qstr = "select * into #c from(select crmzdy_82058177 idjt,camp.id,isnull(nullif(camp.crmzdy_87673593,''),'无') quality,camp.crmzdy_82053647 gym,camp.crm_name phone,isnull(nullif(crmzdy_82053557,''),'未处理') status,isnull(dateadd(s,crmzdy_82053430+8*3600,'1970-01-01 00:00:00'),convert(varchar(20),create_time,120))dtenrol,crmzdy_82051555 centerid,replace(crmzdy_82053258,'官网预约体验','官网')campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,isnull(crmzdy_82051553,'') babyname,case when (charindex('-',crmzdy_82051554)>0 or charindex('/',crmzdy_82051554)>0) then crmzdy_82051554 when ISNUMERIC(crmzdy_82051554)=1 and crmzdy_82051554>'0' and crmzdy_82051554<'40' then dateadd(year,0-crmzdy_82051554,getdate()) else '' end birth,crmzdy_82053558 remark,convert(varchar(20),camp.create_time,120)create_time from crm_zdytable_238592_27045_238592_view camp where id in(@ids))c;"
+var qstr = "select * into #c from(select crmzdy_87673590 能力,crmzdy_87673587 性格,crmzdy_87673584 距离,crmzdy_87673581 早教,crmzdy_82058177 idjt,camp.id,isnull(nullif(camp.crmzdy_87673593,''),'无') quality,camp.crmzdy_82053647 gym,camp.crm_name phone,isnull(nullif(crmzdy_82053557,''),'未处理') status,isnull(dateadd(s,crmzdy_82053430+8*3600,'1970-01-01 00:00:00'),convert(varchar(20),create_time,120))dtenrol,crmzdy_82051555 centerid,replace(crmzdy_82053258,'官网预约体验','官网')campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,isnull(crmzdy_82051553,'') babyname,case when (charindex('-',crmzdy_82051554)>0 or charindex('/',crmzdy_82051554)>0) then crmzdy_82051554 when ISNUMERIC(crmzdy_82051554)=1 and crmzdy_82051554>'0' and crmzdy_82051554<'40' then dateadd(year,0-crmzdy_82051554,getdate()) else '' end birth,crmzdy_82053558 remark,convert(varchar(20),camp.create_time,120)create_time from crm_zdytable_238592_27045_238592_view camp where id in(@ids))c;"
 qstr +="insert into crm_zdytable_238592_25112_238592(org_id,cust_id,crm_syrID,create_time,crmzdy_81756602_id,crm_name,crmzdy_81755633,crmzdy_81755550,crmzdy_81755551)select distinct 238592,279833,279833,getdate(),59 type,'总部活动-'+#c.campaign,#c.campaign,1,1  from #c left join crm_zdytable_238592_25112_238592_view channel on #c.campaign=channel.crmzdy_81755633 where channel.crm_name is null;"
 qstr += "select #c.*,isnull((select top 1 id from crm_zdytable_238592_25112_238592_view channel where #c.campaign=channel.crmzdy_81755633 and crmzdy_81756602_id=59),0)idchannel into #cc from #c;"
 //jt
@@ -200,7 +206,9 @@ qstr += "select 238592,@iduser,gym.crm_syrID,@iduser,@iduser,getdate(),babyname+
 qstr += " left join crm_sj_238592_view jt2 on jt2.crm_tel=#cc.phone where jt.crm_surname is null and jt2.crm_surname is null ;";
 //zx
 qstr += "select * into #tmp from(select *,row_number() over(partition by idjt order by idzx desc)xh from(select 238592 org_id,279833 cust_id,gym.crm_syrid,getdate() create_time,gym.crm_name+'-'+cast(jt.id as varchar) name,remark 备注,'|'+convert(varchar(10),getdate(),120)+',系统管理员:'+remark remark2,gym.id 中心,279833 负责老师,279833 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,jt.id idjt,#cc.id idcamp,isnull(zx.id,0) idzx from #cc join crm_sj_238592_view jt on jt.crmzdy_80620120=#cc.phone join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id union all select 238592,279833,gym.crm_syrid,getdate(),gym.crm_name+'-'+cast(jt.id as varchar),remark 备注,'|'+convert(varchar(10),getdate(),120)+',系统管理员:'+remark,gym.id 中心,279833 负责老师,279833 接待老师,getdate() 咨询日期,#cc.quality 质量评估,#cc.centerid,#cc.idchannel,jt.id,#cc.id,isnull(zx.id,0) idzx from #cc join crm_sj_238592_view jt on jt.crm_tel=#cc.phone  join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116=#cc.centerid left join crm_zdytable_238592_25111_238592_view zx on zx.crmzdy_81611091_id=jt.id and gym.id=zx.crmzdy_81620171_id)a)a where xh=1;"; 
-qstr += "insert into crm_zdytable_238592_25111_238592(org_id,cust_id,crm_syrid,create_time,crm_name,crmzdy_81741656 /*备注*/,crmzdy_81802275 /*gthz*/,crmzdy_81620171_id /*中心*/,crmzdy_81636452_id /*负责老师*/,crmzdy_81620164_id /*接待老师*/,crmzdy_81620163 /*咨询日期*/,crmzdy_81636187 /*质量评估*/,crmzdy_81769392 /*中心编号*/,crmzdy_81620162_id/*中心获得家长信息的渠道*/,crmzdy_81755584_id  /*家长是从哪里了解到小小运动馆的*/,crmzdy_81611091_id /*家庭*/,crmzdy_81757915 /*家庭id*/,crmzdy_87673451)output inserted.cust_id ,inserted.crm_syrid,inserted.id,inserted.crmzdy_81611091_id,inserted.crmzdy_81741656,inserted.crmzdy_81802275,inserted.crmzdy_81769392,inserted.crmzdy_87673451  into @gt select  org_id,cust_id,crm_syrid,create_time,name,备注,remark2,中心,负责老师,接待老师,咨询日期,质量评估,centerid,idchannel,idchannel,idjt,idjt,idcamp from #tmp where idzx=0;";
+qstr += "insert into crm_zdytable_238592_25111_238592(org_id,cust_id,crm_syrid,create_time,crm_name,crmzdy_81741656 /*备注*/,crmzdy_81802275 /*gthz*/,crmzdy_81620171_id /*中心*/,crmzdy_81636452_id /*负责老师*/,crmzdy_81620164_id /*接待老师*/,crmzdy_81620163 /*咨询日期*/,crmzdy_81636187 /*质量评估*/,crmzdy_81769392 /*中心编号*/,crmzdy_81620162_id/*中心获得家长信息的渠道*/,crmzdy_81755584_id  /*家长是从哪里了解到小小运动馆的*/,crmzdy_81611091_id /*家庭*/,crmzdy_81757915 /*家庭id*/,crmzdy_87673451/*id_campaign*/,crmzdy_87676851/*家长需求*/,crmzdy_87676839/*孩子性格*/,crmzdy_87676845/*距离*/,crmzdy_87676842/*早教课程*/)";
+qstr += "output inserted.cust_id ,inserted.crm_syrid,inserted.id,inserted.crmzdy_81611091_id,inserted.crmzdy_81741656,inserted.crmzdy_81802275,inserted.crmzdy_81769392,inserted.crmzdy_87673451  into @gt ";
+qstr += "select  org_id,cust_id,crm_syrid,create_time,name,备注,remark2,中心,负责老师,接待老师,咨询日期,质量评估,centerid,idchannel,idchannel,idjt,idjt,idcamp,能力,性格,距离,早教 from #tmp where idzx=0;";
  //gt
 qstr +="insert into crm_zdytable_238592_25121_238592(crm_name,crmzdy_81762823/*type*/,org_id,cust_id,crm_syrID,create_time,crmzdy_81748926_id/*idZx*/,crmzdy_81748934/*内容*/,crmzdy_81803726/*content2*/,crmzdy_81762900/*gymcode*/)"
 qstr +="select upper('JTGTJL-')+cast(idzx as varchar)+'-'+convert(varchar(8),getdate(),112)+'B','潜在会员沟通',238592,cust_id,crm_syrid,getdate(),idzx,memo,memo2,gymcode from @gt where len(memo)>0;"
@@ -233,6 +241,7 @@ export default {
   },
   data(){
     return{
+		  history:false,
 		  tbl_maxheight:"600px",	 
 		  arr_status:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
 		  arr_status_cur:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
@@ -297,7 +306,7 @@ export default {
 			   {label:['会员等级',this.field_show],value:['','','level'],order:-1},
 			   {label:['会员有效期',this.field_show],value:['','dt','dtlevelexpire']},
 			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
-			   {label:['报名日期'],value:['','dt','dtenrol'],order:-1},
+			   {label:['报名日期'],value:['','dt','dtenrol'],order:2},
 			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
 			   {label:['来自朋友推荐',this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','isrecd']},
 			   {label:['是否上过早教',this.field_show],value:['','','zaojiao'],order:-1},
@@ -309,7 +318,8 @@ export default {
 			   {label:['参加过的活动'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
-			   {label:['创建时间'],value:['','dt','create_time'],order:2}
+			   {label:['签约金额'],value:['','','amt']},
+			   {label:['签约日期'],value:['','','dtsign']}
 		     ]
 		},
 		theader_coupon: function(){
@@ -321,13 +331,6 @@ export default {
 			   {label:['使用状态'],value:['','','status'],order:-1},
 			   {label:['是否会员'],value:['','','type'],order:-1}
 		     ]
-		},
-        url_export:function(){
-              var url="https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_excel.aspx"
-              var sql="select camp.crmzdy_82053602 记录ID,isnull(gym.crm_name,'总部') 来源中心,camp.crmzdy_82053439 物料编号,case when isnull(crmzdy_82053430,'')='' then null else dateadd(S,cast(crmzdy_82053430 as int),'1970-01-01 08:00:00') end  预报名日期,camp.crmzdy_82053647 报名中心,camp.crm_name 报名手机,crmzdy_82051553  孩子姓名 ,crmzdy_82051554 孩子年龄,crmzdy_82053557 报名状态,crmzdy_82053258 活动动名称,camp.create_time 创建时间 from crm_zdytable_238592_27045_238592_view camp left join crm_zdytable_238592_23594_238592_view gym on gym.crmzdy_80620116 =camp.crmzdy_82053429 where crmzdy_82053258='@campaign' order by 报名中心,camp.create_time desc;"
-              sql = this.convertor.ToUnicode(sql.replace('@campaign',this.select.campaign_selected));
-              var filename = this.convertor.ToUnicode(this.select.campaign_selected+"_"+new Date().getTime());
-              return url+'?sql='+sql+'&filename='+filename;
 		},
 		condition:function(){
 			var c=[];
@@ -355,7 +358,7 @@ export default {
 			//console.error(c);
 		    return c;  
 		},
-		sqlBuilder:function () {
+		sqlBase:function(){
 			var id =this.select.gym_selected;
 			var sql=this.sql_cur;
 			if(id=="all"){
@@ -373,13 +376,36 @@ export default {
 			}else{
 				sql= sql.replace('@recentWhere',"")
 			}
-			sql=this.fn_pager(sql,this.options) 
+			if(this.history){
+				sql= sql.replace("@campaign","replace((select name+',' from(select top 100 crmzdy_82053258 name,max(c.id) id from crm_zdytable_238592_27045_238592_view c where c.crm_name=camp.crm_name group by crmzdy_82053258 order by max(c.id))a for xml path('')),crmzdy_82053258,'<b>'+crmzdy_82053258+'</b>')");
+			}else{
+                sql= sql.replace("@campaign","crmzdy_82053258");
+			}
+			return sql;
+		},
+		sqlBuilder:function () {
+			var sql=this.fn_pager(this.sqlBase,this.options) 
 			//console.error(this.sql(sql))
 			sql = this.convertor.ToUnicode(sql);
 			return sql; 
+		},
+        url_export:function(){
+              var url="https://bbk.800app.com/uploadfile/staticresource/238592/279833/dataInterface_excel.aspx"
+			  var sql="with p as("+this.sqlBase+")select uniqueid,gym 中心,phone 手机号,babyname 孩子姓名,babyage 孩子年龄,status 处理状态,dtenrol 活动报名日期,campaign 活动名称,amt 签约合同金额,dtsign 签约日期 from p";
+			  if(this.condition){
+				   sql=sql+" where "+this.condition;
+			  }
+			  sql = sql+" order by 活动报名日期 desc"
+			  sql = this.convertor.ToUnicode(sql);
+              var filename = this.convertor.ToUnicode(this.select.campaign_selected+"活动_"+new Date().getTime());
+			  url = url+'?sql='+sql+'&filename='+filename;
+			  return url
 		}
   },
   methods:{
+	  	clearTime:function(){
+          this.recent=[];
+		},
 	    goSearch:function(){ 
 			this.adv=true;
 			this.dialogAdv.show=false;
@@ -556,7 +582,7 @@ export default {
 			this.contactModal.title=(this.select.gym_selected&&this.select.gymNames[this.select.gym_selected]||'')+"手机联系人";
 			this.contactModal.show = true;
 	   },
-	  readContact(check){
+	   readContact(check){
 			var self=this;
 			self.warnModal.show=false;
 			if (self.select.gym_selected=="all"||!self.select.gym_selected) return;
