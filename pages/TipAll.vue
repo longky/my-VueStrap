@@ -10,7 +10,7 @@ import Preparations from './components/Preparations.vue';
 export default {
 	  data(){
 		return  { 
-            task:"must-do",
+            task:"Preparations",
 			select: {
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",

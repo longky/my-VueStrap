@@ -336,6 +336,6 @@
 
        
 	setTimeout(function () {
-		if(jQuery("#music")[0].pause)jQuery("#music")[0].pause();
+		if(jQuery("#music")[0]&&jQuery("#music")[0].pause)jQuery("#music")[0].pause();
 	}, 10000)
     </script>
