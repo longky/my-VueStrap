@@ -5,23 +5,21 @@
 		    <Icon type="ios-trophy" slot="dot"></Icon>
             <p class="time" v-html="key"></p>
 			<span>待完成</span>
-         
-        <div class="content" id="box" :class="isCheck?'ui teal message':'ui orange message'">
-            <tooltip effect="scale" placement="bottom" content="完成后请打勾">
-                <checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
-            </tooltip>
-            <div class="content">
-                <div class="header">
-                    工作内容
-                </div>
-                <ul class="list">
-				    <ol>
-				      <li  v-for="con of item">{{con}}</li>
-				    </ol>
-                </ul>
-            </div>
-		</div>	
-	 
+			<div class="content" id="box" :class="isCheck?'ui teal message':'ui orange message'">
+				<tooltip effect="scale" placement="bottom" content="完成后请打勾">
+					<checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
+				</tooltip>
+				<div class="content">
+					<div class="header">
+						工作内容
+					</div>
+					<ul class="list">
+						<ol>
+						<li  v-for="con of item">{{con}}</li>
+						</ol>
+					</ul>
+				</div>
+			</div>	
         </Timeline-item>
     </Timeline>
   </div>
