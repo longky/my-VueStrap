@@ -339,3 +339,19 @@
 		if(jQuery("#music")[0]&&jQuery("#music")[0].pause)jQuery("#music")[0].pause();
 	}, 10000)
     </script>
+
+	<style scoped>
+        .ui .checkbox {
+            /* //border:  solid red 4px ; */
+            margin-right: 20px !important;
+        }
+        .dt-input {
+            cursor: pointer;
+        }
+        .finish {
+            float: right;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1;
+        }
+    </style>
