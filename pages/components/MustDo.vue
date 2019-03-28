@@ -1,6 +1,6 @@
 <template>
     <div class='incompatible'>
-        <div id="box" :class="isCheck?'ui teal message':'ui orange message'">
+        <div id="box" style="height:290px" :class="isCheck?'ui teal message':'ui orange message'">
             <tooltip effect="scale" placement="bottom" content="完成后请打勾">
                 <checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
             </tooltip>
@@ -39,7 +39,6 @@
                         </div>
                     </div>
                 </div>
-
                 <embed class='incompatible' id="music" src="" width="0" height="0">
             </alert>
         </div>
@@ -58,6 +57,11 @@
                 tooltip,
                 checkbox,
                 alert
+            },
+            props: {
+                select: {
+                    type:Object
+                }
             },
             data:function() {
 				return	{
@@ -216,7 +220,7 @@
 					],
 					data: [],
 					data_zk: [],
-					data_yuyue: [],
+					data_yuyue: []
 				}
 			},
             computed: {
@@ -226,9 +230,16 @@
                     return this.weeknum || mydate.getDay() || 7
                 }
             },
-            created: function () {
-                this.getchkRec_jsonp()
-                this.getYuyue();
+            watch: {
+                "select.ispreparing":{
+                    handler(newValue, oldValue) {
+                        if(newValue==0){
+                            this.getchkRec_jsonp()
+                            this.getYuyue();
+                        }
+            　　　   },
+            　　　   deep: true
+                }
             },
             methods: {
                 showAlert: function () {
@@ -242,6 +253,7 @@
                 },
                 getchkRec_jsonp: function () {
                     var self = this;
+                    sql_getzk=sql_getzk.replace(/iduser/g,self.select.iduser);
                     self.$http.jsonp(url_jsonp, {
                         sql1: sql_getchkRec
                     }, {
@@ -272,6 +284,7 @@
                 },
                 getzk: function () {
                     var self = this;
+                    sql_getzk=sql_getzk.replace(/iduser/g,self.select.iduser);
                     var sql_zk = GB2312UnicodeConverter.ToUnicode(sql_getzk);
                     self.$http.jsonp(url_jsonp, {
                         sql1: sql_zk
@@ -296,6 +309,7 @@
                 //官网预约查询
                 getYuyue: function () {
                     var self = this;
+                    sql_getzk=sql_getzk.replace(/iduser/g,self.select.iduser);
                     var sql_zk = GB2312UnicodeConverter.ToUnicode(sql_getyuyue);
                     self.$http.jsonp(url_jsonp, {
                         sql1: sql_zk
@@ -341,6 +355,20 @@
     </script>
 
 	<style scoped>
+        .content{
+           font-size:1.4em!important;
+        }
+        .header{
+            font-size:1.4em!important;
+            margin-top:1.5%!important;
+            margin-bottom:2%!important;
+        }
+        .list{
+            margin-top:5%;
+        }
+        .list >li{
+           line-height:150%;
+        }
         .ui .checkbox {
             /* //border:  solid red 4px ; */
             margin-right: 20px !important;

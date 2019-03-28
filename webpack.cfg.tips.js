@@ -59,7 +59,6 @@ if (argv.env=== 'production') {
       }
     }),
     new webpack.optimize.UglifyJsPlugin({
-      comments: false,  
       compress: {
         drop_console: true,
         warnings: false

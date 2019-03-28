@@ -12,8 +12,7 @@ Vue.mixin(global);
  
 new Vue({
   el: '#app',
-  components: { Tips },
-  template: '<Tips/>'
+  components: { Tips }
 })
 
  
