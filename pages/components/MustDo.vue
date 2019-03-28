@@ -1,6 +1,6 @@
 <template>
     <div class='incompatible'>
-        <div id="box" style="height:290px" :class="isCheck?'ui teal message':'ui orange message'">
+        <div id="box" style="height:275px" :class="isCheck?'ui teal message':'ui orange message'">
             <tooltip effect="scale" placement="bottom" content="完成后请打勾">
                 <checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
             </tooltip>
@@ -18,26 +18,26 @@
                 </ul>
             </div>
 
-            <alert :show.sync="showTop" placement="top" type="info" width="650px" dismissable>
+            <alert :show.sync="showTop" placement="top" type="info" width="650px" class="alert" dismissable>
                 <div class="ui" v-show="showzk">
                     <span class="glyphicon glyphicon-info-sign"></span>
                     <strong>转课待处理</strong>
-                    <div class="ui">
-                        <div v-for="s of data_zk">
-                            <p><label v-html="s.msg"></label><a class="text text-danger" href="https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_sj&menu=3&mid={{s.id}}"
-                                    target="_blank">转到家庭</a></p>
-                        </div>
-                    </div>
+                    <ul class="ui">
+                            <li v-for="s of data_zk"
+                             ><label v-html="s.msg"></label><a class="text text-danger" href="https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_sj&menu=3&mid={{s.id}}"
+                                    target="_blank">转到家庭</a>
+                            </li>
+                    </ul>
                 </div>
                 <div v-show="showYuyue" class="ui">
                     <span class="glyphicon glyphicon-info-sign"></span>
                     <strong>官网预约体验"未处理"</strong>
-                    <div class="ui">
-                        <div v-for="s of data_yuyue">
-                            <p><label >你有官网预约未处理，家长手机:{{s.phone}},孩子姓名：{{s.babyname}},</label><a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/campaign.html"
-                                    target="_blank">前往处理</a></p>
-                        </div>
-                    </div>
+                    <ul class="ui">
+                        <li v-for="s of data_yuyue">
+                            <label >你有官网预约未处理，家长手机:{{s.phone}},孩子姓名：{{s.babyname}},</label><a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/campaign.html"
+                                    target="_blank">前往处理</a>
+                        </li>
+                    </ul>
                 </div>
                 <embed class='incompatible' id="music" src="" width="0" height="0">
             </alert>
@@ -361,7 +361,7 @@
         .header{
             font-size:1.4em!important;
             margin-top:1.5%!important;
-            margin-bottom:2%!important;
+            margin-bottom:2.5%!important;
         }
         .list{
             margin-top:5%;
@@ -372,6 +372,15 @@
         .ui .checkbox {
             /* //border:  solid red 4px ; */
             margin-right: 20px !important;
+        }
+        .alert{
+            font-size:1.2em!important;
+        }
+        .alert ul li{
+            list-style: none;
+        }
+        .alert .ui{
+            margin-top:2%!important;
         }
         .dt-input {
             cursor: pointer;

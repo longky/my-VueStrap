@@ -90,9 +90,7 @@
 				})
 				.then(function(res){
 					if(res.status==200 && res.data.errcode==0){
-					 res.data.arr.forEach(element => {
-						   my.tasks.push(element)
-					 });
+						my.tasks=res.data.arr;
 					}  
 				},function(res){
 					console.error(res);
@@ -152,6 +150,9 @@
 	}
     .list{
 		font-size: 13px;
+	}
+	alert {
+		font-size: 3em;
 	}
 	.finish {
 		float: right;
