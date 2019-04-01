@@ -1,6 +1,6 @@
 <template>
     <div class='incompatible'>
-        <div id="box" style="height:275px" :class="isCheck?'ui teal message':'ui orange message'">
+        <div id="box"  :class="isCheck?'ui teal message':'ui orange message'">
             <tooltip effect="scale" placement="bottom" content="完成后请打勾">
                 <checkbox @click="checked()" class="finish" :disabled="isCheck" :checked.sync="isCheck" type="primary">完成</checkbox>
             </tooltip>
@@ -359,15 +359,15 @@
            font-size:1.4em!important;
         }
         .header{
-            font-size:1.4em!important;
-            margin-top:1.5%!important;
-            margin-bottom:2.5%!important;
+            font-size:1.3em!important;
+            margin-top:1.2%!important;
+            margin-bottom:2%!important;
         }
         .list{
             margin-top:5%;
         }
         .list >li{
-           line-height:150%;
+           line-height:120%;
         }
         .ui .checkbox {
             /* //border:  solid red 4px ; */

@@ -158,7 +158,7 @@ export default {
             });
         },
         getIndexes:function(code){ 
-            var sql=sql_getIndex;self=this;
+            var sql=sql_getIndex,self=this;
             sql=sql.replace("@gymcode",code);
             sql=this.convertor.ToUnicode(sql);
             this.$axios.get(url_local,{
