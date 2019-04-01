@@ -112,7 +112,7 @@ export default {
             var self=this
             //281584(月总)  292939 246152(陈婕) 301931(pd)
             var sql=sql_quanxian
-            //sql=sql.replace('iduser',301931);
+            sql=sql.replace('iduser',246152);
             sql=this.convertor.ToUnicode(sql);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql}
@@ -195,7 +195,7 @@ export default {
                                 standard:res["标准会员总出勤率"]
                             })
                         }
-                        indx.title=res.name+"关键指标提醒";
+                        indx.title=res.name+"关键指标提醒  【月份:"+res.m+"】";
                         indx.warn=true;
                         indx.id=res.id;
                   }
