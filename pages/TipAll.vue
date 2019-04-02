@@ -112,7 +112,7 @@ export default {
             var self=this
             //281584(月总)  292939 246152(陈婕) 301931(pd)
             var sql=sql_quanxian
-            sql=sql.replace('iduser',246152);
+            //sql=sql.replace('iduser',281584);
             sql=this.convertor.ToUnicode(sql);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql}

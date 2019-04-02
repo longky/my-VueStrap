@@ -351,10 +351,13 @@
        
 	setTimeout(function () {
 		if(jQuery("#music")[0]&&jQuery("#music")[0].pause)jQuery("#music")[0].pause();
-	}, 10000)
+    }, 10000)
+    
     </script>
-
 	<style scoped>
+        #box{
+            min-height:270px!important; /*至少这个宽度，但超过也可以自动扩大*/
+        }
         .content{
            font-size:1.4em!important;
         }
