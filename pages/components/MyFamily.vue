@@ -364,8 +364,7 @@ export default {
   },
   methods:{	 
 	    plus:function(t){
-			console.log(this.T)
-		   if(this.searchTypesFilter.length<=0) return;
+		   if(this.Tp.length>=this.searchTypesFilter.length) return;
            this.Tp.push(undefined);
 		},
 	    minus:function(index){
