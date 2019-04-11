@@ -9,21 +9,15 @@
 						</div>
 					</div>
 					<div class="column left aligned">
-						<tooltip effect="scale" placement="bottom" content="筛选条件为空,则不条件限制">
-						   <div class="ui small action input">
-								<select class="ui compact selection dropdown" v-model="T">
-							    	<option v-for="t of searchTypesFilter" :value="t.val" v-text="t.label"></option>
-								</select>
-								<select class="ui compact selection dropdown" v-model="Tm" v-show="gt_show">
-							    	<option v-for="t of followTime" :value="t.val" v-text="t.label"></option>
-								</select>
-								<input  class="optionval" v-for="s of searchTypes[T].sub_option" type="text" v-model="s.val" :placeholder="s.placeholder" @change="val_match(s)">
-								<div type="submit" @click="init()" class="ui button" style="cursor:pointer">
-									<i class="search icon"></i>搜索
-								</div>          
-         
-						   </div>
-						</tooltip>
+						<bs-input label="With dropdown and button" :value.sync="search"  placeholder="手机号/家长/孩子"  showClear style="width:72%" type="text">
+							<dropdown slot="after">
+								<button slot="before" type="button" class="btn btn-default" @click.prevent="init()"><span class="glyphicon glyphicon-search"></span>&nbsp;搜索</button>
+								<li><a href="#dropdown"></a></li>
+								<ul slot="dropdown-menu" class="dropdown-menu">
+									<li><a href="#dropdown" @click.prevent="dialogAdv.show=true">高级筛选</a></li>
+								</ul>
+							</dropdown>
+						</bs-input> 
 					</div>
 					<div class="column center aligned">
 						<div class="ui small action input">
@@ -60,6 +54,32 @@
 			
 			<tlg-table :select="select" :checkbox="tchecked" :tb_style="tb_style" :maxheight="tbl_maxheight"  :header="theader" :pagenation=pagenation :loading="select.start" ></tlg-table>
 		
+			<modal :show.sync="dialogAdv.show" effect="fade" :width="450" >
+				<span slot="title">
+					{{dialogAdv.title}}
+				</span>
+				<div slot="modal-body" class="modal-body">
+				  <div class="ui grid">
+						<template v-for="t in Tp" track-by="$index">
+								<div class="sixteen wide column filter">
+									<div class="ui labeled  input">
+										<i class="plus icon" @click="plus(t)" v-if="$index==0"></i>
+										<i class="minus icon" @click="minus($index)" v-else></i>
+										<v-select :value.sync="t"  placeholder="请选择条件" clearable :options="searchTypesFilter" options-value="val" options-label="label" style="width:135px"></v-select>	
+										<v-select :value.sync="Tm" placeholder="无"  :options="followTime" options-value="val" v-show="t=='follower'"></v-select>	
+										<v-select v-for="s of searchTypes['quality'].sub_option" :options="s.vals" :value.sync="s.val" v-if="t=='quality'" ></v-select>	
+										<datepicker v-for="s of t&&searchTypes[t].sub_option" :value.sync="s.val" :format="s.fmt" :clear-button="clear" :placeholder="s.placeholder"  width="120px" v-if="t=='dtzx'"></datepicker>
+										<bs-input :class="{'optionval':t&&searchTypes[t].sub_option.length==2}" v-for="s of t&&searchTypes[t].sub_option" type="text" :value.sync="s.val" :placeholder="s.placeholder" @change="val_match(s)"  v-if="t!='quality'&&t!='dtzx'"></bs-input>
+									</div>								
+								</div>					   
+						</template>	
+                  </div>
+				</div>
+				<div slot="modal-footer" class="modal-footer">
+					<button type="button" class="btn btn-success" @click="goSearch(true)">搜索</button>
+					<button type="button" class="btn btn-default" @click="dialogAdv.show = false">取消</button>
+				</div>
+			</modal>
 			<modal :show.sync="typeModal.show" effect="fade" :width="400">
 				<div slot="modal-header" class="modal-header">
 					<h4 class="modal-title">
@@ -100,13 +120,17 @@
 					<button type="button" class="btn btn-danger" @click="reset()">重置</button>
 				</div>
 			</modal>
-
 			<alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
 					<span class="glyphicon glyphicon-info-sign"></span>
 					<strong>{{alertError.title}}</strong>
 					<p style="padding-left:8%" v-html="alertError.msg"></p>
 			</alert>
-			<alert :show.sync="alertInfo.show" placement="top" duration="0" type="success" width="400px" dismissable>
+			<alert :show.sync="alertSuccess.show" placement="top" duration="3000" type="success" width="400px" dismissable>
+					<span class="ion-information-circled alert-icon-float-left"></span>
+					<strong>{{alertSuccess.title}}</strong>
+					<p v-html="alertSuccess.msg"></p>
+			</alert>
+			<alert :show.sync="alertInfo.show" placement="top" duration="0" type="info" width="400px" dismissable>
 					<span class="ion-information-circled alert-icon-float-left"></span>
 					<strong>{{alertInfo.title}}</strong>
 					<p v-html="alertInfo.msg"></p>
@@ -114,7 +138,6 @@
 	</div>
 </template>
  
-
 
 <script>
 import vSelect from '@/src/Select.vue'
@@ -124,6 +147,9 @@ import modal from '@/src/Modal.vue'
 import bsInput from '@/src/Input.vue'
 import tlgTable from '@/src/Table.vue'
 import tooltip from '@/src/Tooltip.vue'
+import dropdown from '@/src/Dropdown.vue'
+import datepicker from 'src/Datepicker.vue'
+import formGroup from 'src/formGroup.vue'
 
 export default {
   props: {
@@ -138,7 +164,10 @@ export default {
 	modal,
 	bsInput,
 	tlgTable,
-	tooltip
+	dropdown,
+	datepicker,
+	tooltip,
+	formGroup
   },
   data(){
     return{
@@ -146,27 +175,28 @@ export default {
 		  familyType:'',
 		  updateType:null,
 		  updateTypes:['转移老师负责的所有例子','转移老师负责的全部潜在客户','转移老师负责的全部活跃会员','转移老师负责的全部历史会员','仅转移复选框选中的记录'],
-		  T:"",
 		  searchTypes:{
 			  age:{label:"孩子年龄",sub_option:[{val:"",opr:">=",placeholder:"年龄下限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"},{val:"",opr:"<=",placeholder:"年龄上限(个月)",match:"^[1-9]\\d*$",errmsg:"请输入正确的年龄月数"}],context:"active,history,potential"},
-			  kid:{label:"孩 子",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"all"},
-			  parent:{label:"家长姓名",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"recent"},
-			  phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"手机号"}],context:"all"},
-			  phone:{label:"咨询日期",sub_option:[{val:"",opr:"=",placeholder:"日期"}],context:"potential"},
-			  quality:{label:"客户质量评估",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
-			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"all"},
-			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"},
-			  follower:{label:"老师跟进",sub_option:[{val:"",opr:"like",placeholder:"老师姓名"}],context:"all"}
+			//   kid:{label:"孩 子",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"all"},
+			//   parent:{label:"家长姓名",sub_option:[{val:"",opr:"like",placeholder:"姓名任意字符"}],context:"recent"},
+			//   phone:{label:"家长手机",sub_option:[{val:"",opr:"=",placeholder:"手机号"}],context:"all"},
+			  dtzx:{label:"咨询日期",sub_option:[{val:"",opr:">=",fmt:'yyyy-MM-dd',placeholder:"开始日期"},{val:"",opr:"<=",fmt:'yyyy-MM-dd',placeholder:"结束日期"}],context:"potential"},
+			  tutor:{label:"负责老师",sub_option:[{val:"",opr:"like",placeholder:"老师姓名"}],context:"all"},
+			  follower:{label:"老师跟进",sub_option:[{val:"",opr:"like",placeholder:"老师姓名"}],context:"all"},
+              quality:{label:"客户质量评估",sub_option:[{val:undefined,opr:"=",vals:['希望非常大，加油！','比较有希望，努力！','还行，继续跟！','拼一拼，还是可以的！','缘分暂时没到！']}],context:"potential"},
+			  channel:{label:"获得家长信息的渠道",sub_option:[{val:"",opr:"like",placeholder:"任意字符"}],context:"potential"}
 		  },
-		  Tm:1,
-		  followTime:[{val:1,label:"今天"},{val:7,label:"本周"}],
+		  Tp:[undefined],
+		  Tm:6,
+		  followTime:[{val:0,label:"今天"},{val:6,label:"一周内"}],
 		  pagenation:{
             pageSize :10,
 			pageNow:1,
 			order:""
 		  },
           alertError:{show:false,title:'错误提示',msg:''},
-    	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
+		  alertInfo:{show:false,title:'操作提示',msg:''},
+		  alertSuccess:{show:false,title:'操作提示',msg:'导入成功'},
           onlyNoItro:false,
 		  sql_cur:sql_recent,
 		  getQuery:this.getEnrol,
@@ -182,12 +212,16 @@ export default {
 		  },
 		  typeModal:{show:false,title:'批量修改方式选择',dropback:false},
 		  saveLsModal:{show:false,title:'批量转换负责老师',dropback:false,formers:[],newers:[],former:null,newer:null},
+		  dialogAdv:{
+			show:false,
+			title:"高级筛选",
+			conditions:[{label:"报名日期(选填)",type:'daterange',item:'dtenrol',value:[]},{label:"姓名(选填)",type:'string',item:"babyname",value:undefined},{label:"手机(选填)",type:'string',item:"phone",value:undefined}]
+		  },
+		  search:"",
+		  adv:""
 	}
   },
   computed:{
-	    gt_show(){
-          return this.T=='follower';
-		},
 		typeGroup:function(){
 			if(this.isadmin||(this.select.gym_selected&&this.select.gym_selected.split("|")[1]==1)){
 				return [
@@ -207,48 +241,56 @@ export default {
 			return false;
 		},
 		searchTypesFilter:function(){
-			var res=[],item;
+			var res=[],item,self=this;
 			for(var i in this.searchTypes){
 				item=this.searchTypes[i];
 				if(item['context']=="all"||item['context'].indexOf(this.familyType)!=-1){
-                   res.push({label:item.label,val:i});
+                    res.push({label:item.label,val:i});
 				}
 			}
-			this.T=res[0].val;
 			return res;
 		},
 		condition:function(){
-			if(this.T=='follower') return'';
-			let c_join=function(label,opr,val){
-				label=label.replace(/\s+/ig,"")+" ";
-				var res="";
-				if(opr=="like"){
-					res=label+opr+" '%"+val.trim()+"%'";
-				}else{
-					res=label+opr+((typeof val=='nummber')?val:" '"+val+"'");
+			var self=this,c=[];
+			//普通条件或高级条件
+			if(this.adv){
+				let c_join=function(label,opr,val){
+					label=label.replace(/\s+/ig,"")+" ";
+					var res="";
+					if(opr=="like"){
+						res=label+opr+" '%"+val.trim()+"%'";
+					}else{
+						res=label+opr+((typeof val=='nummber')?val:" '"+val+"'");
+					}
+					return res;
 				}
-				return res;
-			}
-			var c=[],item=this.searchTypes[this.T];
-			if(this.T!='age'&&item){
-				item.sub_option.map(function(p){
-					if(p.val.trim()!=""){
-						//console.log(item.label,p.opr,p.val)
-						c.push(c_join(item.label,p.opr,p.val))
+				var item=undefined;
+				this.Tp.forEach(function(t){
+					item=t&&self.searchTypes[t];
+					if(t!='follower'&&t!='age'&&item){
+						item.sub_option.map(function(p){
+							if(p.val&&p.val.trim()!=""){
+								c.push(c_join(item.label,p.opr,p.val))
+							}
+						})
+					}
+					//age特殊
+					if(t=="age"){
+						var p=self.searchTypes['age'].sub_option;
+						if(p&&p[0].val.trim()!=""&&p[0].val.trim()!="") c.push("孩子<>''");
 					}
 				})
+            }else{
+				if(this.search&&this.search.trim()!=""){
+					c.push("charindex('"+this.search.trim()+"',search)>0");
+				}
 			}
-			//age特殊
-			if(this.T=="age"){
-			    var p=this.searchTypes[this.T].sub_option;
-			    if(p&&p[0].val.trim()!=""&&p[0].val.trim()!="") c.push("孩子<>''");
-			}
+			//共用条件及最终join条件字串
 			if(this.onlyNoItro){
                 c.push("孩子<>''");
 			}
 			c = Array.from(new Set(c));
 			c = c.join(" and ");
-			//console.error(c);
 			return c;
 		},
 		whereLs:function(){
@@ -260,8 +302,9 @@ export default {
 		},
      	whereAge:function(){
 		   var con='';
-		   if(this.T=="age"){
-			 var option=this.searchTypes[this.T].sub_option;
+		   var indx=this.Tp.indexOf('age')
+		   if(indx!=-1&&this.adv){
+			 var option=this.searchTypes['age'].sub_option;
 		     if(option[0].val.trim()!=''){
 		        con += "and hz.crmzdy_80653845>=dateadd(d,-@up*30,getdate())";
 			 }
@@ -302,16 +345,16 @@ export default {
 		},
 		sqlBuilder:function () {
 			var sql=this.sql_cur;
-			if(this.gt_show){
+			var indx=this.Tp.indexOf('follower');
+			if(indx!=-1){
 			   sql +=" cross apply(select top 1 convert(varchar(20),create_time,120)+ ', '+cust_name+'：'+crmzdy_81748934 recent from crm_zdytable_238592_25121_238592_view gt where gt.crmzdy_81748926_id=zx.id and crmzdy_81762823<>'短信' and datediff(d,gt.create_time,getdate())<=@limit and cust_name like '%@ls%' order by id desc)gt";
-			   sql =sql.replace('/*main*/','/*main*/ gt.recent,').replace("@limit",this.Tm).replace("@ls",this.searchTypes[this.T].sub_option[0].val||'');
+			   sql =sql.replace('/*main*/','/*main*/ gt.recent,').replace("@limit",this.Tm).replace("@ls",this.searchTypes['follower'].sub_option[0].val||'');
 			}
 			//console.log("2:"+this.sql_cur);
 			sql=sql.replace("@whereAge",this.whereAge)
 			sql=sql.replace("@idGym",this.select.gym_selected&&this.select.gym_selected.split("|")[0])
 			sql=sql.replace("@whereNoIntro",this.WhereNoIntro)
 			sql=sql.replace("@whereLs",this.whereLs)
-			
 			//console.log(this.sql(sql))
 			sql=this.fn_pager(sql,this.options) 
 			//console.log(this.sql(sql))
@@ -320,6 +363,19 @@ export default {
 		}
   },
   methods:{	 
+	    plus:function(t){
+			console.log(this.T)
+		   if(this.searchTypesFilter.length<=0) return;
+           this.Tp.push(undefined);
+		},
+	    minus:function(index){
+           this.Tp.splice(index,1);
+		},
+	    goSearch:function(adv){ 
+			this.adv=adv||false;
+			this.dialogAdv.show=false;
+			this.init();
+	    },
 	    goCancel(){
 		   this.updateType=null;
            this.typeModal.show=false;
@@ -444,7 +500,7 @@ export default {
 						params:{sql1:sql_update,onlysql:(self.select.onlysql?1:0)}
 					}).then(function(res){
 						if(res.status=200&&res.data.errcode==0){
-							self.alertInfo={show:true,title:'操作提示',msg:'操作成功'};
+							self.alertSuccess={show:true,title:'操作提示',msg:'操作成功'};
 							self.reset("q");
 						}else{
                             self.alertError={title:"错误提示",msg:"操作失败",show:true}
@@ -534,6 +590,7 @@ export default {
   watch: {
     familyType (newval) {
 		this.theader=this.theader_comm;
+		this.Tp=[undefined];
 		switch(newval){
 			case 'recent':
 				this.sql_cur=sql_recent;
@@ -574,13 +631,27 @@ export default {
 }
 </script>
  <style  scoped>
- 
+	.plus,.minus{
+		margin-top:2%;
+        cursor:pointer;
+	}
+	.box{
+		border:1px dashed #000;
+	}
+	.mz-datepicker input {
+		border-radius: 6%;
+		margin-bottom: 6%;
+	}
+    .filter{
+		padding-bottom: 0!important;
+		padding-top: 1%!important;
+	}
 	.ui.selection.dropdown{
 		padding-right: .2em!important;
 		padding-bottom: .6em!important;
 	}
 	.optionval{
-		width:100px!important;
+		width:30%!important;
 		font-size:12px!important;
 	}
 	.box{

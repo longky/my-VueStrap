@@ -83,7 +83,7 @@ export default {
         },
         getAcl:function(){
             var self=this;
-            //sql_quanxian=sql_quanxian.replace('iduser',281584);
+            //sql_quanxian=sql_quanxian.replace(/iduser/g,279833);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql_quanxian}
             })

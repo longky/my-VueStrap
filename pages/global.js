@@ -74,7 +74,7 @@ export default{
               header=","
             } 
             if(/^(.*)(select\s*?)\/\*main\*\/(.*?)[;]?$/.test(str)){
-                var pager = "select * from p order by @order id"+(!option.sw?"":","+option.sw);
+                var pager = "select * from p order by @order id desc"+(!option.sw?"":","+option.sw);
                 pager += " offset "+(option.pageNow-1)*option.pageSize+" rows fetch next "+option.pageSize+" rows only"
                 str = RegExp.$1+header+"p1 as("+RegExp.$2+RegExp.$3+"),p as(select * from p1 @c) select (select 0 errcode,'ok'errmsg,(select count(1) from p)total,isnull((@pager for json path),'[]')arr,'@sql'sql from (select 1 x)x for json path,without_array_wrapper)";
                 str = str.replace("@c",!option.condition?"":"where "+option.condition).replace("@pager",pager).replace("@order",option.order);

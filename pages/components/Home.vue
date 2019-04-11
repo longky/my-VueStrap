@@ -97,11 +97,9 @@
 			<tlg-table :select="select" :checkbox="tchecked" :maxheight="tbl_maxheight" :tb_style="tb_style"  :header="theader" :pagenation=pagenation :loading="select.start"></tlg-table>
 		
 			<modal :show.sync="dialogAdv.show" effect="fade" :width="280" small>
-				<div slot="modal-header" class="modal-header">
-					<h4 class="modal-title">
-					<b>{{dialogAdv.title}}</b> 
-					</h4>
-				</div>
+				<span slot="title">
+					{{dialogAdv.title}}
+				</span>
 				<div slot="modal-body" class="modal-body">
 					<template v-for="(index,c) of dialogAdv.conditions" >
 					  <form-group>
@@ -109,10 +107,9 @@
 						<bs-input maxlength=11 track-by="$index" style="width:87%" :placeholder="c.label" :value.sync="c.value" v-else></bs-input>
 					  </form-group>
 					</template>	
-					
 				</div>
 				<div slot="modal-footer" class="modal-footer">
-					<button type="button" class="btn btn-success" @click="goSearch">搜索</button>
+					<button type="button" class="btn btn-success" @click="goSearch(true)">搜索</button>
 					<button type="button" class="btn btn-default" @click="dialogAdv.show = false">取消</button>
 				</div>
 			</modal>
@@ -335,11 +332,11 @@ export default {
 		condition:function(){
 			var c=[];
 			if(this.summerType=="preEnrol"){
-			  this.search.trim()&&c.push("phone+babyname like '%"+this.search.trim()+"%'")	
+			  if(!this.adv) this.search.trim()&&c.push("phone+babyname like '%"+this.search.trim()+"%'");
               this.isrecd&&c.push("isrecd ='是'");
 			  c.push("status in ('"+this.arr_status_cur.join("','")+"')")
 			}else{
-              this.search.trim()&&c.push("phone+user_name like '%"+this.search.trim()+"%'")	
+				this.search.trim()&&c.push("phone+user_name like '%"+this.search.trim()+"%'");
 			}
 			if(this.adv){
 				this.dialogAdv.conditions.forEach(function(cn){
@@ -406,8 +403,8 @@ export default {
 	  	clearTime:function(){
           this.recent=[];
 		},
-	    goSearch:function(){ 
-			this.adv=true;
+	    goSearch:function(adv){ 
+			this.adv=adv||false;
 			this.dialogAdv.show=false;
 			this.init();
 	    },
