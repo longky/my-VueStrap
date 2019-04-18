@@ -75,6 +75,8 @@
     "tips": "webpack-dev-server --n --hot --quiet --port 80 --config webpack.cfg.tips.js",
     "buildFam": "webpack --progress --hide-modules --config webpack.cfg.family.js --env=production",
     "family": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.family.js",
+    "buildDailyPhone": "webpack --progress --hide-modules --config webpack.cfg.dailyPhone.js --env=production",
+    "dailyPhone": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.dailyPhone.js",
     "docs": "webpack-dev-server --inline --hot --quiet",
     "gpages": "gh-pages -d build",
     "postversion": "git push && git push --tags",
