@@ -19,7 +19,7 @@
     	             <datepicker :value.sync="select.dtReport" format="yyyy-MM-dd" placeholder="请选择日期"></datepicker>
                 </div>
                 <div class="column left aligned">
-                    <a href="javascript:" class="btn btn-default" @click="getPhonePlans()">查询</a>
+                    <a href="javascript:" class="btn btn-default" @click="getQuery()">查询</a>
 					<input type="button" class="btn btn-default"  value="打印" onclick="PrintDoc()" />
                     <input id="Button1" type="button" class="btn btn-danger"  value="导出EXCEL" class="rbtn23" onclick="javascript:HtmlExportToExcel('PanelExcel','DailyPhoneCall')" />
 					<a id="dlink" style="display: none;"></a>
@@ -44,7 +44,7 @@
     	</div>	
     </div>
     <div class="ui segment" v-show="select.onlysql">
-        <pre v-for="s of datasql "v-text="s"></pre>
+        <pre v-for="s of datasql" track-by="$index" v-text="s"></pre>
     </div>
 
     <div class="ui segment">
@@ -59,20 +59,21 @@
                         <td width="10%">负责老师</td>
                         <td width="15%">班级</td>
                         <td width="10%">考勤状态</td>
-                        <td width="10%">操作</td>
+                        <td width="10%" class="noPrint">操作</td>
                     </tr>
                     <template v-for="p of phonePlansFilter(st.type)">
                         <tr>
-                            <td width="10%" v-html="p['家长']"></td>
+                            <td class="noPrint" width="10%" v-html="p|family_url"></td>
+                            <td class="onlyPrint" width="10%" v-html="p['家长']"></td>
                             <td v-text="p['手机']"></td>
                             <td v-text="p['孩子']"></td>
                             <td v-text="p['负责老师']"></td>
-                            <td v-text="p['班级']"></td>
+                            <td v-text="p['班级']|simplefy"></td>
                             <td v-text="p['考勤状态']"></td>
-                            <td><button class="btn btn-primary btn-mini">分配老师</button></td>
+                            <td class="noPrint"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
                         </tr>
-                        <tr>
-                            <td align="left" colspan="7">【沟通记录】{{p['沟通记录']}}
+                        <tr v-if="!isempty(p['沟通记录'])">
+                            <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
                                 <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
                             </td>
                         </tr>
@@ -82,6 +83,25 @@
         </panel>
     </div>
 
+    <modal :show.sync="saveLsModal.show" effect="fade" :width="350">
+        <div slot="modal-header" class="modal-header">
+            <h4 class="modal-title">
+            <b>{{saveLsModal.title}}</b> 
+            </h4>
+        </div>
+        <div slot="modal-body" class="modal-body">
+            <div class="ui form">
+                <div class="two fields">
+                    <div class="field"><v-select readonly disabled :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select></div>	
+                    <div class="field"><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span><v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" clearable :options="saveLsModal.newers|lsFilter" options-label="name" options-value="id" required></v-select></div>
+                </div>
+            </div>
+        </div>
+        <div slot="modal-footer" class="modal-footer">
+            <button type="button" class="btn btn-success" @click="save()">确定</button>
+            <button type="button" class="btn btn-danger" @click="saveLsModal.show=false;">取消</button>
+        </div>
+    </modal>
     <alert :show.sync="error.show" placement="top" duration="3000" type="danger" width="400px" dismissable>
         <span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
         <strong>错误提示!</strong>
@@ -112,7 +132,8 @@ export default {
 				acl: "",
                 iduser:"",
                 username:"",
-                idgym:"",
+                idgym:null,
+                row:null,
                 gyms:[],
                 gymNames:{},
                 phonePlans:[],
@@ -132,8 +153,8 @@ export default {
             error:{
                 show:false,
                 content:''
-            }
-            
+            },
+            saveLsModal:{show:false,title:'重新指派老师负责跟进',dropback:false,formers:[],newers:[],former:null,newer:null}
 		}
 	  },
       components:{
@@ -149,40 +170,70 @@ export default {
             isadmin:function(){
                 if(this.select.acl.indexOf('系统管理员')!=-1
                   ||this.select.acl.indexOf('运营顾问')!=-1
+                  ||this.select.acl.indexOf('运营总监')!=-1
                 ){
+                    this.onlyOwn=false
                     return true;
                 }
                 return false;
             }
-	  },
+      },
+      filters:{
+        simplefy:function(val){
+            if(!val) return '';
+            let indx=val.indexOf("中心");
+            val=val.substr(indx+3);
+            return val;
+        },
+        family_url:function(row){
+           let url = "<a href='https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_zdytable_238592_25111&menu=3&mzdyshowname=咨询中心&mRelateClassName=crm_sj&mRelateID=@idjt&mid=@idzxzx' target='_blank'>@name</a>";
+           url=url.replace("@idjt",row.idjt).replace("@idzxzx",row.id).replace("@name",row['家长']);
+           return url
+        },
+        lsFilter:function(val){
+          let self=this;
+          return val&&val.filter(function(v){
+              return v.id!=self.saveLsModal.former;
+           })
+        }
+      },
       watch: {
-            "select.codes":{
+            "select.idgym":{
                 handler(newValue, oldValue) {
-                    var self=this;
-
-        　　　   },
-        　　　   deep: true
-            },
-            "select.username":{
-                handler(newValue, oldValue) {
- 
+                    this.getQuery();
         　　　   },
         　　　   deep: true
             }  
       },
       methods: {
+        param:function(sql){
+           //281584(月总)  292939 246152(陈婕) 301931(pd)
+           //ql = sql.replace(/iduser/ig,345617);
+           sql = sql.replace(/@idgym/ig,this.select.idgym);
+           sql = sql.replace(/@dtReport/ig,this.select.dtReport);
+           sql = sql.replace(/@former/ig,this.saveLsModal.former);
+           sql = sql.replace(/@newer/ig,this.saveLsModal.newer);
+           sql = sql.replace(/@id/ig,this.select.row&&this.select.row.id);
+           return sql;
+        },
+        isempty:function(str){
+            if(!str) return true;
+            return str.indexOf(':')+1==str.length;
+        },
         phonePlansFilter:function(type){
-            var res= this.select.phonePlans.filter(function(p){
-                return p.type==type; 
+            let self = this;
+            let res= this.select.phonePlans.filter(function(p){
+                //console.log(p.idls,self.select.iduser)
+                return p.type==type&&(
+                    !self.onlyOwn||p.idls==self.select.iduser
+                ); 
             })
             return res;
         },
         getAcl:function(){
-            var self=this
-            //281584(月总)  292939 246152(陈婕) 301931(pd)
-            var sql=sql_quanxian
-            sql=sql.replace('iduser',279833);
-            console.log(sql)
+            let self=this
+            let sql=sql_quanxian
+            sql=this.param(sql);
             sql=this.convertor.ToUnicode(sql);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql}
@@ -190,25 +241,17 @@ export default {
             .then(function(res){
                 if(res.status==200 && res.data.info[0].rec.constructor !=String){
                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
-                    if(res.data.info[0].rec[0].ispreparing==1){
-                        self.task="Preparations";
-                    }
-                    self.select.ispreparing = res.data.info[0].rec[0].ispreparing;
-                    self.select.dtenrol = res.data.info[0].rec[0].dtenrol;
-                    self.select.idgym = res.data.info[0].rec[0].idgym;
                     self.select.iduser = res.data.info[0].rec[0].id;
-                    self.select.username = res.data.info[0].rec[0].crm_qm;
-                    self.select.code = res.data.info[0].rec[0].code;
-                    self.select.codes = res.data.info[0].rec[0].codes;
                 }  
             },function(res){
                 console.error(res);
             });
         },
         getGym:function(func){
-             var self=this;
-             sql_getGym=sql_getGym.replace('iduser',279833);
-			 sql_getGym = this.convertor.ToUnicode(sql_getGym);
+             let self=this;
+             let sql=sql_getGym;
+             sql=this.param(sql);
+			 sql_getGym = this.convertor.ToUnicode(sql);
              self.$axios.get(url_jsonp,{
                  params:{sql1: sql_getGym}
              }).then(function(res){
@@ -216,6 +259,7 @@ export default {
                     self.select.gyms = res.data.info[0].rec;
                     self.select.gyms.map(function(g){
                         self.select.gymNames[g.id]=g.name;
+                        self.select.idgym=g.id;
                     })
                  } 
              },function(res){
@@ -233,13 +277,18 @@ export default {
             }
             return true;
         },
-        getPhonePlans:function(){
+        getQuery:function(){
             if(!this.valid()) return;
-             var self=this;
-             var sql=sql_getPhonePlans;
+            this.select.datasql=[];
+            this.select.phonePlans=[];
+            this.getPhonePlans();
+            this.getBirthDayPlans();
+        },
+        getPhonePlans:function(){
+             let self=this;
+             let sql=sql_getPhonePlans;
+             sql = this.param(sql);
              self.select.start=true;
-             sql=sql.replace(/@idgym/ig,this.select.idgym);
-             sql=sql.replace(/@dtReport/ig,this.select.dtReport);
              sql = this.convertor.ToUnicode(sql);
              self.$axios({
                     method: 'post',
@@ -247,10 +296,9 @@ export default {
                     data:qs.stringify({sql1:sql,onlysql:(self.select.onlysql?1:0)})
                 }).then(function(res){
                  if(res.status==200){
-                    var sql =res.data.info[1].sql;
+                    let sql =res.data.info[1].sql;
 				    sql =sql.replace(/quot;/gi,"'")
                     self.datasql.push(sql)
-                    console.log(self.datasql)
                     res=res.data.info[0].rec;
                     if(typeof res=='object'){
                        self.select.phonePlans = res.concat(self.select.phonePlans);
@@ -261,7 +309,89 @@ export default {
                  console.error(res.status);
                  self.select.start=false;
              });
-        }
+        },
+        getBirthDayPlans:function(){
+            if(!this.valid()) return;
+             let self=this;
+             let sql=sql_getBirthdayList;
+             sql = this.param(sql);
+             sql = this.convertor.ToUnicode(sql);
+             self.$axios({
+                    method: 'post',
+                    url:url_jsonp,
+                    data:qs.stringify({sql1:sql,onlysql:(self.select.onlysql?1:0)})
+                }).then(function(res){
+                 if(res.status==200){
+                    let sql =res.data.info[1].sql;
+				    sql =sql.replace(/quot;/gi,"'")
+                    self.datasql.push(sql)
+                    res=res.data.info[0].rec;
+                    if(typeof res=='object'){
+                       self.select.phonePlans = self.select.phonePlans.concat(res);
+                    }
+                 } 
+             },function(res){
+                 console.error(res.status);
+             });
+        },
+	    getLs:function(){
+			let self=this;
+			self.select.start=true;
+            let sql=this.param(sql_ls);
+			sql = this.convertor.ToUnicode(sql);
+			self.$axios({
+				method: 'post',
+				url:url_local,
+                params:{sql1:sql,onlysql:(self.select.onlysql?1:0)}
+			}).then(function(res){
+			    if(res.status=200){
+				   self.saveLsModal.newers=res.data.newers;
+				   self.saveLsModal.show=true;
+				}
+				self.select.start=false;
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            });
+        },
+        allocate:function(row){
+            this.select.row=row;
+            this.saveLsModal.newer=null;
+            this.saveLsModal.former=row.idls;
+            this.saveLsModal.formers.push({id:row.idls,name:row['负责老师']});
+            this.getLs();
+            this.saveLsModal.show=true;    
+        },
+	    save(){
+           let sql_update="update zx set zx.crmzdy_81636452_id=@newer from crm_zdytable_238592_25111_238592_view zx where zx.id=@id;";
+           sql_update = this.param(sql_update);
+           //console.log(sql_update)
+		   if(sql_update){
+				sql_update+="select top 1 0 errcode,'ok' errmsg for json path,without_array_wrapper;"
+				sql_update=this.convertor.ToUnicode(sql_update);
+				let self=this;
+				self.saveLsModal.show=false;
+				self.$axios({
+						method: 'post',
+						url:url_local,
+						params:{sql1:sql_update,onlysql:(self.select.onlysql?1:0)}
+					}).then(function(res){
+						if(res.status=200&&res.data.errcode==0){
+							self.alertSuccess={show:true,title:'操作提示',msg:'操作成功'};
+                            self.select.row.idls=self.saveLsModal.newer
+                            let n = self.saveLsModal.newers.find(function(n){
+                                return self.saveLsModal.newer==n.id;
+                            });
+                            //console.log(n)
+                            self.select.row['负责老师']=n['name'];
+						}else{
+                            self.alertError={title:"错误提示",msg:"操作失败",show:true}
+						}
+					},function(res){
+						console.log(res.status);
+					});
+		    }
+	    }
       },
       created: function () {
            this.getAcl();
@@ -271,6 +401,9 @@ export default {
 
 </script>
 <style scoped>
+    .field{
+       border:1px solid transparent;
+    }
     table.console{  
         font-family:"微软雅黑";
         font-size:10px;
@@ -282,7 +415,10 @@ export default {
        text-align:center;
        font-size:2.5em;
        font-weight: bold;
-       margin-bottom:1%;
+       
+    }
+    .ui.subtitle{
+       margin-top:4%;
     }
     .subtitle{
        font-size:1.5em;
@@ -296,6 +432,10 @@ export default {
         .onlyPrint{
             display: "";
         } 
+        * {
+            padding:0!important;
+            border:none!important;
+        }
     }
     .panel{
        margin-bottom:5px!important;
@@ -313,4 +453,16 @@ export default {
         float:left;
         margin-right:15px;
     }
+    .btn-mini [class^="icon-"],
+    .btn-mini [class*=" icon-"] {
+    margin-top: -1px;
+    }
+    .btn-mini {
+    padding: 0 6px;
+    font-size: 10.5px;
+    -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+            border-radius: 3px;
+    }
+    
 </style>
