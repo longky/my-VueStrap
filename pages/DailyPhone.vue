@@ -61,8 +61,9 @@
                         <td width="10%">考勤状态</td>
                         <td width="10%" class="noPrint">操作</td>
                     </tr>
-                    <template v-for="p of phonePlansFilter(st.type)">
-                        <tr>
+                   
+                    <template>
+                        <tr v-for="p of st.data">
                             <td class="noPrint" width="10%" v-html="p|family_url"></td>
                             <td class="onlyPrint" width="10%" v-html="p['家长']"></td>
                             <td v-text="p['手机']"></td>
@@ -72,12 +73,13 @@
                             <td v-text="p['考勤状态']"></td>
                             <td class="noPrint"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
                         </tr>
-                        <tr v-if="!isempty(p['沟通记录'])">
+                        <tr v-if="p&&!isempty(p['沟通记录'])">
                             <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
                                 <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
                             </td>
                         </tr>
                     </template>
+                    
                 </tbody>
             </table>
         </panel>
@@ -120,6 +122,7 @@ import tooltip from '@/src/Tooltip.vue';
 import datepicker from 'src/Datepicker.vue';
 import checkbox from 'src/Checkbox.vue';
 import panel from 'src/Panel.vue';
+
 import qs from 'qs';
 
 export default {
@@ -130,7 +133,7 @@ export default {
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
 				acl: "",
-                iduser:"",
+                iduser:null,
                 username:"",
                 idgym:null,
                 row:null,
@@ -140,13 +143,13 @@ export default {
 	            dtReport:this.fmtDt_s(new Date())
             },
             subtitles:[
-                {type:1,content:"三天前录入且尚未预约体验"},
-                {type:2,content:"前天体验且未报名"},
-                {type:3,content:"昨天体验未出席"},
-                {type:4,content:"明天体验"},
-                {type:5,content:"今天计划联系"},
-                {type:6,content:"过去30天没有联系的潜在客户"},
-                {type:7,content:"即将到来的生日会"}
+                {type:1,content:"三天前录入且尚未预约体验",data:[]},
+                {type:2,content:"前天体验且未报名",data:[]},
+                {type:3,content:"昨天体验未出席",data:[]},
+                {type:4,content:"明天体验",data:[]},
+                {type:5,content:"今天计划联系",data:[]},
+                {type:6,content:"过去30天没有联系的潜在客户",data:[]},
+                {type:7,content:"即将到来的生日会",data:[]}
             ],
             datasql:[],
             onlyOwn:true,
@@ -167,16 +170,6 @@ export default {
            datepicker
       },
 	  computed:{
-            isadmin:function(){
-                if(this.select.acl.indexOf('系统管理员')!=-1
-                  ||this.select.acl.indexOf('运营顾问')!=-1
-                  ||this.select.acl.indexOf('运营总监')!=-1
-                ){
-                    this.onlyOwn=false
-                    return true;
-                }
-                return false;
-            }
       },
       filters:{
         simplefy:function(val){
@@ -186,9 +179,13 @@ export default {
             return val;
         },
         family_url:function(row){
-           let url = "<a href='https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_zdytable_238592_25111&menu=3&mzdyshowname=咨询中心&mRelateClassName=crm_sj&mRelateID=@idjt&mid=@idzxzx' target='_blank'>@name</a>";
-           url=url.replace("@idjt",row.idjt).replace("@idzxzx",row.id).replace("@name",row['家长']);
-           return url
+           if(row){
+                let url = "<a href='https://bbk.800app.com/index.jsp?mlist=1&mfs1=crm_zdytable_238592_25111&menu=3&mzdyshowname=咨询中心&mRelateClassName=crm_sj&mRelateID=@idjt&mid=@idzxzx' target='_blank'>@name</a>";
+                url=url.replace("@idjt",row.idjt).replace("@idzxzx",row.id).replace("@name",row['家长']);
+                return url;
+           }else{
+                return '';
+           }
         },
         lsFilter:function(val){
           let self=this;
@@ -200,15 +197,34 @@ export default {
       watch: {
             "select.idgym":{
                 handler(newValue, oldValue) {
-                    this.getQuery();
+                    newValue&&this.getQuery();
         　　　   },
         　　　   deep: true
-            }  
+            },
+            "select.phonePlans":{
+                handler(newValue, oldValue) {
+                    this.phoneFilter();
+        　　　   },
+        　　　   deep: true
+            },
+            "onlyOwn":{
+                handler(newValue, oldValue) {
+                    this.phoneFilter();
+        　　　   },
+        　　　   deep: true
+            }      
       },
       methods: {
         param:function(sql){
            //281584(月总)  292939 246152(陈婕) 301931(pd)
-           //ql = sql.replace(/iduser/ig,345617);
+           //sql = sql.replace(/iduser/ig,279833);
+           var param=GetRequest() 
+           if(param&&param.iduser){
+               sql = sql.replace(/iduser/ig,param.iduser);
+           }
+           if(this.select.iduser){
+               sql = sql.replace(/iduser/ig,this.select.iduser);
+           }
            sql = sql.replace(/@idgym/ig,this.select.idgym);
            sql = sql.replace(/@dtReport/ig,this.select.dtReport);
            sql = sql.replace(/@former/ig,this.saveLsModal.former);
@@ -217,31 +233,40 @@ export default {
            return sql;
         },
         isempty:function(str){
-            if(!str) return true;
-            return str.indexOf(':')+1==str.length;
+            if(str){
+              return str.indexOf(':')+1==str.length;
+            }else{
+              return true;
+            }
         },
-        phonePlansFilter:function(type){
-            let self = this;
-            let res= this.select.phonePlans.filter(function(p){
-                //console.log(p.idls,self.select.iduser)
-                return p.type==type&&(
-                    !self.onlyOwn||p.idls==self.select.iduser
-                ); 
+        phoneFilter:function(){
+            var self=this;
+            var data=[];
+            self.subtitles.map(function(s){
+                data = self.select.phonePlans.filter(function(p){
+                        return  s.type==p.type&&(
+                                !self.onlyOwn||p.idls==self.select.iduser
+                        )
+                })
+                if(data) s.data=data;
             })
-            return res;
         },
         getAcl:function(){
-            let self=this
-            let sql=sql_quanxian
-            sql=this.param(sql);
-            sql=this.convertor.ToUnicode(sql);
-            this.$axios.get(url_jsonp,{
-                params:{sql1:sql}
-            })
-            .then(function(res){
-                if(res.status==200 && res.data.info[0].rec.constructor !=String){
+            var self=this
+            var sql = this.param(sql_quanxian);
+            self.$axios.get(url_jsonp,{
+                 params:{sql1: sql}
+             }).then(function(res){
+                if(res.status==200&&res.data.info[0].rec.constructor !=String){
                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
                     self.select.iduser = res.data.info[0].rec[0].id;
+                    if(self.select.acl.indexOf('系统管理员')!=-1
+                    ||self.select.acl.indexOf('运营顾问')!=-1
+                    ||self.select.acl.indexOf('运营总监')!=-1
+                    ){
+                        self.onlyOwn=false;
+                    }
+                    self.getGym();
                 }  
             },function(res){
                 console.error(res);
@@ -259,7 +284,9 @@ export default {
                     self.select.gyms = res.data.info[0].rec;
                     self.select.gyms.map(function(g){
                         self.select.gymNames[g.id]=g.name;
-                        self.select.idgym=g.id;
+                        if(self.select.acl.indexOf('系统管理员')==-1){
+                           self.select.idgym=g.id;
+                        }
                     })
                  } 
              },function(res){
@@ -395,7 +422,6 @@ export default {
       },
       created: function () {
            this.getAcl();
-           this.getGym();
       }
   } 
 
