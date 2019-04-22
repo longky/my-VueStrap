@@ -2,11 +2,6 @@
 <div class="ui segment">
     <div class="ui segment isPrint">
         <h1 class="title">每日电话报表</h1>
-        <div class="ui grid onlyPrint subtitle">
-            <div class="four wide column"></div>
-            <div class="six wide column">{{select.gymNames[select.idgym]?'中心：'+select.gymNames[select.idgym]:''}}</div>
-            <div class="six wide column">{{select.dtReport}}</div>
-        </div>
     </div>
     <div class="ui segment noPrint">
         <div class='ui three column stackable grid'>
@@ -21,14 +16,14 @@
                 <div class="column left aligned">
                     <a href="javascript:" class="btn btn-default" @click="getQuery()">查询</a>
 					<input type="button" class="btn btn-default"  value="打印" onclick="PrintDoc()" />
-                    <input id="Button1" type="button" class="btn btn-danger"  value="导出EXCEL" class="rbtn23" onclick="javascript:HtmlExportToExcel('PanelExcel','DailyPhoneCall')" />
+                    <input id="Button1" type="button" class="btn btn-danger"  value="导出EXCEL" class="rbtn23" @click.client="HtmlExportToExcel('PanelExcel','DailyPhoneCall')" />
 					<a id="dlink" style="display: none;"></a>
                 </div>
             </div>
             <div class="row">
     		    <div class="column"></div>
     			<div class="column middle aligned">
-    			      <checkbox :checked.sync="onlyOwn" type="danger" class="tooltips" title="负责老师是自己的例子家庭'">仅显示自己负责</checkbox>
+    			      <checkbox :checked.sync="onlyOwn" type="danger" class="tooltips" title="负责老师是自己的例子家庭'">仅显示自己需要跟进的</checkbox>
     			</div>
     			<div class="column middle aligned" v-if="select.acl.indexOf('系统管理员')!=-1">
     			      <checkbox :checked.sync="select.onlysql" type="danger" >是否打印sql（仅管理员）</checkbox>
@@ -47,68 +42,72 @@
         <pre v-for="s of datasql" track-by="$index" v-text="s"></pre>
     </div>
 
-    <div class="ui segment">
+    <div class="ui segment" id="PanelExcel">
+        <div class="ui grid onlyPrint subtitle">
+            <div class="four wide column"></div>
+            <div class="six wide column">{{select.gymNames[select.idgym]?'中心：'+select.gymNames[select.idgym]:''}}</div>
+            <div class="six wide column">{{select.dtReport}}</div>
+        </div>
         <panel v-for="st of subtitles">
-            <p slot="header" class="header">{{st.content}}</p>
+            <p slot="header" style="text-align: center;font-size: 20px;font-weight:bold;">{{st.content}}</p>
             <table class="console" width="100%">
-                <tbody>
+                <thead>
                     <tr>
-                        <td width="10%">家长</td>
-                        <td width="8%">手机</td>
-                        <td width="12%">孩子</td>
-                        <td width="10%">负责老师</td>
-                        <td width="15%">班级</td>
-                        <td width="10%">考勤状态</td>
-                        <td width="10%" class="noPrint">操作</td>
+                        <th width="10%">家长</td>
+                        <th width="8%">手机</td>
+                        <th width="12%">孩子</td>
+                        <th width="10%">负责老师</td>
+                        <th width="15%">班级</td>
+                        <th width="10%">考勤状态</td>
+                        <th width="10%" class="noPrint s_close">操作</td>
                     </tr>
-                   
-                    <template>
-                        <tr v-for="p of st.data">
-                            <td class="noPrint" width="10%" v-html="p|family_url"></td>
-                            <td class="onlyPrint" width="10%" v-html="p['家长']"></td>
-                            <td v-text="p['手机']"></td>
-                            <td v-text="p['孩子']"></td>
-                            <td v-text="p['负责老师']"></td>
-                            <td v-text="p['班级']|simplefy"></td>
-                            <td v-text="p['考勤状态']"></td>
-                            <td class="noPrint"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
-                        </tr>
-                        <tr v-if="p&&!isempty(p['沟通记录'])">
-                            <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
-                                <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
-                            </td>
-                        </tr>
-                    </template>
-                    
+                </thead>
+                <tbody  v-for="p of st.data">
+                    <tr>
+                        <td class="noPrint s_close" width="10%" v-html="p|family_url"></td>
+                        <td class="onlyPrint" width="10%" v-html="p['家长']"></td>
+                        <td v-text="p['手机']"></td>
+                        <td v-text="p['孩子']"></td>
+                        <td v-text="p['负责老师']"></td>
+                        <td v-text="p['班级']|simplefy"></td>
+                        <td v-text="p['考勤状态']"></td>
+                        <td class="noPrint s_close"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
+                    </tr>
+                    <tr v-if="p&&!isempty(p['沟通记录'])">
+                        <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
+                            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
+                        </td>
+                    </tr>          
                 </tbody>
             </table>
         </panel>
     </div>
-
-    <modal :show.sync="saveLsModal.show" effect="fade" :width="350">
-        <div slot="modal-header" class="modal-header">
-            <h4 class="modal-title">
-            <b>{{saveLsModal.title}}</b> 
-            </h4>
-        </div>
-        <div slot="modal-body" class="modal-body">
-            <div class="ui form">
-                <div class="two fields">
-                    <div class="field"><v-select readonly disabled :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select></div>	
-                    <div class="field"><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span><v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" clearable :options="saveLsModal.newers|lsFilter" options-label="name" options-value="id" required></v-select></div>
+    <div>
+        <modal :show.sync="saveLsModal.show" effect="fade" :width="350">
+            <div slot="modal-header" class="modal-header">
+                <h4 class="modal-title">
+                <b>{{saveLsModal.title}}</b> 
+                </h4>
+            </div>
+            <div slot="modal-body" class="modal-body">
+                <div class="ui form">
+                    <div class="two fields">
+                        <div class="field"><v-select readonly disabled :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select></div>	
+                        <div class="field"><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span><v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" clearable :options="saveLsModal.newers|lsFilter" options-label="name" options-value="id" required></v-select></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div slot="modal-footer" class="modal-footer">
-            <button type="button" class="btn btn-success" @click="save()">确定</button>
-            <button type="button" class="btn btn-danger" @click="saveLsModal.show=false;">取消</button>
-        </div>
-    </modal>
-    <alert :show.sync="error.show" placement="top" duration="3000" type="danger" width="400px" dismissable>
-        <span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
-        <strong>错误提示!</strong>
-        <p style="font-size:1.5em">{{error.content}}</p>
-    </alert>
+            <div slot="modal-footer" class="modal-footer">
+                <button type="button" class="btn btn-success" @click="save()">确定</button>
+                <button type="button" class="btn btn-danger" @click="saveLsModal.show=false;">取消</button>
+            </div>
+        </modal>
+        <alert :show.sync="error.show" placement="top" duration="3000" type="danger" width="400px" dismissable>
+            <span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
+            <strong>错误提示!</strong>
+            <p style="font-size:1.5em">{{error.content}}</p>
+        </alert>
+    </div>
 </div>
 </template>
 
@@ -215,6 +214,10 @@ export default {
             }      
       },
       methods: {
+        HtmlExportToExcel:function(id,name){
+            HtmlExportToExcel(id,name+'_'+this.select.dtReport);
+            window.location.reload();
+        },
         param:function(sql){
            //281584(月总)  292939 246152(陈婕) 301931(pd)
            //sql = sql.replace(/iduser/ig,279833);
@@ -444,7 +447,8 @@ export default {
        
     }
     .ui.subtitle{
-       margin-top:4%;
+       margin-bottom:2%;
+       margin-top:3%;
     }
     .subtitle{
        font-size:1.5em;
@@ -469,11 +473,7 @@ export default {
     [v-cloak]{
        display:none;
     }
-    p.header{
-        text-align: center;
-        font-size: 20px;
-        font-weight:bold;
-    }
+
     .alert-icon-float-left {
         font-size:32px;
         float:left;

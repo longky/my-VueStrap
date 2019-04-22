@@ -92,7 +92,7 @@ export default {
                     self.select.acl = res.data.info[0].rec[0].crm_jiandang;
                 }  
             },function(res){
-                console.error(res)    ;
+                console.error(res);
             });
         },
         getGym:function(func){
