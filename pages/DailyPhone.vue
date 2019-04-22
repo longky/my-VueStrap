@@ -216,7 +216,7 @@ export default {
       methods: {
         HtmlExportToExcel:function(id,name){
             HtmlExportToExcel(id,name+'_'+this.select.dtReport);
-            window.location.reload();
+            // window.location.reload();
         },
         param:function(sql){
            //281584(月总)  292939 246152(陈婕) 301931(pd)
