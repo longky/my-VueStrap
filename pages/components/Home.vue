@@ -77,6 +77,12 @@
 						</div>
 						<div class="field">
 							<div class="ui checkbox">
+								<input id="timelimit" type="checkbox" value="4" v-model="timelimit">
+								<label for="timelimit">超过4小时未处理</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui checkbox">
 								<input id="history" type="checkbox"  v-model="history">
 								<label for="history">是否显示参加过的历史活动</label>
 							</div>
@@ -238,7 +244,6 @@ export default {
   },
   data(){
     return{
-		  history:false,
 		  tbl_maxheight:"600px",	 
 		  arr_status:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
 		  arr_status_cur:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
@@ -276,6 +281,8 @@ export default {
 			  ids:[],
 			  checkall:false
 		  },
+		  history:false,
+		  timelimit:[],
 		  recent:['30']
 	}
   },
@@ -321,6 +328,7 @@ export default {
 		},
 		theader_coupon: function(){
 		    return [
+               {label:['中心'],value:['',this.gymName,'centerid']},
 			   {label:['姓名'],value:['','','user_name']},
 			   {label:['手机'],value:['',this.urlView,'row']},
 			   {label:['礼券名称'],value:['','','coupon_name'],order:-1},
@@ -372,6 +380,11 @@ export default {
 				sql= sql.replace('@recentWhere',"and create_time>=dateadd(d,-@recent,getdate())".replace("@recent",this.recent[0]));
 			}else{
 				sql= sql.replace('@recentWhere',"")
+			}
+			if(this.timelimit&&this.timelimit[0]>0){
+				sql= sql.replace('@timelimitWhere',"and create_time<dateadd(hh,-@timelimit,getdate())".replace("@timelimit",this.timelimit[0]));
+			}else{
+				sql= sql.replace('@timelimitWhere',"")
 			}
 			if(this.history){
 				sql= sql.replace("@campaign","replace((select name+',' from(select top 100 crmzdy_82053258 name,max(c.id) id from crm_zdytable_238592_27045_238592_view c where c.crm_name=camp.crm_name group by crmzdy_82053258 order by max(c.id))a for xml path('')),crmzdy_82053258,'<b>'+crmzdy_82053258+'</b>')");
@@ -654,6 +667,7 @@ export default {
                 page: self.pageNow,
                 centerid: self.select.gym_selected,
 				campain: self.select.campaign_selected,
+				search: self.search&&self.search.trim(),
 				pageSize:11
             },{
                 jsonp:'callback'
@@ -699,6 +713,7 @@ export default {
             });
         },
 	    getEnrol:function(){
+
 			if(!this.validate()) return;
 			var self=this;
             self.select.start=true;
@@ -761,6 +776,15 @@ export default {
 　　　   },
 　　　   deep: true
 	},
+	"timelimit":{
+		handler(newValue, oldValue) {
+			if(newValue&&newValue[0]>0){
+				this.arr_status_cur=["未处理"];
+				this.recent=[];
+			}
+　　　   },
+　　　   deep: true
+	},
 	"select.gym_selected":{
 		handler(newValue, oldValue) {
 			if(this.select.gym_selected){
@@ -782,6 +806,9 @@ export default {
   created(){
       if(this.$route.params.id=='4'){
 		  this.select.menuGroup[1].enabled=true;
+	  }
+	  if(this.$route.params&&this.$route.params.id==2){
+		  this.timelimit=['4'];
 	  }
 	  this.select.campaign_selected="所有";
   }

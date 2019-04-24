@@ -113,6 +113,10 @@ export default {
             //281584(月总)  292939 246152(陈婕) 301931(pd)
             var sql=sql_quanxian
             //sql=sql.replace('iduser',281584);
+            var param=GetRequest() 
+            if(param&&param.iduser){
+               sql = sql.replace(/iduser/ig,param.iduser);
+            }
             sql=this.convertor.ToUnicode(sql);
             this.$axios.get(url_jsonp,{
                 params:{sql1:sql}

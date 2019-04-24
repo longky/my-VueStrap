@@ -17,7 +17,14 @@
                     </li>
                 </ul>
             </div>
-
+            <alert :show.sync="error.show" placement="top" type="danger" width="400px" dismissable>
+                <span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
+                <strong>工作提醒</strong>
+                <p style="font-size:1.1em">
+                    <span>{{error.content}}</span>
+                     <a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/campaign.html#!/home/2" target="_blank">>>转到家庭</a>
+                </p>
+            </alert>
             <alert :show.sync="showTop" placement="top" type="info" width="650px" class="alert" dismissable>
                 <div class="ui" v-show="showzk">
                     <span class="glyphicon glyphicon-info-sign"></span>
@@ -72,7 +79,8 @@
 					showzk:false,
 					idgym: "",
 					gym: "",
-					role: "",
+                    role: "",
+                    error:{show:false,content:""},
 					data_gd: [
 						[
 							{ txt: "要求所有人必须在大厅" },
@@ -234,8 +242,9 @@
                 "select.ispreparing":{
                     handler(newValue, oldValue) {
                         if(newValue==0){
-                            this.getchkRec_jsonp()
-                            this.getYuyue();
+                           this.getchkRec_jsonp()
+                           this.getYuyue();
+                           this.getCampaignTip();
                         }
             　　　   },
             　　　   deep: true
@@ -309,10 +318,10 @@
                 //官网预约查询
                 getYuyue: function () {
                     var self = this;
-                    sql_getzk=sql_getzk.replace(/iduser/g,self.select.iduser);
-                    var sql_zk = GB2312UnicodeConverter.ToUnicode(sql_getyuyue);
+                    var sql = sql_getyuyue.replace(/iduser/g,self.select.iduser);
+                    sql = GB2312UnicodeConverter.ToUnicode(sql);
                     self.$http.jsonp(url_jsonp, {
-                        sql1: sql_zk
+                        sql1: sql
                     }, {
                             jsonp: 'callback'
                         }).then(function (res) {
@@ -323,6 +332,27 @@
                                     self.showTop = true;
                                     self.showYuyue = true;
                                     //document.getElementById("music").src = "https://static.thelittlegym.com.cn/assert/audio/zhuankeinfo.mp3";
+                                }
+                            }
+                            if (res && typeof res != "string") {
+                                //self.inp=res.msg;
+                            };
+                        });
+                },
+                getCampaignTip: function () {
+                    var self = this;
+                    var sql = sql_campaignTip.replace(/iduser/g,self.select.iduser);
+                    sql = GB2312UnicodeConverter.ToUnicode(sql);
+                    self.$http.jsonp(url_jsonp, {
+                        sql1: sql
+                    }, {
+                            jsonp: 'callback'
+                        }).then(function (res) {
+                            var res = res.data.info[0].rec;
+                            if (res[0]) {
+                                if (res[0].content) {
+                                    self.error.content = res[0].content;
+                                    self.error.show = true;
                                 }
                             }
                             if (res && typeof res != "string") {
@@ -357,6 +387,9 @@
 	<style scoped>
         #box{
             min-height:270px!important; /*至少这个宽度，但超过也可以自动扩大*/
+        }
+        a:link{
+           text-decoration:underline;
         }
         .content{
            font-size:1.4em!important;
@@ -393,5 +426,10 @@
             font-size: 21px;
             font-weight: bold;
             line-height: 1;
+        }
+        .alert-icon-float-left {
+            font-size:23px;
+            float:left;
+            margin-right:5px;
         }
     </style>

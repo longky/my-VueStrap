@@ -59,7 +59,7 @@
                         <th width="10%">负责老师</td>
                         <th width="15%">班级</td>
                         <th width="10%">考勤状态</td>
-                        <th width="10%" class="noPrint s_close">操作</td>
+                        <th v-if="isadmin" width="10%" class="noPrint s_close">操作</td>
                     </tr>
                 </thead>
                 <tbody  v-for="p of st.data">
@@ -71,7 +71,7 @@
                         <td v-text="p['负责老师']"></td>
                         <td v-text="p['班级']|simplefy"></td>
                         <td v-text="p['考勤状态']"></td>
-                        <td class="noPrint s_close"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
+                        <td v-if="isadmin" class="noPrint s_close"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
                     </tr>
                     <tr v-if="p&&!isempty(p['沟通记录'])">
                         <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
@@ -151,6 +151,7 @@ export default {
                 {type:7,content:"即将到来的生日会",data:[]}
             ],
             datasql:[],
+            isadmin:false,
             onlyOwn:true,
             error:{
                 show:false,
@@ -268,6 +269,7 @@ export default {
                     ||self.select.acl.indexOf('运营总监')!=-1
                     ){
                         self.onlyOwn=false;
+                        self.isadmin=true;
                     }
                     self.getGym();
                 }  
