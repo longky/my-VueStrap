@@ -91,3 +91,4 @@ See [Roadmap](https://github.com/yuche/vue-strap/issues/41)
 ## License
 vue-strap is licensed under [The MIT License](LICENSE).
 "# my-VueStrap" 
+"# iview1.2" 
