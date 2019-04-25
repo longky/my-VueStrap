@@ -18,8 +18,8 @@
                     </div>
                     <div class="column left aligned">
                         <div class="ui mini action input">
-                              <datepicker v-show="report_cur!='memberstat'" :value.sync="dtStart" format="yyyy-MM-dd" :clear-button="clear" placeholder="开始日期" ch></datepicker>
-                              -<datepicker v-show="report_cur!='memberstat'" :value.sync="dtEnd" format="yyyy-MM-dd" :clear-button="clear" placeholder="结束日期"></datepicker>
+                              <datepicker :value.sync="dtStart" format="yyyy-MM-dd" :clear-button="clear" placeholder="开始日期" ch></datepicker>
+                              -<datepicker :value.sync="dtEnd" format="yyyy-MM-dd" :clear-button="clear" placeholder="结束日期"></datepicker>
                             <div type="submit" @click="getQuery()" class="ui primary button"><i class="search icon"></i>搜索</div> 
                             <input v-show="report_cur=='kxjData'" id="Button1" type="button" class="ui positive button" value="导出EXCEL" class="rbtn23" onclick="javascript:HtmlExportToExcel('PanelExcel','开学季活动报名情况汇总')" />
                               <a id="dlink" style="display: none;"></a>
@@ -285,7 +285,7 @@ export default {
         reports:[{id:"fansData",label:"新增粉丝量汇总表"},
                  {id:"sumData",label:"预报名和报名汇总表"},
                  {id:"kxjData",label:"开学季活动报名情况汇总"},
-                 {id:"memberstat",label:"截止系统会员与非会员统计"}
+                 {id:"memberstat",label:"系统会员与非会员统计"}
                  ],
         report_cur:null,
         sumData:[],
@@ -480,7 +480,32 @@ export default {
       },
       getMemberStat:function(){
             let self=this;
-            let sql="select count(distinct case when isnull(zx.crmzdy_81802303,'')<>'' then  jt.id end)会员,count(distinct case when isnull(zx.crmzdy_81802303,'')='' then  jt.id end)非会员 from crm_zdytable_238592_25111_238592_view zx join crm_sj_238592_view jt on jt.id=zx.crmzdy_81611091_id and zx.crmzdy_81769392 like '50%' join crm_zdytable_238592_23893_238592_view hz on hz.crmzdy_80653840_id=jt.id";  
+            let sql=member_stat;  
+            if(this.dtEnd){
+                sql=sql.replace("@whereend","zx.create_time<='"+this.dtEnd+" 00:00:00'")
+            }else{
+                sql=sql.replace("@whereend","1=1")
+            }
+            var whereht=[],wherezx=[]
+            if(this.dtStart){
+                whereht.push("ht.create_time>='"+this.dtStart+" 23:23:59'");
+                wherezx.push("zx.create_time>='"+this.dtStart+" 23:23:59'");
+            }
+            if(this.dtEnd){
+                whereht.push("ht.create_time<='"+this.dtEnd+" 23:23:59'");
+                wherezx.push("zx.create_time<='"+this.dtEnd+" 23:23:59'");
+            }
+            if(whereht.length==0){
+                sql=sql.replace("@whereht","1=1")
+            }else{
+                sql=sql.replace("@whereht",whereht.join(" and "))
+            }
+            if(wherezx.length==0){
+                sql=sql.replace("@wherezx","1=1")
+            }else{
+                sql=sql.replace("@wherezx",wherezx.join(" and "))
+            }
+
             sql = this.convertor.ToUnicode(sql);
             self.select.start=true;
             self.$http.jsonp(url_jsonp,{

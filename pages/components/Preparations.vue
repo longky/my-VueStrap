@@ -1,26 +1,74 @@
 <template>
-  <div class="ui segment">
-    <Timeline>
-        <Timeline-item :color="t.status=='已完成'?'grean':'red'" v-for="t of tasks">
-		    <Icon v-if="t.status=='已完成'" color="green" type="ios-trophy" slot="dot"></Icon>
-            <p class="time" v-html="t.time"></p>
-			<span :class="{'text-danger':t.status=='完成确认未通过，待重新申请','text-success':t.status=='已完成'}" v-html="status_generate(t)"></span>
-			<div class="content" id="box" :class="{'ui teal message':t.status=='已完成','ui pink message':t.status=='已申请完成，待审核','ui orange message':t.status=='待申请完成'||t.status=='完成确认未通过，待重新申请'}">
-				<tooltip effect="scale" placement="bottom" content="请在完成后，打勾申请完成">
-					<checkbox @click="checked(t)" class="finish" :disabled="t.status=='已完成'||t.status=='已申请完成，待审核'" :checked.sync="t.isfinish" type="primary">完成</checkbox>
-				</tooltip>
-				<div class="content">
-					<div class="header">
-						工作内容
+  <div>
+	<div class="ui segment">
+		<div class="ui grid">
+			<div class="four wide column"></div>
+			<div class="eight wide column">
+				<button class="btn btn-block btn-default" @click="upload.show=true">提交开业相关资料</button>
+			</div>
+			<div class="four wide column"></div>
+		</div>
+	</div>	  
+	<div class="ui segment">
+		<Timeline>
+			<Timeline-item :color="t.status=='已完成'?'grean':'red'" v-for="t of tasks">
+				<Icon v-if="t.status=='已完成'" color="green" type="ios-trophy" slot="dot"></Icon>
+				<p class="time" v-html="t.time"></p>
+				<span :class="{'text-danger':t.status=='完成确认未通过，待重新申请','text-success':t.status=='已完成'}" v-html="status_generate(t)"></span>
+				<div class="content" id="box" :class="{'ui teal message':t.status=='已完成','ui pink message':t.status=='已申请完成，待审核','ui orange message':t.status=='待申请完成'||t.status=='完成确认未通过，待重新申请'}">
+					<tooltip effect="scale" placement="bottom" content="请在完成后，打勾申请完成">
+						<checkbox @click="checked(t)" class="finish" :disabled="t.status=='已完成'||t.status=='已申请完成，待审核'" :checked.sync="t.isfinish" type="primary">完成</checkbox>
+					</tooltip>
+					<div class="content">
+						<div class="header">
+							工作内容
+						</div>
+						<ul class="list">
+							<li  v-for="con of plans[t.time]">{{con}}</li>
+						</ul>
 					</div>
-					<ul class="list">
-						<li  v-for="con of plans[t.time]">{{con}}</li>
-					</ul>
-				</div>
-			</div>	
-        </Timeline-item>
-    </Timeline>
-	
+				</div>	
+			</Timeline-item>
+		</Timeline>
+	</div>
+    <modal :title="upload.title" :show.sync="upload.show" effect="zoom" large>
+						<div slot="modal-body" class="modal-body">
+								<table class="ui single line table">
+									<thead>
+										<tr>
+											<th>文件名称</th>
+											<th>提交形式</th>
+											<th>提交结果</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr v-for="f of files">
+											<td>{{f.name}}</td>
+											<td>{{f.form}}</td>
+											<td></td>
+											<td>
+												<Upload
+														:format="f.type"
+														:max-size="20480"
+														:name="f.name"
+														:data="{gymcode:select.code}"
+														action="https://api.thelittlegym.com.cn/oss/upload_preparation_files">
+ 
+
+														<button type="button" class="btn btn-default">
+															<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> upload
+														</button>
+												</Upload>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+						</div>
+            <div slot="modal-footer" class="modal-footer">
+                <button type="button" class="btn btn-primary" @click="upload.show=false;">退出</button>
+            </div>
+    </modal>
   </div>
 </template>
 
@@ -28,8 +76,12 @@
 	import Timeline from 'src/timeline/index.js';
 	import Icon from 'src/icon/index.js';
 	import TimelineItem from 'src/timeline-item/index.js';
-	import Tooltip from 'src/Tooltip.vue'
-	import Checkbox from 'src/Checkbox.vue'
+	import ITable from 'src/table/index.js';
+	import Upload from 'src/upload/index.js';
+	import IButton from 'src/button/index.js';
+	import Tooltip from 'src/Tooltip.vue';
+	import modal from '@/src/Modal.vue';
+	import Checkbox from 'src/Checkbox.vue';
 	import qs from 'qs';
 
     export default {
@@ -38,6 +90,10 @@
 			TimelineItem,
 			Tooltip,
 			Checkbox,
+			modal,
+			Upload,
+			IButton,
+			ITable,
 			Icon
 		},
 		props: {
@@ -47,8 +103,22 @@
 		},
 		data(){
 			return  { 
+				files:[
+					{name:'中心价目表',form:'Excel表格',type:['xls','xlsx']},
+					{name:'中心排课表',form:'Excel表格',type:['xls','xlsx']},
+					{name:'开业申请表',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
+					{name:'营业业执照',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
+					{name:'中心场地租凭协议',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
+					{name:'保险合同扫描件',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
+					{name:'中心消防合格证',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']}
+				],
 				visible: false,
 				tasks:[],
+				upload:{
+					show:false,
+					title:"上传文件"
+
+				},
 				plans:{
 					"Week 1": ["运营培训：启动培训，发出调研表格，Owner需要着手兼职的招聘； 薪酬结构框架图片要给到Owner，跟直营具体的薪酬结构（启动邮件中）结合来说。调研表格（市场+薪酬），薪酬调研（包括常用招聘渠道/对手品牌薪酬水平/当地的薪资水平）"],
 					"Week 2": [

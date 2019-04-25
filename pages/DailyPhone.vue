@@ -39,7 +39,7 @@
     	</div>	
     </div>
     <div class="ui segment" v-show="select.onlysql">
-        <pre v-for="s of datasql" track-by="$index" v-text="s"></pre>
+        <pre v-for="s of select.datasql" track-by="$index" v-text="s"></pre>
     </div>
 
     <div class="ui segment" id="PanelExcel">
@@ -50,31 +50,26 @@
         </div>
         <panel v-for="st of subtitles">
             <p slot="header" style="text-align: center;font-size: 20px;font-weight:bold;">{{st.content}}</p>
-            <table class="console" width="100%">
+            <table class="table console" width="100%">
                 <thead>
                     <tr>
-                        <th width="10%">家长</td>
-                        <th width="8%">手机</td>
-                        <th width="12%">孩子</td>
-                        <th width="10%">负责老师</td>
-                        <th width="15%">班级</td>
-                        <th width="10%">考勤状态</td>
-                        <th v-if="isadmin" width="10%" class="noPrint s_close">操作</td>
+                        <th v-for="f of st.fields" width="10%" v-if="f!='每日电话说明'">{{f}}</td>
+                        <th v-if="isadmin" width="10%" class="noPrint">操作</td>
                     </tr>
                 </thead>
                 <tbody  v-for="p of st.data">
-                    <tr>
-                        <td class="noPrint s_close" width="10%" v-html="p|family_url"></td>
-                        <td class="onlyPrint" width="10%" v-html="p['家长']"></td>
-                        <td v-text="p['手机']"></td>
-                        <td v-text="p['孩子']"></td>
-                        <td v-text="p['负责老师']"></td>
-                        <td v-text="p['班级']|simplefy"></td>
-                        <td v-text="p['考勤状态']"></td>
-                        <td v-if="isadmin" class="noPrint s_close"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
+                    <tr :class="{'success':todayGt(p)}">
+                        <td class="noPrint" width="10%" v-html="p|family_url"></td>
+                        <td :class="{'onlyPrint':f=='家长'}" v-for="f of st.fields" v-if="f!='每日电话说明'">{{p[f]}}</td>
+                        <td v-if="isadmin" class="noPrint"><button @click="allocate(p)" class="btn btn-primary btn-mini">分配老师</button></td>
                     </tr>
-                    <tr v-if="p&&!isempty(p['沟通记录'])">
-                        <td align="left" colspan="7">【沟通记录】<span v-html="p['沟通记录']"></span>
+                    <tr :class="{'success':todayGt(p)}" v-if="st.fields.indexOf('每日电话说明')!=-1">
+                        <td align="left" :colspan="st.fields.length+1">【每日电话说明】<span v-html="p['每日电话说明']"></span>
+                            <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
+                        </td>
+                    </tr>    
+                    <tr :class="{'success':todayGt(p)}" v-if="p&&!isempty(p['沟通记录'])">
+                        <td align="left" :colspan="st.fields.length+1">【沟通记录】<span v-html="p['沟通记录']"></span>
                             <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
                         </td>
                     </tr>          
@@ -83,7 +78,7 @@
         </panel>
     </div>
     <div>
-        <modal :show.sync="saveLsModal.show" effect="fade" :width="350">
+        <modal :show.sync="saveLsModal.show" effect="fade" small>
             <div slot="modal-header" class="modal-header">
                 <h4 class="modal-title">
                 <b>{{saveLsModal.title}}</b> 
@@ -91,10 +86,7 @@
             </div>
             <div slot="modal-body" class="modal-body">
                 <div class="ui form">
-                    <div class="two fields">
-                        <div class="field"><v-select readonly disabled :value.sync="saveLsModal.former" placeholder="原负责老师" :options="saveLsModal.formers" options-label="name" options-value="id" required></v-select></div>	
-                        <div class="field"><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span><v-select :value.sync="saveLsModal.newer" placeholder="新负责老师" clearable :options="saveLsModal.newers|lsFilter" options-label="name" options-value="id" required></v-select></div>
-                    </div>
+                        <div class="field "><v-select :value.sync="saveLsModal.newer" placeholder="今日电话老师" clearable :options="saveLsModal.newers|lsFilter" options-label="name" options-value="id" required></v-select></div>
                 </div>
             </div>
             <div slot="modal-footer" class="modal-footer">
@@ -139,25 +131,25 @@ export default {
                 gyms:[],
                 gymNames:{},
                 phonePlans:[],
+                datasql:[],
 	            dtReport:this.fmtDt_s(new Date())
             },
             subtitles:[
-                {type:1,content:"三天前录入且尚未预约体验",data:[]},
-                {type:2,content:"前天体验且未报名",data:[]},
-                {type:3,content:"昨天体验未出席",data:[]},
-                {type:4,content:"明天体验",data:[]},
-                {type:5,content:"今天计划联系",data:[]},
-                {type:6,content:"过去30天没有联系的潜在客户",data:[]},
-                {type:7,content:"即将到来的生日会",data:[]}
+                {type:1,fields:['家长','手机','孩子','负责老师','今日电话老师'],content:"三天前录入且尚未预约体验",data:[]},
+                {type:2,fields:['家长','手机','孩子','负责老师','班级','今日电话老师'],content:"前天体验且未报名",data:[]},
+                {type:3,fields:['家长','手机','孩子','负责老师','班级','最近体验信息','今日电话老师'],content:"昨天体验未出席",data:[]},
+                {type:4,fields:['家长','手机','孩子','负责老师','班级','考勤状态','今日电话老师'],content:"明天体验",data:[]},
+                {type:5,fields:['家长','手机','孩子','负责老师','咨询日期','每日电话说明','最近体验信息','今日电话老师'],content:"今天计划联系",data:[]},
+                {type:6,fields:['家长','手机','孩子','负责老师','咨询日期','每日电话说明','最近体验信息','今日电话老师'],content:"过去30天没有联系的潜在客户",data:[]},
+                {type:7,fields:['家长','手机','孩子','生日','今日电话老师'],content:"即将到来的生日会",data:[]}
             ],
-            datasql:[],
             isadmin:false,
             onlyOwn:true,
             error:{
                 show:false,
                 content:''
             },
-            saveLsModal:{show:false,title:'重新指派老师负责跟进',dropback:false,formers:[],newers:[],former:null,newer:null}
+            saveLsModal:{show:false,title:'指派老师负责电话跟进',dropback:false,formers:[],newers:[],former:null,newer:null}
 		}
 	  },
       components:{
@@ -236,8 +228,15 @@ export default {
            sql = sql.replace(/@id/ig,this.select.row&&this.select.row.id);
            return sql;
         },
+        todayGt:function(p){
+            return p&&(p['沟通记录'].indexOf(this.select.dtReport)!=-1||
+                     p.dtappoint==this.select.dtReport
+                    )
+            
+        },
         isempty:function(str){
             if(str){
+              str=str.replace('<b></b>','');
               return str.indexOf(':')+1==str.length;
             }else{
               return true;
@@ -330,7 +329,7 @@ export default {
                  if(res.status==200){
                     let sql =res.data.info[1].sql;
 				    sql =sql.replace(/quot;/gi,"'")
-                    self.datasql.push(sql)
+                    self.select.datasql.push(sql)
                     res=res.data.info[0].rec;
                     if(typeof res=='object'){
                        self.select.phonePlans = res.concat(self.select.phonePlans);
@@ -356,7 +355,7 @@ export default {
                  if(res.status==200){
                     let sql =res.data.info[1].sql;
 				    sql =sql.replace(/quot;/gi,"'")
-                    self.datasql.push(sql)
+                    self.select.datasql.push(sql)
                     res=res.data.info[0].rec;
                     if(typeof res=='object'){
                        self.select.phonePlans = self.select.phonePlans.concat(res);
@@ -395,11 +394,11 @@ export default {
             this.saveLsModal.show=true;    
         },
 	    save(){
-           let sql_update="update zx set zx.crmzdy_81636452_id=@newer from crm_zdytable_238592_25111_238592_view zx where zx.id=@id;";
+           let sql_update="update zx set crmzdy_87682347_id=@newer from crm_zdytable_238592_25111_238592_view zx where zx.id=@id;";
            sql_update = this.param(sql_update);
            //console.log(sql_update)
 		   if(sql_update){
-				sql_update+="select top 1 0 errcode,'ok' errmsg for json path,without_array_wrapper;"
+				sql_update+="select top 1 0 errcode,'ok' errmsg,'@sql'sql for json path,without_array_wrapper;"
 				sql_update=this.convertor.ToUnicode(sql_update);
 				let self=this;
 				self.saveLsModal.show=false;
@@ -409,13 +408,12 @@ export default {
 						params:{sql1:sql_update,onlysql:(self.select.onlysql?1:0)}
 					}).then(function(res){
 						if(res.status=200&&res.data.errcode==0){
-							self.alertSuccess={show:true,title:'操作提示',msg:'操作成功'};
                             self.select.row.idls=self.saveLsModal.newer
                             let n = self.saveLsModal.newers.find(function(n){
                                 return self.saveLsModal.newer==n.id;
                             });
                             //console.log(n)
-                            self.select.row['负责老师']=n['name'];
+                            self.select.row['今日电话老师']=n['name'];
 						}else{
                             self.alertError={title:"错误提示",msg:"操作失败",show:true}
 						}
@@ -453,7 +451,7 @@ export default {
        margin-top:3%;
     }
     .subtitle{
-       font-size:1.5em;
+       font-size:1.4em;
     }
     @media screen{
         .onlyPrint{
@@ -467,6 +465,9 @@ export default {
         * {
             padding:0!important;
             border:none!important;
+        }
+        .table {
+            margin: 0!important;
         }
     }
     .panel{

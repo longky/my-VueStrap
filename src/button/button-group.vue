@@ -4,19 +4,15 @@
     </div>
 </template>
 <script>
-    import { oneOf } from 'src/utils/assist';
+    import { oneOf } from '../utils/assist';
 
     const prefixCls = 'ivu-btn-group';
 
     export default {
-        name: 'ButtonGroup',
         props: {
             size: {
                 validator (value) {
-                    return oneOf(value, ['small', 'large', 'default']);
-                },
-                default () {
-                    return !this.$IVIEW || this.$IVIEW.size === '' ? 'default' : this.$IVIEW.size;
+                    return oneOf(value, ['small', 'large']);
                 }
             },
             shape: {
