@@ -32,43 +32,52 @@
 		</Timeline>
 	</div>
     <modal :title="upload.title" :show.sync="upload.show" effect="zoom" large>
-						<div slot="modal-body" class="modal-body">
-								<table class="ui single line table">
-									<thead>
-										<tr>
-											<th>文件名称</th>
-											<th>提交形式</th>
-											<th>提交结果</th>
-											<th>操作</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr v-for="f of files">
-											<td>{{f.name}}</td>
-											<td>{{f.form}}</td>
-											<td></td>
-											<td>
-												<Upload
-														:format="f.type"
-														:max-size="20480"
-														:name="f.name"
-														:data="{gymcode:select.code}"
-														action="https://api.thelittlegym.com.cn/oss/upload_preparation_files">
- 
-
-														<button type="button" class="btn btn-default">
-															<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> upload
-														</button>
-												</Upload>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-						</div>
+			<div slot="modal-body" class="modal-body">
+					<table class="ui single line table">
+						<thead>
+							<tr>
+								<th>文件名称</th>
+								<th>提交形式</th>
+								<th>提交结果</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="f of files">
+								<td>{{f.name}}</td>
+								<td>{{f.form}}</td>
+								<td>
+									<Tag color="success"  v-if="f.result">{{f.result}}</Tag>
+									<Tag color="error" v-else>待提交</Tag>
+								</td>
+								<td>
+									<Upload
+										:format="f.type"
+										:on-format-error="handleFormatError"
+										:max-size="20480"
+										:on-exceeded-size="handleMaxSize"
+										:name="f.name"
+										:data="{gymcode:select.code}"
+										:on-success="handleSuccess(f)"
+										action="https://api.thelittlegym.com.cn/oss/upload_preparation_files">
+										<button type="button" class="btn btn-default">
+											<span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> Upload
+										</button>
+									</Upload>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+			</div>
             <div slot="modal-footer" class="modal-footer">
                 <button type="button" class="btn btn-primary" @click="upload.show=false;">退出</button>
             </div>
     </modal>
+	<alert :show.sync="error.show" placement="top" duration="3000" type="danger" width="400px" dismissable>
+	<span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
+	<strong>Heads up!</strong>
+	<p>{{error.msg}}</p>
+	</alert>
   </div>
 </template>
 
@@ -82,6 +91,8 @@
 	import Tooltip from 'src/Tooltip.vue';
 	import modal from '@/src/Modal.vue';
 	import Checkbox from 'src/Checkbox.vue';
+	import alert from '@/src/Alert.vue';
+    import Tag from 'src/tag';
 	import qs from 'qs';
 
     export default {
@@ -94,7 +105,9 @@
 			Upload,
 			IButton,
 			ITable,
-			Icon
+			Icon,
+			alert,
+			Tag 
 		},
 		props: {
 			select: {
@@ -103,14 +116,15 @@
 		},
 		data(){
 			return  { 
+				error:{show:false,msg:""},
 				files:[
-					{name:'中心价目表',form:'Excel表格',type:['xls','xlsx']},
-					{name:'中心排课表',form:'Excel表格',type:['xls','xlsx']},
-					{name:'开业申请表',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
-					{name:'营业业执照',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
-					{name:'中心场地租凭协议',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
-					{name:'保险合同扫描件',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']},
-					{name:'中心消防合格证',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf']}
+					{name:'中心价目表',form:'Excel表格',type:['xls','xlsx'],result:""},
+					{name:'中心排课表',form:'Excel表格',type:['xls','xlsx'],result:""},
+					{name:'开业申请表',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf'],result:""},
+					{name:'营业业执照',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf'],result:""},
+					{name:'中心场地租凭协议',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf'],result:""},
+					{name:'保险合同扫描件',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf'],result:""},
+					{name:'中心消防合格证',form:'电子照片或扫描件',type:['jpg','jpeg','png','pdf'],result:""}
 				],
 				visible: false,
 				tasks:[],
@@ -166,6 +180,36 @@
 					console.error(res);
 				});
 			},
+            handleFormatError (file) {
+				this.error.msg="文件格式不正确";
+				this.error.show=true;
+			},
+            handleMaxSize (file) {
+				this.error.msg="超出文件大小限制(最大20M)";
+				this.error.show=true;
+			},
+            handleSuccess (f) {
+				var self=this;
+				return function (res, file){
+					if(res.code==200){
+						console.log(res.data['oss-request-url'])
+						file.url = res.data['oss-request-url'];
+						if(res.data['oss-stringtosign']&&self.getFileName(res.data['oss-stringtosign'])){
+						   file.name = self.getFileName(res.data['oss-stringtosign']);
+						}
+						f.result="已提交"
+					}
+				}
+			
+			},
+			getFileName:function(path){
+				let res=path.match(/\/([^\/]*)$/);
+				if(res){
+				  return res[1];
+				}else{
+				  return null;
+				}
+			},
 			checked: function (t) {
 				if(t.isfinish) return;
 				var sql=sql_confirm;self=this;
@@ -182,6 +226,26 @@
 					console.error(res);
 				});
 			},
+			getOss: function (t) {
+				let url="https://api.thelittlegym.com.cn/oss/list_preparation_files";
+				let self=this;
+				this.$axios.get(url,{
+					params:{gymcode:this.select.code}
+				})
+				.then(function(res){
+					if(res.status==200){
+						self.files.map(function(f){
+							if(res.data.findIndex(function(row){
+								return row.name.indexOf(f.name)!=-1;
+							})!=-1){
+								f.result="已提交";
+							}
+						})
+					}  
+				},function(res){
+					console.error(res);
+				});
+			},
 			status_generate:function(t){
                 var mess=t.status;
 				mess+=t.reason?('  原因：'+t.reason):'';
@@ -190,7 +254,8 @@
 			}
 		},
 		ready(){
-            this.getTasks();
+			this.getTasks();
+			this.getOss();
 		},
 	}
  </script>
@@ -214,7 +279,10 @@
 		/* //border:  solid red 4px ; */
 		margin-right: 20px !important;
 	}
-
+	 .table>tbody>tr>td, .table>tfoot>tr>td{
+		padding-bottom: 0!important;
+		vertical-align: middle!important;
+	}
 	.dt-input {
 		cursor: pointer;
 	}
@@ -229,5 +297,10 @@
 		font-size: 21px;
 		font-weight: bold;
 		line-height: 1;
+	}
+	.alert-icon-float-left {
+		font-size:23px;
+		float:left;
+		margin-right:5px;
 	}
 </style>
