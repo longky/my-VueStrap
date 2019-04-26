@@ -226,7 +226,7 @@
 					console.error(res);
 				});
 			},
-			getOss: function (t) {
+			getOss: function () {
 				let url="https://api.thelittlegym.com.cn/oss/list_preparation_files";
 				let self=this;
 				this.$axios.get(url,{
