@@ -1,5 +1,5 @@
 <template>
-<div class="ui segment">
+<div class="ui segment" @click="flushstate">
     <div class="ui segment isPrint">
         <h1 class="title">每日电话报表</h1>
     </div>
@@ -68,8 +68,9 @@
                             <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
                         </td>
                     </tr>    
-                    <tr :class="{'success':todayGt(p)}" v-if="p&&!isempty(p['沟通记录'])">
-                        <td align="left" :colspan="st.fields.length+1">【沟通记录】<span v-html="p['沟通记录']"></span>
+                    <tr :class="{'success':todayGt(p)}">
+                        <td align="left" :colspan="st.fields.length+1">
+                            <span v-if="p&&!isempty(p['沟通记录'])" v-html="'【沟通记录】'+p['沟通记录']"></span>
                             <hr style="height:1px;border:none;border-top:1px dashed #0066CC;">
                         </td>
                     </tr>          
@@ -162,6 +163,15 @@ export default {
            datepicker
       },
 	  computed:{
+          id_sql:function(){
+              var data=this.select.phonePlans;
+              var sql="";
+              data&&data.forEach(function(el,index){
+                sql += "select "+el.id+" idzx,"+index+" xh union all ";
+              }); 
+              sql = sql.slice(0,-10)
+              return  sql;
+          }
       },
       filters:{
         simplefy:function(val){
@@ -207,6 +217,32 @@ export default {
             }      
       },
       methods: {
+        flushstate:function(){
+           if(this.id_sql){
+                let self=this,res=[];
+                let sql="select zx.crmzdy_87682347 ls,trans.*,isnull((select convert(varchar(10),create_time,120)+';' from crm_zdytable_238592_23576_238592 ty where ty.isdelete=0 and ty.crmzdy_81620307_id=zx.id for xml path('')),'')dtappoint,replace(replace('<b>'+ltrim(isnull( '家长需求：'+nullif(crmzdy_87677161,''),'')+isnull( ' 孩子性格：'+nullif(crmzdy_87676839,''),'')+isnull( ' 距离：'+nullif(crmzdy_87676845,''),'')+isnull( ' 早教课程：'+nullif(crmzdy_87676842,''),'')+isnull( ' 家庭带养人：'+nullif(crmzdy_87676848 ,''),'')),' ','，')+'</b> '+replace(case when patindex('|%|%|%|%',isnull(crmzdy_81802275,''))>0 then substring(isnull(crmzdy_81802275,''),2,charindex('|',isnull(crmzdy_81802275,''),2)-3)+substring(replace(reverse(left(reverse(isnull(crmzdy_81802275,'')),charindex('|',reverse(isnull(crmzdy_81802275,'')),charindex('|',reverse(isnull(crmzdy_81802275,'')))+1))),'|',''),0,8000) else substring(replace(isnull(crmzdy_81802275,''),'|',''),0,8000) end,char(13),' '),char(10),'。')gt from crm_zdytable_238592_25111_238592_view zx join (@trans) trans on zx.id=trans.idzx";
+                sql=sql.replace("@dtReport",this.select.dtReport).replace("@trans",this.id_sql);
+                sql = this.convertor.ToUnicode(sql);
+                self.$axios.get(url_jsonp,{
+                    params:{sql1: sql}
+                }).then(function(res){
+                    if(res.status==200){
+                        res = res.data.info[0].rec;
+                        if(res&& typeof res!='string'){
+                            res.map(function(r){
+                                if(self.select.phonePlans[r.xh]){
+                                    self.select.phonePlans[r.xh]['沟通记录']=r.gt;
+                                    self.select.phonePlans[r.xh]['今日电话老师']=r.ls;  
+                                    self.select.phonePlans[r.xh]['dtappoint']=r.dtappoint;  
+                                }
+                            })
+                        }
+                    } 
+                },function(res){
+                    console.error(res.status);
+                });
+           }
+        },
         HtmlExportToExcel:function(id,name){
             HtmlExportToExcel(id,name+'_'+this.select.dtReport);
             // window.location.reload();
@@ -230,8 +266,8 @@ export default {
         },
         todayGt:function(p){
             return p&&(p['沟通记录'].indexOf(this.select.dtReport)!=-1||
-                     p.dtappoint==this.select.dtReport
-                    )
+                      p.dtappoint.indexOf(this.select.dtReport+";")!=-1
+                    );
             
         },
         isempty:function(str){
@@ -247,9 +283,9 @@ export default {
             var data=[];
             self.subtitles.map(function(s){
                 data = self.select.phonePlans.filter(function(p){
-                        return  s.type==p.type&&(
-                                !self.onlyOwn||p.idls==self.select.iduser
-                        )
+                    return  s.type==p.type&&(
+                            !self.onlyOwn||p.idls==self.select.iduser
+                    )
                 })
                 if(data) s.data=data;
             })
@@ -425,6 +461,12 @@ export default {
       },
       created: function () {
            this.getAcl();
+           let self=this;
+           setInterval(() => {
+               if(self.select.phonePlans&&self.select.phonePlans.length>0){
+                 self.flushstate();
+               }
+           }, 120000);
       }
   } 
 
@@ -462,7 +504,7 @@ export default {
         .onlyPrint{
             display: "";
         } 
-        * {
+        :not(hr) {
             padding:0!important;
             border:none!important;
         }
