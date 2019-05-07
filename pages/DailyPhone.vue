@@ -145,7 +145,7 @@ export default {
                 {type:7,fields:['家长','手机','孩子','生日','今日电话老师'],content:"即将到来的生日会",data:[]}
             ],
             isadmin:false,
-            onlyOwn:true,
+            onlyOwn:false,
             error:{
                 show:false,
                 content:''
@@ -466,7 +466,7 @@ export default {
                if(self.select.phonePlans&&self.select.phonePlans.length>0){
                  self.flushstate();
                }
-           }, 120000);
+           }, 110000);
       }
   } 
 

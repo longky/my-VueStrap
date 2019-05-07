@@ -1,6 +1,11 @@
 <template>
     <div class="ui segments" v-show="pageShow">
         <div class="ui segment">
+              <alert :show.sync="alertError.show" placement="top" type="danger" width="400px" dismissable>
+                <span class="glyphicon glyphicon-info-sign alert-icon-float-left"></span>
+                <strong>{{alertError.title}}</strong>
+                <p style="font-size:1.5em" v-html="alertError.msg"></p>
+              </alert>
               <div class="ui four column stackable grid">
                     <div class="column left aligned">
 						<div class="input-group">
@@ -236,29 +241,17 @@
                   </div>
             </div>
         </div>    
-        <div class="ui segment" v-show="report_cur=='memberstat'">
-            <table class="ui selectable celled table">
-                <tr class="positive">
-                    <th>会员数</th>
-                    <th>非会员数</th>
-                </tr>
-                <tr>
-                    <td>{{stat['会员']}}</td>
-                    <td>{{stat['非会员']}}</td>
-                </tr>
-            <table>
-         </div>
-        <alert :show.sync="alertError.show" placement="top" duration="4000" type="danger" width="400px" dismissable>
-                <span class="glyphicon glyphicon-info-sign"></span>
-                <strong>{{alertError.title}}</strong>
-                <p style="padding-left:8%" v-html="alertError.msg"></p>
-        </alert>
+        <Rpt-member v-if="report_cur=='memberstat'" :stat="stat"></Rpt-member>
+        <Rpt-unhandle v-if="report_cur=='unhandle_stat'" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
+         
     </div>
 </template>
 
 <script>
 import vSelect from '@/src/Select.vue'
 import alert from '@/src/Alert.vue'
+import RptMember from './components/RptMember.vue'
+import RptUnhandle from './components/RptUnhandle.vue'
 import datepicker from '@/src/Datepicker.vue'
 
 export default {
@@ -271,6 +264,8 @@ export default {
   components:{
 	vSelect,
     alert,
+    RptMember,
+    RptUnhandle,
     datepicker
   },
   data:function(){
@@ -285,7 +280,8 @@ export default {
         reports:[{id:"fansData",label:"新增粉丝量汇总表"},
                  {id:"sumData",label:"预报名和报名汇总表"},
                  {id:"kxjData",label:"开学季活动报名情况汇总"},
-                 {id:"memberstat",label:"系统会员与非会员统计"}
+                 {id:"memberstat",label:"系统会员与非会员统计"},
+                 {id:"unhandle_stat",label:"总部市场例子跟进情况统计"}
                  ],
         report_cur:null,
         sumData:[],
@@ -299,7 +295,9 @@ export default {
         stat:{},
         fansTotal:0,
         campaigns:this.select.campaigns,
-        alertError:{show:false,title:'错误提示',msg:''}
+        alertError:{show:false,title:'错误提示',msg:''},
+        handle_rank_down:[],
+        handle_rank:[]
      }
   },
   computed:{
@@ -358,7 +356,11 @@ export default {
           }
       },
       where_campaign:function(){
-          return "camp.crmzdy_82053258='"+this.select.campaign_selected+"'";
+            if (this.select.campaign_selected="所有"){
+                return "1=1";
+            }else{
+                return "camp.crmzdy_82053258='"+this.select.campaign_selected+"'";
+            }
       },
       sqlEnrolTotal:function () {
           if(this.group_selected=="按中心"){
@@ -411,9 +413,9 @@ export default {
         },
         isrecd:function(val){
             if(val==1){
-            return "是";
+               return "是";
             }else{
-            return "否";
+               return "否";
             }
         }
   },
@@ -476,15 +478,17 @@ export default {
             this.getKxjTotal(); 
         }else if(this.report_cur=="memberstat"){
             this.getMemberStat(); 
+        }else if(this.report_cur=="unhandle_stat"){
+            this.getHandleStat(); 
         }
       },
       getMemberStat:function(){
             let self=this;
             let sql=member_stat;  
             if(this.dtEnd){
-                sql=sql.replace("@whereend","zx.create_time<='"+this.dtEnd+" 00:00:00'")
+                sql=sql.replace("@whereend","zx.create_time<='"+this.dtEnd+" 00:00:00'").replace(/@dtend/g,this.dtEnd);
             }else{
-                sql=sql.replace("@whereend","1=1")
+                sql=sql.replace("@whereend","1=1").replace(/@dtend/g,this.fmtDt_s(new Date()));
             }
             var whereht=[],wherezx=[]
             if(this.dtStart){
@@ -524,7 +528,6 @@ export default {
                 self.select.start=false;
                 console.log(res.status);
             })
-
       },
 	  getKxjTotal:function(){
         var self=this;
@@ -553,6 +556,62 @@ export default {
             self.select.start=false;
             console.log(res.status);
         });
+      }, 
+	  getHandleStat:function(){
+            if(!this.dtStart||!this.dtEnd){
+                this.alertError.msg="请选择开始和结束日期";
+                this.alertError.show=true;
+                console.log(this.alertError)
+                return;
+            }
+            var self=this;
+            self.select.start=true;
+            self.handle_rank=[];
+            self.handle_rank_down=[];
+            var sql = sql_handle;
+            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = this.convertor.ToUnicode(sql);
+            self.$http.jsonp(url_jsonp,{
+                sql1: sql ,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value=sql;
+                var res_data = res.data.info[0].rec;
+                if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                    self.handle_rank=res_data;
+                    //console.log(JSON.stringify(self.rowGroup))
+                }
+                self.select.start=false; 
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            });
+            sql = sql_handle_down;
+            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = this.convertor.ToUnicode(sql);
+            self.$http.jsonp(url_jsonp,{
+                sql1: sql ,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value=sql;
+                var res_data = res.data.info[0].rec;
+                if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                    self.handle_rank_down=res_data;
+                    //console.log(JSON.stringify(self.rowGroup))
+                }
+                self.select.start=false; 
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            });
       }, 
       getEnrolTotal:function(){
         var self=this;
@@ -678,6 +737,8 @@ export default {
                     return c.name.indexOf("奥运集训营")!=-1;
                 })
                 this.select.campaign_selected=this.campaigns[0]&&this.campaigns[0].name;
+            }else if(this.report_cur=="unhandle_stat"){
+                this.select.campaign_selected="所有";
             }else{
                 this.campaigns=this.select.campaigns;
                 this.select.campaign_selected=null;
