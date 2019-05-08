@@ -33,7 +33,7 @@
               </div>	
         </div>
         <div class="ui segment">
-           <div v-show="onlysql.checked"><pre v-text="onlysql.value|sql"></pre></div>
+           <div v-show="onlysql.checked"><pre v-for="s of onlysql.value" v-text="s|sql"></pre></div>
         </div>
         <div class="ui segment">
             <div class="ui form">
@@ -272,7 +272,7 @@ export default {
      return {
         dtStart:"",
         dtEnd:"",
-        onlysql:{checked:false,value:""},
+        onlysql:{checked:false,value:undefined},
         groups:[{id:"m_code",name:"按宣传资料"},{id:"center",name:"按来源中心"},{id:"is_recnd",name:"按是否来自朋友推荐"}],
         groups2:["按中心","按是否来自朋友推荐"],
         groups_selected:["m_code","center","is_recnd"],
@@ -520,7 +520,7 @@ export default {
             }).then(function(res){
                 var sql =res.data.info[1].sql;
                 sql =sql.replace(/quot;/gi,"'")
-                self.onlysql.value=sql;
+                self.onlysql.value=[sql];
                 var res_data = res.data.info[0].rec[0];
                 self.stat=res_data;
                 self.select.start=false;
@@ -545,7 +545,7 @@ export default {
         }).then(function(res){
             var sql =res.data.info[1].sql;
             sql =sql.replace(/quot;/gi,"'")
-            self.onlysql.value=sql;
+            self.onlysql.value=[sql];
             var res_data = res.data.info[0].rec;
             if(res_data.constructor!=String&&!self.onlysql.checked){ 
                 self.kxjData=res_data;
@@ -579,7 +579,7 @@ export default {
             }).then(function(res){
                 var sql =res.data.info[1].sql;
                 sql =sql.replace(/quot;/gi,"'")
-                self.onlysql.value=sql;
+                self.onlysql.value=[sql];
                 var res_data = res.data.info[0].rec;
                 if(res_data.constructor!=String&&!self.onlysql.checked){ 
                     self.handle_rank=res_data;
@@ -601,7 +601,7 @@ export default {
             }).then(function(res){
                 var sql =res.data.info[1].sql;
                 sql =sql.replace(/quot;/gi,"'")
-                self.onlysql.value=sql;
+                self.onlysql.value.push(sql);
                 var res_data = res.data.info[0].rec;
                 if(res_data.constructor!=String&&!self.onlysql.checked){ 
                     self.handle_rank_down=res_data;
@@ -627,7 +627,7 @@ export default {
         }).then(function(res){
             var sql =res.data.info[1].sql;
             sql =sql.replace(/quot;/gi,"'")
-            self.onlysql.value=sql;
+            self.onlysql.value=[sql];
             var res_data = res.data.info[0].rec;
             if(res_data.constructor!=String&&!self.onlysql.checked){ 
                 self.sumData=res_data;
@@ -658,7 +658,7 @@ export default {
             jsonp:'callback'
         }).then(function(res){
             var sql =self.sqlBuilder;
-            self.onlysql.value=sql;
+            self.onlysql.value=[sql];
             var res_data = res.data;
             if(!res.code&&!self.onlysql.checked){ 
                 self.h5_data=res_data.data;
