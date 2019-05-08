@@ -22,10 +22,21 @@
             </div>
             <div class="row">
     		    <div class="column"></div>
-    			<div class="column middle aligned">
-    			      <checkbox :checked.sync="onlyOwn" type="danger" class="tooltips" title="负责老师是自己的例子家庭'">仅显示自己需要跟进的</checkbox>
+    			<div class="column">
+                    <div class="ui two column grid">
+                            <div class="column">
+                                <tooltip effect="scale" placement="bottom" content="GD分配需要今日电话的例子家庭">
+                                     <checkbox :checked.sync="onlyAllocated" type="danger">显示自己今天需要跟进的</checkbox>
+                                </tooltip>
+                            </div>
+                            <div class="column">
+                                <tooltip effect="scale" placement="bottom" content="负责老师是自己的例子家庭">
+                                    <checkbox :checked.sync="onlyCharge" type="danger">显示自己负责的</checkbox>                   
+                                </tooltip>
+                            </div>
+                    </div>
     			</div>
-    			<div class="column middle aligned" v-if="select.acl.indexOf('系统管理员')!=-1">
+    			<div class="column" v-if="select.acl.indexOf('系统管理员')!=-1">
     			      <checkbox :checked.sync="select.onlysql" type="danger" >是否打印sql（仅管理员）</checkbox>
     			</div>
     			<div class="column"></div>
@@ -112,7 +123,7 @@ import vSelect from '@/src/Select.vue';
 import modal from '@/src/Modal.vue';
 import tooltip from '@/src/Tooltip.vue';
 import datepicker from 'src/Datepicker.vue';
-import checkbox from 'src/Checkbox.vue';
+import checkbox from 'src/checkbox';
 import panel from 'src/Panel.vue';
 
 import qs from 'qs';
@@ -145,7 +156,8 @@ export default {
                 {type:7,fields:['家长','手机','孩子','生日','今日电话老师'],content:"即将到来的生日会",data:[]}
             ],
             isadmin:false,
-            onlyOwn:false,
+            onlyAllocated:false,
+            onlyCharge:false,
             error:{
                 show:false,
                 content:''
@@ -160,6 +172,7 @@ export default {
            alert,
            vSelect,
            checkbox,
+           tooltip,
            datepicker
       },
 	  computed:{
@@ -209,12 +222,18 @@ export default {
         　　　   },
         　　　   deep: true
             },
-            "onlyOwn":{
+            "onlyAllocated":{
                 handler(newValue, oldValue) {
                     this.phoneFilter();
         　　　   },
         　　　   deep: true
-            }      
+            },
+            "onlyCharge":{
+                handler(newValue, oldValue) {
+                    this.phoneFilter();
+        　　　   },
+        　　　   deep: true
+            }          
       },
       methods: {
         flushstate:function(){
@@ -265,8 +284,8 @@ export default {
            return sql;
         },
         todayGt:function(p){
-            return p&&(p['沟通记录'].indexOf(this.select.dtReport)!=-1||
-                      p.dtappoint.indexOf(this.select.dtReport+";")!=-1
+            return p&&p['沟通记录']&&(p['沟通记录'].indexOf(this.select.dtReport)!=-1||
+                      p.dtappoint&&p.dtappoint.indexOf(this.select.dtReport+";")!=-1
                     );
             
         },
@@ -284,8 +303,10 @@ export default {
             self.subtitles.map(function(s){
                 data = self.select.phonePlans.filter(function(p){
                     return  s.type==p.type&&(
-                            !self.onlyOwn||p.idls==self.select.iduser
-                    )
+                                (!self.onlyAllocated&&!self.onlyCharge)||
+                                (self.onlyAllocated&&p.idls==self.select.iduser)||
+                                (self.onlyCharge&&p.idfzls==self.select.iduser)
+                           )
                 })
                 if(data) s.data=data;
             })
@@ -303,7 +324,7 @@ export default {
                     ||self.select.acl.indexOf('运营顾问')!=-1
                     ||self.select.acl.indexOf('运营总监')!=-1
                     ){
-                        self.onlyOwn=false;
+                        self.onlyAllocated=false;
                         self.isadmin=true;
                     }
                     self.getGym();
@@ -359,14 +380,14 @@ export default {
              sql = this.convertor.ToUnicode(sql);
              self.$axios({
                     method: 'post',
-                    url:url_jsonp,
+                    url:url_local,
                     data:qs.stringify({sql1:sql,onlysql:(self.select.onlysql?1:0)})
                 }).then(function(res){
                  if(res.status==200){
-                    let sql =res.data.info[1].sql;
+                    let sql =res.data.sql;
 				    sql =sql.replace(/quot;/gi,"'")
                     self.select.datasql.push(sql)
-                    res=res.data.info[0].rec;
+                    res=res.data.phones;
                     if(typeof res=='object'){
                        self.select.phonePlans = res.concat(self.select.phonePlans);
                     }
@@ -424,8 +445,8 @@ export default {
         allocate:function(row){
             this.select.row=row;
             this.saveLsModal.newer=null;
-            this.saveLsModal.former=row.idls;
-            this.saveLsModal.formers.push({id:row.idls,name:row['负责老师']});
+            // this.saveLsModal.former=row.idls;
+            // this.saveLsModal.formers.push({id:row.idls,name:row['每日电话老师']||row['负责老师']});
             this.getLs();
             this.saveLsModal.show=true;    
         },
@@ -450,6 +471,7 @@ export default {
                             });
                             //console.log(n)
                             self.select.row['今日电话老师']=n['name'];
+                            console.log(self.select.row)
 						}else{
                             self.alertError={title:"错误提示",msg:"操作失败",show:true}
 						}
