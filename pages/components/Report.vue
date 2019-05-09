@@ -242,7 +242,7 @@
             </div>
         </div>    
         <Rpt-member v-if="report_cur=='memberstat'" :stat="stat"></Rpt-member>
-        <Rpt-unhandle v-if="report_cur=='unhandle_stat'" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
+        <Rpt-unhandle v-if="report_cur=='unhandle_stat'" :handle_time_ave="handle_time_ave" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
          
     </div>
 </template>
@@ -272,7 +272,7 @@ export default {
      return {
         dtStart:"",
         dtEnd:"",
-        onlysql:{checked:false,value:undefined},
+        onlysql:{checked:false,value:[]},
         groups:[{id:"m_code",name:"按宣传资料"},{id:"center",name:"按来源中心"},{id:"is_recnd",name:"按是否来自朋友推荐"}],
         groups2:["按中心","按是否来自朋友推荐"],
         groups_selected:["m_code","center","is_recnd"],
@@ -297,7 +297,8 @@ export default {
         campaigns:this.select.campaigns,
         alertError:{show:false,title:'错误提示',msg:''},
         handle_rank_down:[],
-        handle_rank:[]
+        handle_rank:[],
+        handle_time_ave:[],
      }
   },
   computed:{
@@ -561,7 +562,6 @@ export default {
             if(!this.dtStart||!this.dtEnd){
                 this.alertError.msg="请选择开始和结束日期";
                 this.alertError.show=true;
-                console.log(this.alertError)
                 return;
             }
             var self=this;
@@ -579,7 +579,7 @@ export default {
             }).then(function(res){
                 var sql =res.data.info[1].sql;
                 sql =sql.replace(/quot;/gi,"'")
-                self.onlysql.value=[sql];
+                if(sql)self.onlysql.value=[sql];
                 var res_data = res.data.info[0].rec;
                 if(res_data.constructor!=String&&!self.onlysql.checked){ 
                     self.handle_rank=res_data;
@@ -605,6 +605,28 @@ export default {
                 var res_data = res.data.info[0].rec;
                 if(res_data.constructor!=String&&!self.onlysql.checked){ 
                     self.handle_rank_down=res_data;
+                    //console.log(JSON.stringify(self.rowGroup))
+                }
+                self.select.start=false; 
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            });
+            sql = sql_handle_time_ave;
+            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = this.convertor.ToUnicode(sql);
+            self.$http.jsonp(url_jsonp,{
+                sql1: sql ,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value.push(sql);
+                var res_data = res.data.info[0].rec;
+                if(res_data.constructor!=String&&!self.onlysql.checked){ 
+                    self.handle_time_ave=res_data;
                     //console.log(JSON.stringify(self.rowGroup))
                 }
                 self.select.start=false; 

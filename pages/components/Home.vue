@@ -61,7 +61,13 @@
 					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
 						<label>筛选条件:</label>
 						<div class="field" v-for="s in arr_status">
-							<div class="ui checkbox">
+							<div class="ui checkbox"  v-if="s=='已首次联系'">
+								<tooltip effect="scale" placement="bottom" :content="tips.handling">
+								<input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
+								<label :for="s">{{s}}</label>
+								</tooltip>
+							</div>
+							<div class="ui checkbox"  v-else>
 								<input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
 								<label :for="s">{{s}}</label>
 							</div>
@@ -188,14 +194,15 @@
 
 
 <script>
-import vSelect from '@/src/Select.vue'
-import alert from '@/src/Alert.vue'
-import modal from '@/src/Modal.vue'
-import bsInput from '@/src/Input.vue'
-import tlgTable from '@/src/Table.vue'
-import dropdown from '@/src/Dropdown.vue'
-import mzDatepicker from 'src/Daterange.vue'
-import formGroup from 'src/formGroup.vue'
+import vSelect from '@/src/Select.vue';
+import alert from '@/src/Alert.vue';
+import modal from '@/src/Modal.vue';
+import bsInput from '@/src/Input.vue';
+import tlgTable from '@/src/Table.vue';
+import tooltip from '@/src/Tooltip.vue';
+import dropdown from '@/src/Dropdown.vue';
+import mzDatepicker from 'src/Daterange.vue';
+import formGroup from 'src/formGroup.vue';
 import qs from 'qs';
 
 //channel
@@ -240,13 +247,14 @@ export default {
 	tlgTable,
 	dropdown,
 	mzDatepicker,
-	formGroup 
+	formGroup,
+	tooltip 
   },
   data(){
     return{
 		  tbl_maxheight:"600px",	 
-		  arr_status:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
-		  arr_status_cur:["未处理","处理中","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status:["未处理","已首次联系","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  arr_status_cur:["未处理","已首次联系","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
           summerType:'preEnrol',
 		  typeGroup:[{val:'preEnrol',label:'预报名信息'},{val:'coupon',label:'礼券名单'}],
 		  isrecd:false,
@@ -256,6 +264,7 @@ export default {
 			pageNow:1,
 			order:""
 		  },
+		  tips:{handling:"（含首次联系家长未接通、或号码不正确）"},
           alertError:{show:false,title:'错误提示',msg:''},
     	  alertInfo:{show:false,title:'操作提示',msg:'导入成功'},
 		  contactModal:{show:false,title:'手机联系人',phones:['',''],valid:true,phone_reg:/^1[3|4|5|6|7|8|9][0-9]\d{8}$/},
@@ -318,7 +327,7 @@ export default {
 			   {label:['性格',this.field_show],value:['','','xingge'],order:-1},
 			   {label:['能力',this.field_show],value:['','','nengli'],order:-1},
 			   {label:['质量评估',this.field_show],value:['','','quality'],order:-1},
-			   {label:['处理状态'],value:['','','status'],order:-1,class:{"text-danger":"'val'=='未处理'"}},
+			   {label:['处理状态'],value:['',this.tip,'status'],order:-1,class:{"text-danger":"'val'=='未处理'"}},
 			   {label:['参加过的活动'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
@@ -487,6 +496,13 @@ export default {
         urlEdit:function(row){
             var u= "<a class='btn btn-default btn-sm' href='https://bbk.800app.com/index.jsp?mfs=crm_zdytable_238592_27045&mid=@id&menu=1109&gym=@gym' target='_blank'>修改</a>";
             return u.replace('@id',row.id)&&u.replace('@id',row.id).replace('@gym',this.convertor.ToUnicode(this.select.gymNames[row.sign_centerid]||row.gym))||'';
+		},
+        tip:function(val){
+			if(val=='已首次联系'){
+				val ='<span class="tooltips" title="'+this.tips.handling+'">已首次联系</span>';
+				return val;
+			}
+			return val;
         },
 	    field_show:function(item){
 		  //年龄隐藏

@@ -65,9 +65,10 @@
  </template>
 
 <script> 
-
+import tooltip from '@/src/Tooltip.vue';
 export default {
    components:{
+       tooltip
    },
    props: {
        //loading进度
@@ -127,8 +128,12 @@ export default {
    methods:{
       add_class:function(h,val){
         if(!h.class) return '';
-        cl=JSON.stringify(h.class);
-        var cl=cl.replace(/val/ig,val);
+        var cl=JSON.stringify(h.class);
+        //带elemnt的value处理
+        if(/\>(.*)\</.test(val)){
+            val=RegExp.$1;
+        } 
+        cl=cl.replace(/val/ig,val);
         cl=JSON.parse(cl);
         var res=[]
         if(typeof cl=='object'){
@@ -248,13 +253,12 @@ export default {
 	  }	  
    },
    watch:{
-//     pagenation:{
-// 		handler(newValue, oldValue) {
-//             console.log(this.$els.container&&this.$els.container);
-//             console.log(JSON.stringify(this.header))
-// 　　　　   },
-// 　　   deep: true
-// 	}
+        select:{
+            handler(newValue, oldValue) {
+                $('.tooltips')&&$('.tooltips').toolTip();
+    　　　　 },
+    　　    deep: true
+        }
    },
    created:function(){
       // console.log(JSON.stringify(this.header))
@@ -269,10 +273,10 @@ export default {
         font-weight:bold;
     }
     a.disabled {
-                pointer-events: none;
-                filter: alpha(opacity=50); /*IE滤镜，透明度50%*/
-                -moz-opacity: 0.5; /*Firefox私有，透明度50%*/
-                opacity: 0.5; /*其他，透明度50%*/
+        pointer-events: none;
+        filter: alpha(opacity=50); /*IE滤镜，透明度50%*/
+        -moz-opacity: 0.5; /*Firefox私有，透明度50%*/
+        opacity: 0.5; /*其他，透明度50%*/
     }
     #span{
         padding-top:2.2%!important;
