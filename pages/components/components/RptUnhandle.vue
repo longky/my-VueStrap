@@ -148,6 +148,5 @@
 <style scoped>
   tr > th{
     font-size: 0.5em!important;
-
   }
 </style>
