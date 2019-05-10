@@ -40,6 +40,12 @@
                                                 <i class="sort-caret descending" @click="paiXu('time',2)"></i></span>
                                             </div>
                                         </th>
+                                        <th class="is-leaf is-sortable" :class="{' ascending':orders.mx_time==1,' descending':orders.mx_time==2}">
+                                            <div class="cell">最长时间(分钟)<span class="caret-wrapper" >
+                                                <i class="sort-caret ascending"  @click="paiXu('mx_time',1)"></i>
+                                                <i class="sort-caret descending" @click="paiXu('mx_time',2)"></i></span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,6 +54,7 @@
                                         <td>{{r['gym']}}</td>
                                         <td>{{r['num']}}</td>
                                         <td>{{r['time']}}</td>
+                                        <td>{{r['mx_time']}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -105,7 +112,7 @@
         data:function(){
             return {
                  type:'time',
-                 orders:{time:1,num:-1}
+                 orders:{time:1,mx_time:-1,num:-1}
             }
         },
         computed:{

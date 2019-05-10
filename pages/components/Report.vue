@@ -26,7 +26,7 @@
                               <datepicker :value.sync="dtStart" format="yyyy-MM-dd" :clear-button="clear" placeholder="开始日期" ch></datepicker>
                               -<datepicker :value.sync="dtEnd" format="yyyy-MM-dd" :clear-button="clear" placeholder="结束日期"></datepicker>
                             <div type="submit" @click="getQuery()" class="ui primary button"><i class="search icon"></i>搜索</div> 
-                            <input v-show="report_cur=='kxjData'" id="Button1" type="button" class="ui positive button" value="导出EXCEL" class="rbtn23" onclick="javascript:HtmlExportToExcel('PanelExcel','开学季活动报名情况汇总')" />
+                            <input id="Button1" type="button" class="ui positive button" value="导出EXCEL" class="rbtn23" @click.client="HtmlExportToExcel('PanelExcel',reportName)" />
                               <a id="dlink" style="display: none;"></a>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
         <div class="ui segment">
             <div style="text-align:center" v-show="select.start" ><img :src="select.loading_pic" width="40px" height="40px"></div>
         </div>
-        <div class="ui segment total" v-show="report_cur=='sumData'">
+        <div class="ui segment total" v-if="report_cur=='sumData'" id='PanelExcel'>
             <div class="ui  column stackable grid">
                 <div class="column left aligned">
                     <table class="ui selectable celled table">
@@ -134,7 +134,7 @@
                 </div>
             </div>
         </div>
-        <div class="ui segment" v-show="h5_data.length>0 && report_cur=='fansData'">
+        <div class="ui segment" v-if="h5_data.length>0 && report_cur=='fansData'" id='PanelExcel'>
                 <div class="ui one column stackable grid">
                     <div class="ui label total">
                             <a class="detail">新增粉丝合计：</a>
@@ -205,7 +205,7 @@
                     </div>
                 </div>
         </div>
-        <div class="ui segment" v-show="report_cur=='kxjData'" id='PanelExcel'>
+        <div class="ui segment" v-if="report_cur=='kxjData'" id='PanelExcel'>
             <h1 style="display:none" id="lbl_innum_link">开学季活动报名情况汇总</h1>
             <div class="ui  column stackable grid"> 
                   <div class="column left aligned">
@@ -241,8 +241,8 @@
                   </div>
             </div>
         </div>    
-        <Rpt-member v-if="report_cur=='memberstat'" :stat="stat"></Rpt-member>
-        <Rpt-unhandle v-if="report_cur=='unhandle_stat'" :handle_time_ave="handle_time_ave" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
+        <Rpt-member id='PanelExcel' v-if="report_cur=='memberstat'" :stat="stat"></Rpt-member>
+        <Rpt-unhandle id='PanelExcel' v-if="report_cur=='unhandle_stat'" :handle_time_ave="handle_time_ave" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
          
     </div>
 </template>
@@ -302,6 +302,14 @@ export default {
      }
   },
   computed:{
+      reportName:function(){
+          var self=this;
+          var res=self.reports.find(function(r){
+              return r.id==self.report_cur;
+          })
+          console.error(res)
+          return res&&res.label;
+      },
       pageShow:function(){
             var self=this;
             var arr=["市场顾问","市场总监","系统管理员","市场专员","运营顾问"]
@@ -421,6 +429,9 @@ export default {
         }
   },
   methods:{
+      HtmlExportToExcel:function(id,name){
+         HtmlExportToExcel(id,name+'_'+this.dtStart+'_'+this.dtEnd);
+      },
       validate:function(showErr=true){
             if(this.report_cur=='memberstat') return true;
             if(!this.select.campaign_selected) {
@@ -564,12 +575,15 @@ export default {
                 this.alertError.show=true;
                 return;
             }
+            var dtStart=this.dtStart+' 00:00:00';
+            var dtEnd=this.dtEnd+' 23:23:59';
             var self=this;
             self.select.start=true;
             self.handle_rank=[];
             self.handle_rank_down=[];
+            self.onlysql.value=[];
             var sql = sql_handle;
-            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = sql.replace("@dtstart",dtStart).replace("@dtend",dtEnd).replace("@where_campaign",this.where_campaign);
             sql = this.convertor.ToUnicode(sql);
             self.$http.jsonp(url_jsonp,{
                 sql1: sql ,
@@ -579,7 +593,7 @@ export default {
             }).then(function(res){
                 var sql =res.data.info[1].sql;
                 sql =sql.replace(/quot;/gi,"'")
-                if(sql)self.onlysql.value=[sql];
+                if(sql)self.onlysql.value.push(sql);
                 var res_data = res.data.info[0].rec;
                 if(res_data.constructor!=String&&!self.onlysql.checked){ 
                     self.handle_rank=res_data;
@@ -591,7 +605,7 @@ export default {
                 console.log(res.status);
             });
             sql = sql_handle_down;
-            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = sql.replace("@dtstart",dtStart).replace("@dtend",dtEnd).replace("@where_campaign",this.where_campaign);
             sql = this.convertor.ToUnicode(sql);
             self.$http.jsonp(url_jsonp,{
                 sql1: sql ,
@@ -613,7 +627,7 @@ export default {
                 console.log(res.status);
             });
             sql = sql_handle_time_ave;
-            sql = sql.replace("@dtstart",this.dtStart).replace("@dtend",this.dtEnd).replace("@where_campaign",this.where_campaign);
+            sql = sql.replace("@dtstart",dtStart).replace("@dtend",dtEnd).replace("@where_campaign",this.where_campaign);
             sql = this.convertor.ToUnicode(sql);
             self.$http.jsonp(url_jsonp,{
                 sql1: sql ,
