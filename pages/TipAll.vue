@@ -9,13 +9,15 @@
             <div slot="modal-body" class="modal-body">
                 <template v-for="item of indx.items" >
                   <p v-if="item.label" style="padding-left:10%">
-                    <Tag color="error"   v-if="item.standard>item.value">Warning</Tag>
-                    <Tag color="success" v-else>Success</Tag>
+                    <Tag color="success" v-if="item.label=='月销售冠军'">Success</Tag>
+                    <Tag color="error"   v-if="item.label!='月销售冠军'&&item.standard-item.value>0">Warning</Tag>
+                    <Tag color="success" v-if="item.label!='月销售冠军'&&item.standard-item.value<0">Success</Tag>
                     &nbsp;&nbsp;{{item.label}}
-                    <code>{{item.value+'%'}}</code>
-                    <b v-if="item.standard>item.value">低于标准</b> 
-                    <b v-else>达到标准</b> 
-                    <Tag color="default">{{item.standard+'%'}}</Tag>
+                    <code>{{item.label=='月销售冠军'?item.value:item.value+'%'}}</code>
+                    <b v-if="item.label=='月销售冠军'">￥</b> 
+                    <b v-if="item.label!='月销售冠军'&&item.standard-item.value>0">低于标准</b> 
+                    <b v-if="item.label!='月销售冠军'&&item.standard-item.value<0">>达到标准</b> 
+                    <Tag color="default">{{item.label=='月销售冠军'?item.standard:item.standard+'%'}}</Tag>
                   </p>
                   <br v-else/>
                 </template>
@@ -108,6 +110,9 @@ export default {
             }  
       },
       methods: {
+        toJson:function(str){
+            return JSON.parse(str);
+        },
         getAcl:function(){
             var self=this
             //281584(月总)  292939 246152(陈婕) 301931(pd)
@@ -175,6 +180,15 @@ export default {
                             return indx.warn==false;
                         });
                         indx.items=[];
+                        var champ=res["champion"]&&JSON.parse(res["champion"]);
+                        if(champ){
+                            indx.items.push({
+                                label:"月销售冠军",
+                                value:champ.name,
+                                standard:champ['本月合同总金额']
+                            })
+                            indx.items.push({}); //空行
+                        }
                         indx.items.push({
                             label:"体验邀约率",
                             value:res["体验预约率"],
@@ -192,13 +206,14 @@ export default {
                         })
                     
                         if(res.hasmember==1){
-                            indx.items.push({});
+                            indx.items.push({}); //空行
                             indx.items.push({
                                 label:"会员出勤率",
                                 value:res["会员总出勤率"],
                                 standard:res["标准会员总出勤率"]
                             })
                         }
+ 
                         indx.title=res.name+"关键指标提醒  【月份:"+res.m+"】";
                         indx.warn=true;
                         indx.id=res.id;
@@ -233,6 +248,6 @@ export default {
         padding: 1% 1%;
     }
     [v-cloak]{
-    display:none;
+        display:none;
     }
 </style>
