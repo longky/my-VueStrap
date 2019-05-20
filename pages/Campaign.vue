@@ -16,7 +16,7 @@
                         <div class="column left aligned">
 						   <div class="input-group">
 							  <span class="input-group-addon">中心</span>           
-			                  <v-select :value.sync="select.gym_selected" :options="gyms_valid" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
+			                  <v-select :value.sync="select.gym_selected" :multiple="select.multi" :options="gyms_valid" options-label="name" options-value="id" placeholder="请选择中心" search close-on-select></v-select>	
                            </div>
                         </div>
                     </div>
@@ -49,9 +49,9 @@ export default {
                 gyms: [],
 				gymNames:{},
 				gym_selected:"",
-				data: null
+                data: null,
+                multi:false
             }
-            
 		}
 	  },
       components:{
