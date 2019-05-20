@@ -820,7 +820,10 @@ export default {
 	all_status:{
 		handler(newValue, oldValue) {
 			if(newValue){
-				this.arr_status_cur=this.arr_status;
+				var self=this;
+				this.arr_status.forEach(function(i){
+                    self.arr_status_cur.push(i);
+				})
 			}else{
 				this.arr_status_cur=[];
 			}
@@ -841,7 +844,7 @@ export default {
 			if(this.isadmin&&!this.select.multi) this.select.multi=true;
 			if(newValue){
 				this.init();
-			    this.readContact(1); //只有单个中心，才可以设置联系人
+			    if(!this.isadmin)this.readContact(1); //只有中心，才需要设置联系人
 			}
 　　　   },
 　　　   deep: true
