@@ -1,6 +1,6 @@
 
 <template>
-	<div class="ui segments" @click="test">
+	<div class="ui segments">
 			<div class="ui segment">
 				<div class="ui relaxed grid">
 					<div class="seven wide column">
@@ -8,9 +8,9 @@
 							<div class="ten wide column">
 								<div class="input-group">
 									<span class="input-group-addon">活动</span>          
-									<!-- <v-select :value.sync="select.campaign_selected" :multiple="select.multi" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
-									</v-select>					 -->
-									<i-select :model.sync="select.campaign_selected" style="width:200px" placeholder="中心活动" multiple filterable clearable>
+									<v-select :value.sync="group_cur" :multiple="select.multi" placeholder="活动分类" :options="vgroup" options-label="name" options-value="name"  @change="gp_change" search close-on-select>
+									</v-select>					
+									<i-select  :model.sync="select.campaign_selected" style="width:200px" placeholder="活动名称" multiple filterable>
 										<Option-group v-for="g of vgroup" :label="g.name">
 											<i-option v-for="item in select.campaigns |cFilterby g" :value="item.id">{{ item.name }}</i-option>
 										</Option-group>
@@ -317,7 +317,8 @@ export default {
 		  first:false,
 		  timelimit:[],
 		  recent:['30'],
-		  vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'其它',members:['所有']}]
+		  vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'其它',members:['所有']}],
+		  group_cur:null
 	}
   },
   computed:{
@@ -471,7 +472,21 @@ export default {
 	   }
   },
   methods:{
-        test(){
+        gp_change(){
+			var self=this;
+			var res=[];
+			if(typeof self.group_cur=='object'){
+               self.vgroup.forEach(function(g){
+				   if(self.group_cur.indexOf(g.name)!=-1){
+					  self.select.campaigns.forEach(function(c){
+							if(g.members.find(function(m){
+								if(c.id.indexOf(m)!=-1) return true;
+							})) res.push(c.id);
+					  })
+					}
+			   })
+			}
+			self.select.campaign_selected=res;
         },
 	  	clearTime:function(){
           this.recent=[];
