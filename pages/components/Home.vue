@@ -8,7 +8,7 @@
 							<div class="ten wide column">
 								<div class="input-group">
 									<span class="input-group-addon">活动</span>          
-									<v-select :value.sync="select.campaign_selected" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
+									<v-select :value.sync="select.campaign_selected" :multiple="select.multi" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
 									</v-select>					
 								</div>
 							</div>
@@ -70,6 +70,12 @@
 							<div class="ui checkbox"  v-else>
 								<input :id="s" type="checkbox" :value="s" v-model="arr_status_cur">
 								<label :for="s">{{s}}</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui checkbox">
+								<input id="all_status" type="checkbox" value="30" v-model="all_status">
+								<label for="all_status">全选</label>
 							</div>
 						</div>
 					</div>
@@ -255,6 +261,7 @@ export default {
 		  tbl_maxheight:"600px",	 
 		  arr_status:["未处理","已首次联系","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
 		  arr_status_cur:["未处理","已首次联系","预约体验","体验出勤","付费报名夏令营","扣课报名夏令营","成功报名正式课程","家长决定不报名"],
+		  all_status:true,
           summerType:'preEnrol',
 		  typeGroup:[{val:'preEnrol',label:'预报名信息'},{val:'coupon',label:'礼券名单'}],
 		  isrecd:false,
@@ -296,6 +303,13 @@ export default {
 	}
   },
   computed:{
+	    gymcode_cur:function(){
+			if(typeof this.select.gym_selected=='string'){
+               return this.select.gym_selected||'';
+			}else{
+			   return this.select.gym_selected.slice(-1)||'';	
+			}
+		},
 		isadmin:function(){
 			if(this.select.acl.indexOf('系统管理员')!=-1
 			||this.select.acl.indexOf('市场顾问')!=-1
@@ -320,6 +334,7 @@ export default {
 			   {label:['会员有效期',this.field_show],value:['','dt','dtlevelexpire']},
 			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
 			   {label:['报名日期'],value:['','dt','dtenrol'],order:2},
+			   {label:['预约上课时间',this.field_show],value:['','','dtclass']},
 			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
 			   {label:['来自朋友推荐',this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','isrecd']},
 			   {label:['是否上过早教',this.field_show],value:['','','zaojiao'],order:-1},
@@ -375,13 +390,17 @@ export default {
 		sqlBase:function(){
 			var id =this.select.gym_selected;
 			var sql=this.sql_cur;
-			if(id=="all"){
+			if(id.indexOf("all")!=-1){
 				sql= sql.replace(/@gymWhere/gi,"")
+			}else if(typeof id=='object'){
+		     	sql= sql.replace(/@gymWhere/gi,"and crmzdy_82051555 in ("+id.join(",")+")");
 			}else{
 				sql= sql.replace(/@gymWhere/gi,'and crmzdy_82051555='+id)
 			}
-			if(this.select.campaign_selected=="所有"){
-				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''")
+			if(this.select.campaign_selected.indexOf("所有")!=-1){
+				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''");
+			}else if(typeof this.select.campaign_selected=='object'){
+				sql= sql.replace('@campaignWhere',"crmzdy_82053258 in ('"+this.select.campaign_selected.join("','")+"')");
 			}else{
 				sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.select.campaign_selected+"'");
 			}
@@ -508,25 +527,32 @@ export default {
 		  //年龄隐藏
 		  var arr=['婴芭莎展会','开学季','圣诞节'];
 		  var val = this.select.campaign_selected;
-		  if (item=='babyage' && arr.find(function(item){
-				if(val.indexOf(item)!=-1) return true;
+		  if (item=='babyage' && arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 		  //备注显示
 		  var arr=['婴芭莎展会线下'];
-		  if (item=='remark' &&  !arr.find(function(item){
-				if(val.indexOf(item)!=-1) return true;
+		  if (item=='remark' && !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 		  //地推字段显示
 		  var arr=['预约试听','开业地推'];
 		  var fields=['juli','nengli','xingge','zaojiao','quality'];
-		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
+		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
+			})) return false;
+
+		  //地推字段显示
+		  var arr=['复星集团（北京）','小飞侠障碍越野'];
+		  var fields=['dtclass'];
+		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 
 		  //会员相关信息
 		  var arr=['youle','有叻联盟'];
 		  var fields=['membername','dtlevelexpire','level'];
-		  if (fields.indexOf(item)!=-1 &&  !arr.find(function(i){
+		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 			
@@ -605,7 +631,7 @@ export default {
 			if(!this.contactModal.phones||this.contactModal.phones.length==0){
 				this.readContact();
 			}
-			this.contactModal.title=(this.select.gym_selected&&this.select.gymNames[this.select.gym_selected]||'')+"手机联系人";
+			this.contactModal.title=(this.select.gym_selected&&this.select.gymNames[this.gymcode_cur]||'')+"手机联系人";
 			this.contactModal.show = true;
 	   },
 	   readContact(check){
@@ -613,7 +639,7 @@ export default {
 			self.warnModal.show=false;
 			if (self.select.gym_selected=="all"||!self.select.gym_selected) return;
 			var sql_phones="select isnull((select top 1 crm_name phones from crm_zdytable_238592_27059_238592_view where crmzdy_82053884='@gymcode'),'') phones"
-			sql_phones = sql_phones.replace("@gymcode",self.select.gym_selected);
+			sql_phones = sql_phones.replace("@gymcode",self.gymcode_cur);
 			self.$http.jsonp(url_jsonp,{
 				sql1: sql_phones
 			},{
@@ -654,7 +680,7 @@ export default {
 			} 
 			var sql_update_phones = "merge into crm_zdytable_238592_27059_238592_view t using (select '@phones' phones,'@gymcode' gymcode ) s on t.crmzdy_82053884=s.gymcode when matched then update set t.crm_name= s.phones";
 			sql_update_phones += " when not matched by target then insert (org_id,cust_id,crm_syrID,create_time,crm_name,crmzdy_82053884/*gymcode*/) values (238592,279833,279833,getdate(),s.phones,s.gymcode);select 'ok' status;"; 
-			sql_update_phones = sql_update_phones.replace('@phones',res.join('|')).replace('@gymcode',self.select.gym_selected);
+			sql_update_phones = sql_update_phones.replace('@phones',res.join('|')).replace('@gymcode',self.gymcode_cur);
 			self.$http.jsonp(url_jsonp,{
 				sql1: sql_update_phones
 			},{
@@ -729,7 +755,6 @@ export default {
             });
         },
 	    getEnrol:function(){
-
 			if(!this.validate()) return;
 			var self=this;
             self.select.start=true;
@@ -792,6 +817,19 @@ export default {
 　　　   },
 　　　   deep: true
 	},
+	all_status:{
+		handler(newValue, oldValue) {
+			if(newValue){
+				var self=this;
+				this.arr_status.forEach(function(i){
+                    self.arr_status_cur.push(i);
+				})
+			}else{
+				this.arr_status_cur=[];
+			}
+　　　   },
+　　　   deep: true
+	},
 	"timelimit":{
 		handler(newValue, oldValue) {
 			if(newValue&&newValue[0]>0){
@@ -803,15 +841,17 @@ export default {
 	},
 	"select.gym_selected":{
 		handler(newValue, oldValue) {
-			if(this.select.gym_selected){
+			if(this.isadmin&&!this.select.multi) this.select.multi=true;
+			if(newValue){
 				this.init();
-				this.readContact(1);
+			    if(!this.isadmin)this.readContact(1); //只有中心，才需要设置联系人
 			}
 　　　   },
 　　　   deep: true
 	},
 	"select.campaign_selected":{
 		handler(newValue, oldValue) {
+			if(this.isadmin&&!this.select.multi) this.select.multi=true;
 			if(this.select.campaign_selected&&this.select.gym_selected){
 				this.init();
 			}
