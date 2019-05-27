@@ -20,8 +20,7 @@
                            </div>
                         </div>
                     </div>
-                 </div>
-                 
+                </div>
 			</div>
             <router-view :select="select"></router-view> 
 		</div>
@@ -30,6 +29,7 @@
 
 <script>
 import vSelect from '@/src/Select.vue';
+
 export default {
 	  data(){
 		return  { 

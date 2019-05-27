@@ -1,6 +1,6 @@
 
 <template>
-	<div class="ui segments">
+	<div class="ui segments" @click="test">
 			<div class="ui segment">
 				<div class="ui relaxed grid">
 					<div class="seven wide column">
@@ -8,8 +8,13 @@
 							<div class="ten wide column">
 								<div class="input-group">
 									<span class="input-group-addon">活动</span>          
-									<v-select :value.sync="select.campaign_selected" :multiple="select.multi" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
-									</v-select>					
+									<!-- <v-select :value.sync="select.campaign_selected" :multiple="select.multi" placeholder="请选择活动名称" :options="select.campaigns" options-label="name" options-value="id"  @change="select.data=null;" search close-on-select>
+									</v-select>					 -->
+									<i-select :model.sync="select.campaign_selected" style="width:200px" placeholder="中心活动" multiple filterable clearable>
+										<Option-group v-for="g of vgroup" :label="g.name">
+											<i-option v-for="item in select.campaigns |cFilterby g" :value="item.id">{{ item.name }}</i-option>
+										</Option-group>
+									</i-select>
 								</div>
 							</div>
 							<div class="six wide column">
@@ -97,6 +102,12 @@
 							<div class="ui checkbox">
 								<input id="history" type="checkbox"  v-model="history">
 								<label for="history">是否显示参加过的历史活动</label>
+							</div>
+						</div>
+						<div class="field">
+							<div class="ui checkbox">
+								<input id="first" type="checkbox"  v-model="first">
+								<label for="first">是否仅显示首次参加活动记录</label>
 							</div>
 						</div>
 					</div>
@@ -210,6 +221,8 @@ import dropdown from '@/src/Dropdown.vue';
 import mzDatepicker from 'src/Daterange.vue';
 import formGroup from 'src/formGroup.vue';
 import qs from 'qs';
+import  { iSelect, iOption, OptionGroup } from 'src/select/index.js';
+ 
 
 //channel
 var qstr = "select * into #c from(select crmzdy_87673590 能力,crmzdy_87673587 性格,crmzdy_87673584 距离,crmzdy_87673581 早教,camp.id idcamp,isnull(nullif(camp.crmzdy_87673593,''),'无') quality,camp.crmzdy_82053647 gym,camp.crm_name phone,isnull(nullif(crmzdy_82053557,''),'未处理') status,isnull(dateadd(s,crmzdy_82053430+8*3600,'1970-01-01 00:00:00'),convert(varchar(20),create_time,120))dtenrol,crmzdy_82051555 centerid,replace(crmzdy_82053258,'官网预约体验','官网')campaign,crmzdy_82051555 sign_centerid,crmzdy_82051554 babyage,isnull(crmzdy_82051553,'') babyname,case when left(crmzdy_82051554,1)<>'0' and (charindex('-',crmzdy_82051554)>0 or charindex('/',crmzdy_82051554)>0) then crmzdy_82051554 when ISNUMERIC(crmzdy_82051554)=1 and len(crmzdy_82051554)<3 and crmzdy_82051554>'0' and crmzdy_82051554<'40' then dateadd(year,0-cast(crmzdy_82051554 as float),getdate()) else '' end birth,crmzdy_82053558 remark from crm_zdytable_238592_27045_238592_view camp where id in(@ids))c;"
@@ -254,7 +267,10 @@ export default {
 	dropdown,
 	mzDatepicker,
 	formGroup,
-	tooltip 
+	tooltip,
+	iSelect,
+	iOption, 
+	OptionGroup 
   },
   data(){
     return{
@@ -298,8 +314,10 @@ export default {
 			  checkall:false
 		  },
 		  history:false,
+		  first:false,
 		  timelimit:[],
-		  recent:['30']
+		  recent:['30'],
+		  vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'其它',members:['所有']}]
 	}
   },
   computed:{
@@ -422,8 +440,10 @@ export default {
 			return sql;
 		},
 		sqlBuilder:function () {
+			if(this.first){
+				this.options.sql_handle="select * from(select row_number()over(partition by phone order by dtenrol)xh,a.* from (@main)a)a where xh=1";
+			}
 			var sql=this.fn_pager(this.sqlBase,this.options) 
-			//console.error(this.sql(sql))
 			sql = this.convertor.ToUnicode(sql);
 			return sql; 
 		},
@@ -440,7 +460,19 @@ export default {
 			  return url
 		}
   },
+  filters:{
+       cFilterby(data,g){
+		 return	data.filter(function(d){
+				if(g.members.find(function(m){
+					if(d.id.indexOf(m)!=-1) return true;
+				})) return true;
+				return false;
+			})
+	   }
+  },
   methods:{
+        test(){
+        },
 	  	clearTime:function(){
           this.recent=[];
 		},
@@ -866,7 +898,7 @@ export default {
 	  if(this.$route.params&&this.$route.params.id==2){
 		  this.timelimit=['4'];
 	  }
-	  this.select.campaign_selected="所有";
+	  this.select.campaign_selected=['所有'];
   }
 }
 </script>

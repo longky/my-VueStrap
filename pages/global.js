@@ -76,7 +76,13 @@ export default{
             if(/^(.*)(select\s*?)\/\*main\*\/(.*?)[;]?$/.test(str)){
                 var pager = "select * from p order by @order id desc"+(!option.sw?"":","+option.sw);
                 pager += " offset "+(option.pageNow-1)*option.pageSize+" rows fetch next "+option.pageSize+" rows only"
-                str = RegExp.$1+header+"p1 as("+RegExp.$2+RegExp.$3+"),p as(select * from p1 @c) select (select 0 errcode,'ok'errmsg,(select count(1) from p)total,isnull((@pager for json path),'[]')arr,'@sql'sql from (select 1 x)x for json path,without_array_wrapper)";
+                str = RegExp.$1+header+"p1 as(@main),p as(select * from p1 @c) select (select 0 errcode,'ok'errmsg,(select count(1) from p)total,isnull((@pager for json path),'[]')arr,'@sql'sql from (select 1 x)x for json path,without_array_wrapper)";
+                if(!option.sql_handle){
+                    str=str.replace("@main",RegExp.$2+RegExp.$3);
+                }else{
+                    option.sql_handle=option.sql_handle.replace("@main",RegExp.$2+RegExp.$3);
+                    str=str.replace("@main",option.sql_handle);
+                }    
                 str = str.replace("@c",!option.condition?"":"where "+option.condition).replace("@pager",pager).replace("@order",option.order);
             }else{
                 throw new Error("sql没有main标识！")
