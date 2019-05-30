@@ -22,7 +22,7 @@
                             </table>
                     </div>
                     <div class="column center aligned">
-                            <Tag color="primary">已处理例子平均处理时间排名</Tag>
+                            <Tag color="primary">例子平均处理时间排名</Tag>
                             <table class="ui celled table">
                                 <thead>
                                     <tr class="positive">

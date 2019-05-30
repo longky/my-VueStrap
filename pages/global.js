@@ -39,14 +39,30 @@ export default{
     methods:{
         /*campaign module */
         cFilterby:function(data,g){
-            var res=data&&data.filter(function(d){
-                 if(g.members.find(function(m){
-                     if(d.id.indexOf(m)!=-1) return true;
-                 })) return true;
-                 return false;
-             })
-             if(res&&res.length>0) return res;
-             return null;
+            var self=this;
+            var members=[];
+            var res;
+            if(g.members.indexOf('*')!=-1){
+                self.select.vgroup.forEach(function(item){
+                     if(item.name!=g.name) members=members.concat(item.members);
+                });
+                res=data&&data.filter(function(d){
+                    if(!members.find(function(m){
+                         if(d.id.indexOf(m)!=-1) return true;
+                    })) return true;
+                    return false;
+                 })
+            }else{
+                members=g.members; 
+                res=data&&data.filter(function(d){
+                    if(members.find(function(m){
+                         if(d.id.indexOf(m)!=-1) return true;
+                    })) return true;
+                     return false;
+                 })
+            }
+            if(res&&res.length>0) return res;
+            return null;
         },
 		labelify:function(l){
 			var decr=l[2];

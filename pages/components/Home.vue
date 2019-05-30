@@ -414,7 +414,7 @@ export default {
 			}else{
 				sql= sql.replace(/@gymWhere/gi,'and crmzdy_82051555='+id)
 			}
-			if(this.campaigns_cur.indexOf("所有")!=-1){
+			if(!this.campaigns_cur||this.campaigns_cur.length==0){
 				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''");
 			}else if(typeof this.campaigns_cur=='object'){
 				sql= sql.replace('@campaignWhere',"crmzdy_82053258 in ('"+this.campaigns_cur.join("','")+"')");
@@ -546,10 +546,10 @@ export default {
 			return val;
         },
 	    field_show:function(item){
-		  if(this.campaigns_cur&&this.campaigns_cur.length>0)return false;
+		  if(this.campaigns_cur&&(this.campaigns_cur.length>1||this.campaigns_cur.length==0))return false;
 		  //年龄隐藏
 		  var arr=['婴芭莎展会','开学季','圣诞节'];
-		  var val = this.campaigns_cur;
+		  var val = this.campaigns_cur[0];
 		  if (item=='babyage' && arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
@@ -580,12 +580,11 @@ export default {
 			})) return false;
 			
 		  //小小奥运
-		  var arr=['小小奥运'];
+		  var arr=['奥运','集训营'];
 		  var fields=['m_code','isrecd'];
-		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
+		  if(fields.indexOf(item)!=-1 && !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
-			})) return false;
-		  
+		  })) return false
 		  return true;
 		},
         getSignlist:function(){
@@ -896,7 +895,7 @@ export default {
 	  if(this.$route.params&&this.$route.params.id==2){
 		  this.timelimit=['4'];
 	  }
-	  this.select.campaign_selected=['所有'];
+	  this.select.campaign_selected=[];
   }
 }
 </script>
