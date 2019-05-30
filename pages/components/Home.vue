@@ -8,7 +8,7 @@
 							<div class="ten wide column">
 								<div class="input-group">
 									<span class="input-group-addon">活动</span>          
-									<v-select :value.sync="select.group_cur" clearable :multiple="select.multi" placeholder="活动分类" :options="select.vgroup" options-label="name" options-value="name" @change="select.campaign_selected=[];" close-on-select>
+									<v-select v-if="false" :value.sync="select.group_cur" clearable :multiple="select.multi" placeholder="活动分类" :options="select.vgroup" options-label="name" options-value="name" @change="select.campaign_selected=[];" close-on-select>
 									</v-select>					
 									<i-select  :model.sync="select.campaign_selected" style="width:200px" placeholder="活动名称" multiple filterable>
 										<Option-group v-for="g of select.vgroup" :label="g.name" v-if="cFilterby(campaigns,g)">
