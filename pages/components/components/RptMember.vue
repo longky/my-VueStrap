@@ -2,14 +2,18 @@
         <div class="ui segment">
             <table class="ui selectable celled table">
                 <tr class="positive">
-                    <th>会员数</th>
-                    <th>非会员数</th>
-                    <th>期末截止活跃会员数</th>
+                    <th>本期会员数</th>
+                    <th>本期非会员数</th>
+                    <th>期末截止活跃会员总数</th>
+                    <th>期末截止会员总数</th>
+                    <th>期末截止用户总数</th>
                 </tr>
                 <tr>
                     <td>{{stat['会员']}}</td>
                     <td>{{stat['非会员']}}</td>
-                    <td>{{stat['期末截止活跃会员数']}}</td>
+                    <td>{{stat['期末截止活跃会员总数']}}</td>
+                    <td>{{stat['期末截止会员总数']}}</td>
+                    <td>{{stat['期末截止用户总数']}}</td>
                 </tr>
             <table>
         </div>

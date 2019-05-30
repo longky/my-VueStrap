@@ -16,9 +16,16 @@
                     </div>
                     <div class="column left aligned">
 						<div class="input-group" v-show="report_cur!='memberstat'">
-							<span class="input-group-addon">市场活动</span>          
-                            <v-select :value.sync="select.campaign_selected" placeholder="请选活动名称" :options="campaigns" options-label="name" options-value="id" search close-on-select>
-                            </v-select>					
+								<div class="input-group">
+									<span class="input-group-addon">活动</span>          
+									<v-select :value.sync="select.group_cur" clearable :multiple="select.multi" placeholder="活动分类" :options="select.vgroup" options-label="name" options-value="name" @change="select.campaign_selected=[];" close-on-select>
+									</v-select>					
+									<i-select  :model.sync="select.campaign_selected" style="width:200px" placeholder="活动名称" multiple filterable>
+										<Option-group v-for="g of select.vgroup" :label="g.name" v-if="cFilterby(campaigns,g)">
+											<i-option v-for="item in cFilterby(campaigns,g)" :value="item.id">{{ item.name }}</i-option>
+										</Option-group>
+									</i-select>
+								</div>
 						</div>
                     </div>
                     <div class="column left aligned">
@@ -253,7 +260,7 @@ import alert from '@/src/Alert.vue'
 import RptMember from './components/RptMember.vue'
 import RptUnhandle from './components/RptUnhandle.vue'
 import datepicker from '@/src/Datepicker.vue'
-
+import  { iSelect, iOption, OptionGroup } from 'src/select/index.js';
 export default {
   props: {
       select: {
@@ -266,7 +273,10 @@ export default {
     alert,
     RptMember,
     RptUnhandle,
-    datepicker
+    datepicker,
+    iSelect,
+	iOption, 
+	OptionGroup 
   },
   data:function(){
      return {
@@ -294,7 +304,6 @@ export default {
         h5_data:[],
         stat:{},
         fansTotal:0,
-        campaigns:this.select.campaigns,
         alertError:{show:false,title:'错误提示',msg:''},
         handle_rank_down:[],
         handle_rank:[],
@@ -365,11 +374,13 @@ export default {
           }
       },
       where_campaign:function(){
-            if (this.select.campaign_selected="所有"){
-                return "1=1";
-            }else{
-                return "camp.crmzdy_82053258='"+this.select.campaign_selected+"'";
-            }
+			if(this.campaigns_cur.indexOf("所有")!=-1){
+				return "1=1";
+			}else if(typeof this.campaigns_cur=='object'){
+				return "camp.crmzdy_82053258 in ('"+this.campaigns_cur.join("','")+"')";
+			}else{
+				return "camp.crmzdy_82053258='"+this.campaigns_cur+"'";
+			}
       },
       sqlEnrolTotal:function () {
           if(this.group_selected=="按中心"){
@@ -762,22 +773,22 @@ export default {
             if(v=="kxjData"){
                 this.dtEnd=this.fmtDt_s(timestamp+1*24*3600*1000)
                 this.dtStart=this.fmtDt_s(timestamp-250*24*3600*1000);
-                this.campaigns=this.select.campaigns.filter(function(c){
+                this.campaigns_rpt=this.campaigns.filter(function(c){
                     return c.name.indexOf("开学季")!=-1;
                 })
                 this.select.campaign_selected=this.campaigns[0]&&this.campaigns[0].name;
             }else if(v=="sumData"||v=="fansData"){
                 this.dtEnd=this.fmtDt_s(mydate)
                 this.dtStart=this.fmtDt_s(timestamp-myddy*24*3600*1000);
-                this.campaigns=this.select.campaigns.filter(function(c){
+                this.campaigns_rpt=this.campaigns.filter(function(c){
                     return c.name.indexOf("奥运集训营")!=-1;
                 })
                 this.select.campaign_selected=this.campaigns[0]&&this.campaigns[0].name;
             }else if(this.report_cur=="unhandle_stat"){
                 this.select.campaign_selected="所有";
             }else{
-                this.campaigns=this.select.campaigns;
-                this.select.campaign_selected=null;
+                this.campaigns_rpt=this.campaigns;
+                this.select.campaign_selected=[];
             }
       }
   },
@@ -791,6 +802,7 @@ export default {
             }
         });
      }
+     this.select.campaign_selected=[];
   }
 }
 </script>

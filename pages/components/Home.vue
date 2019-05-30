@@ -8,11 +8,11 @@
 							<div class="ten wide column">
 								<div class="input-group">
 									<span class="input-group-addon">活动</span>          
-									<v-select :value.sync="group_cur" clearable :multiple="select.multi" placeholder="活动分类" :options="vgroup" options-label="name" options-value="name"  @change="gp_change" search close-on-select>
+									<v-select :value.sync="select.group_cur" clearable :multiple="select.multi" placeholder="活动分类" :options="select.vgroup" options-label="name" options-value="name" @change="select.campaign_selected=[];" close-on-select>
 									</v-select>					
 									<i-select  :model.sync="select.campaign_selected" style="width:200px" placeholder="活动名称" multiple filterable>
-										<Option-group v-for="g of vgroup" :label="g.name">
-											<i-option v-for="item in select.campaigns |cFilterby g" :value="item.id">{{ item.name }}</i-option>
+										<Option-group v-for="g of select.vgroup" :label="g.name" v-if="cFilterby(campaigns,g)">
+											<i-option v-for="item in cFilterby(campaigns,g)" :value="item.id">{{ item.name }}</i-option>
 										</Option-group>
 									</i-select>
 								</div>
@@ -54,7 +54,7 @@
 			</div>
 			<div class="ui segment">
 				<div class="ui form">
-					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected&&select.campaign_selected.indexOf('集训营')!=-1">
+					<div class="inline fields" v-if="summerType!='coupon'&&campaigns_cur&&campaigns_cur.indexOf('集训营')!=-1">
 						<label>筛选条件：</label>
 						<div class="field">
 							<div class="ui checkbox">
@@ -63,7 +63,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
+					<div class="inline fields" v-if="summerType!='coupon'&&campaigns_cur">
 						<label>筛选条件:</label>
 						<div class="field" v-for="s in arr_status">
 							<div class="ui checkbox"  v-if="s=='已首次联系'">
@@ -84,7 +84,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="inline fields" v-if="summerType!='coupon'&&select.campaign_selected">
+					<div class="inline fields" v-if="summerType!='coupon'&&campaigns_cur">
 						<label>筛选条件:</label>
 						<div class="field">
 							<div class="ui checkbox">
@@ -316,9 +316,7 @@ export default {
 		  history:false,
 		  first:false,
 		  timelimit:[],
-		  recent:['30'],
-		  vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'其它',members:['所有']}],
-		  group_cur:null
+		  recent:['30']
 	}
   },
   computed:{
@@ -354,8 +352,8 @@ export default {
 			   {label:['报名中心|l'],value:['',this.gymName,'sign_centerid'],order:-1},
 			   {label:['报名日期'],value:['','dt','dtenrol'],order:2},
 			   {label:['预约上课时间',this.field_show],value:['','','dtclass']},
-			   {label:['物料编号',this.isadmin && this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','m_code']},
-			   {label:['来自朋友推荐',this.select.campaign_selected&&this.select.campaign_selected.indexOf('奥运集训营')!=-1],value:['','','isrecd']},
+			   {label:['物料编号',this.isadmin && this.field_show],value:['','','m_code']},
+			   {label:['来自朋友推荐',this.field_show],value:['','','isrecd']},
 			   {label:['是否上过早教',this.field_show],value:['','','zaojiao'],order:-1},
 			   {label:['距离',this.field_show],value:['','','juli'],order:-1},
 			   {label:['性格',this.field_show],value:['','','xingge'],order:-1},
@@ -416,12 +414,12 @@ export default {
 			}else{
 				sql= sql.replace(/@gymWhere/gi,'and crmzdy_82051555='+id)
 			}
-			if(this.select.campaign_selected.indexOf("所有")!=-1){
+			if(this.campaigns_cur.indexOf("所有")!=-1){
 				sql= sql.replace('@campaignWhere',"isnull(crmzdy_82053258,'')<>''");
-			}else if(typeof this.select.campaign_selected=='object'){
-				sql= sql.replace('@campaignWhere',"crmzdy_82053258 in ('"+this.select.campaign_selected.join("','")+"')");
+			}else if(typeof this.campaigns_cur=='object'){
+				sql= sql.replace('@campaignWhere',"crmzdy_82053258 in ('"+this.campaigns_cur.join("','")+"')");
 			}else{
-				sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.select.campaign_selected+"'");
+				sql= sql.replace('@campaignWhere',"crmzdy_82053258='"+this.campaigns_cur+"'");
 			}
 			if(this.recent&&this.recent[0]>0){
 				sql= sql.replace('@recentWhere',"and create_time>=dateadd(d,-@recent,getdate())".replace("@recent",this.recent[0]));
@@ -456,38 +454,15 @@ export default {
 			  }
 			  sql = sql+" order by 活动报名日期 desc"
 			  sql = this.convertor.ToUnicode(sql);
-              var filename = this.convertor.ToUnicode(this.select.campaign_selected+"活动_"+new Date().getTime());
+              var filename = this.convertor.ToUnicode(this.campaigns_cur[0]+"等活动_"+new Date().getTime());
 			  url = url+'?sql='+sql+'&filename='+filename;
 			  return url
 		}
   },
   filters:{
-       cFilterby(data,g){
-		 return	data.filter(function(d){
-				if(g.members.find(function(m){
-					if(d.id.indexOf(m)!=-1) return true;
-				})) return true;
-				return false;
-			})
-	   }
+
   },
   methods:{
-        gp_change(){
-			var self=this;
-			var res=[];
-			if(typeof self.group_cur=='object'){
-               self.vgroup.forEach(function(g){
-				   if(self.group_cur.indexOf(g.name)!=-1){
-					  self.select.campaigns.forEach(function(c){
-							if(g.members.find(function(m){
-								if(c.id.indexOf(m)!=-1) return true;
-							})) res.push(c.id);
-					  })
-					}
-			   })
-			}
-			self.select.campaign_selected=res;
-        },
 	  	clearTime:function(){
           this.recent=[];
 		},
@@ -571,9 +546,10 @@ export default {
 			return val;
         },
 	    field_show:function(item){
+		  if(this.campaigns_cur&&this.campaigns_cur.length>0)return false;
 		  //年龄隐藏
 		  var arr=['婴芭莎展会','开学季','圣诞节'];
-		  var val = this.select.campaign_selected;
+		  var val = this.campaigns_cur;
 		  if (item=='babyage' && arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
@@ -603,6 +579,13 @@ export default {
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 			
+		  //小小奥运
+		  var arr=['小小奥运'];
+		  var fields=['m_code','isrecd'];
+		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
+			})) return false;
+		  
 		  return true;
 		},
         getSignlist:function(){
