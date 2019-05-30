@@ -39,7 +39,7 @@ export default {
                     {name:'Home',path:"/home/1",isActive:true,enabled:true},
                     {name:'Report',path:"/report",isActive:false,enabled:false}
                 ],
-                vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'其它',members:['所有']}],
+                vgroup:[{name:'主要',members:['小小奥运','会展','双']},{name:'线下',members:['线下']},{name:'所有',members:['所有']}],
                 group_cur:null,
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
