@@ -248,6 +248,7 @@
                   </div>
             </div>
         </div>    
+        <Rpt-camp-trans id='PanelExcel' v-if="report_cur=='camptrans'" :subtitle="subtitle" :stat="stats"></Rpt-camp-trans>
         <Rpt-member id='PanelExcel' v-if="report_cur=='memberstat'" :stat="stat"></Rpt-member>
         <Rpt-unhandle id='PanelExcel' v-if="report_cur=='unhandle_stat'" :handle_time_ave="handle_time_ave" :handle_rank_down="handle_rank_down" :handle_rank="handle_rank"></Rpt-unhandle>
          
@@ -259,6 +260,7 @@ import vSelect from '@/src/Select.vue'
 import alert from '@/src/Alert.vue'
 import RptMember from './components/RptMember.vue'
 import RptUnhandle from './components/RptUnhandle.vue'
+import RptCampTrans from './components/RptCampTrans.vue'
 import datepicker from '@/src/Datepicker.vue'
 import  { iSelect, iOption, OptionGroup } from 'src/select/index.js';
 export default {
@@ -273,6 +275,7 @@ export default {
     alert,
     RptMember,
     RptUnhandle,
+    RptCampTrans,
     datepicker,
     iSelect,
 	iOption, 
@@ -291,7 +294,8 @@ export default {
                  {id:"sumData",label:"预报名和报名汇总表"},
                  {id:"kxjData",label:"开学季活动报名情况汇总"},
                  {id:"memberstat",label:"系统会员与非会员统计"},
-                 {id:"unhandle_stat",label:"总部市场例子跟进情况统计"}
+                 {id:"unhandle_stat",label:"总部市场例子跟进情况统计"},
+                 {id:"camptrans",label:"总部活动例子转化情况统计"}
                  ],
         report_cur:null,
         sumData:[],
@@ -303,6 +307,7 @@ export default {
 		myData:"",
         h5_data:[],
         stat:{},
+        stats:[],
         fansTotal:0,
         alertError:{show:false,title:'错误提示',msg:''},
         handle_rank_down:[],
@@ -316,7 +321,6 @@ export default {
           var res=self.reports.find(function(r){
               return r.id==self.report_cur;
           })
-          console.error(res)
           return res&&res.label;
       },
       pageShow:function(){
@@ -338,7 +342,18 @@ export default {
             return rowGroup
       },
       where_dt:function(){
-          return "camp.create_time between '"+this.dtStart+" 00:00:00' and '"+this.dtEnd+" 23:59:59'";
+          var conditions=[];
+          if(this.dtStart) conditions.push("camp.create_time>='"+this.dtStart+" 00:00:00'")
+          if(this.dtEnd) conditions.push("camp.create_time<='"+this.dtEnd+" 23:59:59'")
+          return conditions.join(" and ")||'1=1';
+      },
+      subtitle:function(){
+          var dtEnd=this.dtEnd||this.fmtDt_s(new Date())
+          if(this.dtStart){
+             return this.dtStart+'至'+dtEnd;
+          }else{
+             return '截止'+dtEnd
+          }
       },
       where_ht_dt:function(){
           return "ht.crmzdy_80646021 between '"+this.dtStart+" 00:00:00' and '"+ this.dtEnd+" 23:59:59'";
@@ -374,7 +389,7 @@ export default {
           }
       },
       where_campaign:function(){
-			if(this.campaigns_cur.indexOf("所有")!=-1){
+			if(this.campaigns_cur.length==0){
 				return "1=1";
 			}else if(typeof this.campaigns_cur=='object'){
 				return "camp.crmzdy_82053258 in ('"+this.campaigns_cur.join("','")+"')";
@@ -441,7 +456,7 @@ export default {
   },
   methods:{
       HtmlExportToExcel:function(id,name){
-         HtmlExportToExcel(id,name+'_'+this.dtStart+'_'+this.dtEnd);
+         HtmlExportToExcel(id,name+'_'+this.subtitle);
       },
       validate:function(showErr=true){
             if(this.report_cur=='memberstat') return true;
@@ -503,24 +518,26 @@ export default {
             this.getMemberStat(); 
         }else if(this.report_cur=="unhandle_stat"){
             this.getHandleStat(); 
+        }else if(this.report_cur=="camptrans"){
+            this.getTransStat(); 
         }
       },
       getMemberStat:function(){
             let self=this;
             let sql=member_stat;  
             if(this.dtEnd){
-                sql=sql.replace("@whereend","zx.create_time<='"+this.dtEnd+" 00:00:00'").replace(/@dtend/g,this.dtEnd);
+                sql=sql.replace(/@whereend/g,"zx.create_time<='"+this.dtEnd+" 23:59:59'").replace(/@dtend/g,this.dtEnd+" 23:59:59");
             }else{
-                sql=sql.replace("@whereend","1=1").replace(/@dtend/g,this.fmtDt_s(new Date()));
+                sql=sql.replace(/@whereend/g,"1=1").replace(/@dtend/g,this.fmtDt_s(new Date())+' 23:59:59');
             }
             var whereht=[],wherezx=[]
             if(this.dtStart){
-                whereht.push("ht.create_time>='"+this.dtStart+" 23:23:59'");
-                wherezx.push("zx.create_time>='"+this.dtStart+" 23:23:59'");
+                whereht.push("ht.create_time>='"+this.dtStart+" 23:59:59'");
+                wherezx.push("zx.create_time>='"+this.dtStart+" 23:59:59'");
             }
             if(this.dtEnd){
-                whereht.push("ht.create_time<='"+this.dtEnd+" 23:23:59'");
-                wherezx.push("zx.create_time<='"+this.dtEnd+" 23:23:59'");
+                whereht.push("ht.create_time<='"+this.dtEnd+" 23:59:59'");
+                wherezx.push("zx.create_time<='"+this.dtEnd+" 23:59:59'");
             }
             if(whereht.length==0){
                 sql=sql.replace("@whereht","1=1")
@@ -528,9 +545,9 @@ export default {
                 sql=sql.replace("@whereht",whereht.join(" and "))
             }
             if(wherezx.length==0){
-                sql=sql.replace("@wherezx","1=1")
+                sql=sql.replace(/@wherezx/g,"1=1")
             }else{
-                sql=sql.replace("@wherezx",wherezx.join(" and "))
+                sql=sql.replace(/@wherezx/g,wherezx.join(" and "))
             }
 
             sql = this.convertor.ToUnicode(sql);
@@ -546,6 +563,31 @@ export default {
                 self.onlysql.value=[sql];
                 var res_data = res.data.info[0].rec[0];
                 self.stat=res_data;
+                self.select.start=false;
+            },function(res){
+                self.select.start=false;
+                console.log(res.status);
+            })
+      },
+      getTransStat:function(){
+            let self=this;
+            let sql=sql_campaign_trans_stat;  
+            sql=sql.replace("@where_dt",this.where_dt);
+            sql=sql.replace("@where_campaign",this.where_campaign);
+            sql = this.convertor.ToUnicode(sql);
+            self.select.start=true;
+            self.$http.jsonp(url_jsonp,{
+                sql1: sql ,
+                onlysql:(self.onlysql.checked?1:0)
+            },{
+                jsonp:'callback'
+            }).then(function(res){
+                var sql =res.data.info[1].sql;
+                sql =sql.replace(/quot;/gi,"'")
+                self.onlysql.value=[sql];
+                var res_data = res.data.info[0].rec;
+                self.stats=res_data;
+                console.log(JSON.stringify(self.stat))
                 self.select.start=false;
             },function(res){
                 self.select.start=false;

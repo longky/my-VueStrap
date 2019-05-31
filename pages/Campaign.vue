@@ -44,7 +44,7 @@ export default {
                 start: false,
                 loading_pic:"https://bbk.800app.com/uploadfile/staticresource/238592/279833/loading.gif",
                 isShow: true,
-				campaigns:[{id:'所有',name:'所有活动'}],
+				campaigns:[],
 				campaign_selected:null,
                 acl: "",
 				ids:[],

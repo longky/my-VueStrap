@@ -364,7 +364,8 @@ export default {
 			   {label:['备注',this.field_show],value:['','','remark']},
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
 			   {label:['签约金额'],value:['','','amt']},
-			   {label:['签约日期'],value:['','','dtsign']}
+			   {label:['签约日期'],value:['','','dtsign']},
+			   {label:['初始会员状态'],value:['','','member_status']}
 		     ]
 		},
 		theader_coupon: function(){
@@ -454,7 +455,7 @@ export default {
 			  }
 			  sql = sql+" order by 活动报名日期 desc"
 			  sql = this.convertor.ToUnicode(sql);
-              var filename = this.convertor.ToUnicode(this.campaigns_cur[0]+"等活动_"+new Date().getTime());
+              var filename = this.convertor.ToUnicode(this.campaigns_cur[0]+"等活动_"+(new Date()).valueOf());
 			  url = url+'?sql='+sql+'&filename='+filename;
 			  return url
 		}
@@ -492,7 +493,7 @@ export default {
 		   if(field=='channel'){
 				if(this.select.campaign_selected=="官网预约体验")res=true;
 				if(this.select.campaign_selected.indexOf("倒立")!=-1)res=true;
-				if(this.select.campaign_selected=="所有")res=true;
+				if(this.select.campaign_selected=="")res=true;
 		   }
 		   return res;
 		},
