@@ -347,6 +347,18 @@ export default {
           if(this.dtEnd) conditions.push("camp.create_time<='"+this.dtEnd+" 23:59:59'")
           return conditions.join(" and ")||'1=1';
       },
+      where_dtht:function(){
+          var conditions=[];
+          if(this.dtStart) conditions.push("camp.crmzdy_87677139>='"+this.dtStart+" 00:00:00'")
+          if(this.dtEnd) conditions.push("camp.crmzdy_87677139<='"+this.dtEnd+" 23:59:59'")
+          return conditions.join(" and ")||'1=1';
+      },
+      where_dtty:function(){
+          var conditions=[];
+          if(this.dtStart) conditions.push("ty.dtty>='"+this.dtStart+" 00:00:00'")
+          if(this.dtEnd) conditions.push("ty.dtty<='"+this.dtEnd+" 23:59:59'")
+          return conditions.join(" and ")||'1=1';
+      },
       subtitle:function(){
           var dtEnd=this.dtEnd||this.fmtDt_s(new Date())
           if(this.dtStart){
@@ -573,7 +585,10 @@ export default {
             let self=this;
             let sql=sql_campaign_trans_stat;  
             sql=sql.replace("@where_dt",this.where_dt);
-            sql=sql.replace("@where_campaign",this.where_campaign);
+            sql=sql.replace("@where_dtty",this.where_dtty);
+            sql=sql.replace("@where_dtht",this.where_dtht);
+            sql=sql.replace(/@where_gymcode/ig,this.where_gymcode);
+            sql=sql.replace(/@where_campaign/ig,this.where_campaign);
             sql = this.convertor.ToUnicode(sql);
             self.select.start=true;
             self.$http.jsonp(url_jsonp,{
