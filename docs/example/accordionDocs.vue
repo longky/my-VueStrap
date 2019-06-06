@@ -14,7 +14,7 @@
           cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
           proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </panel>
-        <panel header="Panel #2">
+        <panel  is-open header="Panel #2">
           Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
           quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -42,14 +42,14 @@
     </div>
     <doc-code language="markup">
       <accordion :one-at-atime="checked" type="info">
-        <panel is-open type="primary">
+        <panel  is-open type="primary">
           <strong slot="header"><u>Panel #1</u></strong>
           ...
         </panel>
-        <panel header="Panel #2">
+        <panel is-open header="Panel #2">
           ...
         </panel>
-        <panel header="Panel #3">
+        <panel   header="Panel #3">
           ...
         </panel>
         <panel header="Panel #4">
@@ -116,7 +116,7 @@ export default {
   },
   data () {
     return {
-      checked: true,
+      checked: false,
       selected: 'info',
       first: 'primary',
       types: ['default', 'primary', 'info', 'success', 'warning', 'danger']
