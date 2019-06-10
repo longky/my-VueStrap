@@ -365,6 +365,7 @@ export default {
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
 			   {label:['签约金额'],value:['','','amt']},
 			   {label:['签约日期'],value:['','','dtsign']},
+			   {label:['最近体验'],value:['','','tys']},
 			   {label:['初始会员状态'],value:['','','member_status']}
 		     ]
 		},
