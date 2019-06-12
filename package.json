@@ -67,6 +67,8 @@
     ]
   },
   "scripts": {
+    "buildHdkk": "webpack --progress --hide-modules --config webpack.cfg.hdkk.js --env=production",
+    "hdkk": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.hdkk.js",
     "build": "webpack --progress --hide-modules --config  webpack.build.min.js && webpack --progress --hide-modules --config  webpack.build.js",
     "builddocs": "webpack --progress --hide-modules && set NODE_ENV=production webpack --progress --hide-modules",
     "buildCamp": "webpack --progress --hide-modules --config webpack.cfg.campaign.js --env=production",
