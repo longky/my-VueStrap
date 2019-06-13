@@ -51,7 +51,7 @@
                     <span class="glyphicon glyphicon-info-sign"></span>
                     <strong>每日安全检查</strong>
                     <ul class="ui">
-                        <label>您今日{{pm}}的安全检查未执行</label><a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/trainingDaily_C.html" target="_blank">中心每日安全检查</a>
+                        <label>您今日{{pm}}的安全检查未执行.</label><a class="text text-danger" href="https://bbk.800app.com/uploadfile/staticresource/238592/279833/trainingDaily_C.html" target="_blank">中心每日安全检查</a>
                     </ul>
                 </div>
                 <embed class='incompatible' id="music" src="" width="0" height="0">
@@ -59,7 +59,6 @@
         </div>
     </div>
 </template>
-
 
 <script>
 	import alert from '@/src/Alert.vue'
@@ -86,7 +85,7 @@
 					showYuyue: false,
                     showzk:false,
                     showDaily:false,
-                    Pm:null,
+                    pm:null,
 					idgym: "",
 					gym: "",
                     role: "",
@@ -354,7 +353,7 @@
                 getDaily:function(){
                     var self=this
                      var hour = new Date().getHours();
-                     var minute=new date().getMinutes();
+                     var minute=new Date().getMinutes();
                      if(hour<8 ||(hour==8 && minute<30)){ //早上8:30前不提醒
                          self.showDaily=false;
                          return false;
