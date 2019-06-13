@@ -197,13 +197,13 @@ export default {
 	    var def=h.value[0];
 		var method = h.value[1];
 		if(key){
-		    var res =(key=='row'?item:item[key])||h.value[0]; 
+            var res =(key=='row'?item:item[key])||h.value[0]; 
 		    if(typeof method==="function"){
-			    res=method(res);
+                res=method(res);
 			}else if(['age','num','amt','dt'].indexOf(method)!=-1){
                 //console.error(this[method])
                 res=this[method](res);
-			}
+            }
 		}else{
 		    res='';
         }

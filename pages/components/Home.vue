@@ -362,6 +362,7 @@ export default {
 			   {label:['处理状态'],value:['',this.tip,'status'],order:-1,class:{"text-danger":"'val'=='未处理'"}},
 			   {label:['参加过的活动'],value:['','','campaign']},
 			   {label:['备注',this.field_show],value:['','','remark']},
+			   {label:['订金',this.field_show],value:['','',"deposit"]},
 			   {label:['来源渠道|l',this.show_on_campaign('channel')],value:['','','channel'],order:-1},
 			   {label:['签约金额'],value:['','','amt']},
 			   {label:['签约日期'],value:['','','dtsign']},
@@ -567,8 +568,16 @@ export default {
 				if(val.indexOf(i)!=-1) return true;
 			})) return false;
 
-		  //地推字段显示
+ 
 		  var arr=['复星集团（北京）','小飞侠障碍越野'];
+		  var fields=['dtclass'];
+		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
+				if(val.indexOf(i)!=-1) return true;
+			})) return false;
+
+
+		  //预售卡活动
+		  var arr=['预售'];
 		  var fields=['dtclass'];
 		  if (fields.indexOf(item)!=-1 && !arr.find(function(i){
 				if(val.indexOf(i)!=-1) return true;
