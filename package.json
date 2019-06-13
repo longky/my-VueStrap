@@ -37,6 +37,7 @@
     "babel-preset-es2015": "^6.16.0",
     "babel-runtime": "^6.11.0",
     "css-loader": "^0.21.0",
+    "deepmerge": "^3.2.0",
     "gh-pages": "^0.11.0",
     "less": "^2.7.0",
     "less-loader": "^2.2.3",
@@ -49,7 +50,7 @@
     "vue-html-loader": "^1.2.3",
     "vue-loader": "7.1.7",
     "webpack": "^1.13.2",
-    "webpack-dev-server": "^1.16.0"
+    "webpack-dev-server": "^1.16.5"
   },
   "browserify": {
     "transform": [
@@ -72,7 +73,7 @@
     "buildCamp": "webpack --progress --hide-modules --config webpack.cfg.campaign.js --env=production",
     "campaign": "webpack-dev-server --n --hot --quiet --port 80 --config webpack.cfg.campaign.js",
     "buildTips": "webpack --progress --hide-modules --config webpack.cfg.tips.js --env=production",
-    "tips": "webpack-dev-server --n --hot --quiet --port 80 --config webpack.cfg.tips.js",
+    "tips": "webpack-dev-server --n --hot --quiet --port 81 --config webpack.cfg.tips.js",
     "buildFam": "webpack --progress --hide-modules --config webpack.cfg.family.js --env=production",
     "family": "webpack-dev-server --inline --hot --quiet --port 80 --config webpack.cfg.family.js",
     "buildDailyPhone": "webpack --progress --hide-modules --config webpack.cfg.dailyPhone.js --env=production",
